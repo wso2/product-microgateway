@@ -19,7 +19,7 @@ package org.wso2.apimgt.gateway.cli.model.template.service;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPIWrapper;
 
 /**
  * Wraps the {@link Parameter} from swagger models for easier templating.
@@ -39,7 +39,8 @@ public class BallerinaParameter implements BallerinaOpenAPIObject<BallerinaParam
     }
 
     @Override
-    public BallerinaParameter buildContext(Parameter parameter, ExtendedAPI api) throws BallerinaServiceGenException {
+    public BallerinaParameter buildContext(Parameter parameter, ExtendedAPIWrapper api)
+            throws BallerinaServiceGenException {
         String parameterName = parameter.getName();
         this.name = parameterName;
         this.in = parameter.getIn();

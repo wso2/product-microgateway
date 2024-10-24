@@ -45,6 +45,41 @@ service jmsTokenRevocation = service {
             } else {
                 printDebug(KEY_TOKEN_REVOCATION_JMS, "No keys named revokedToken and ttl");
             }
+        } else if (message is jms:TextMessage) {
+            string? | error strMessage = message.getText();
+            if (strMessage is string) {
+                json | error jsonMessage = strMessage.fromJsonString();
+                if (jsonMessage is json) {
+                    json | error eventData = jsonMessage.event;
+                    if (eventData is json) {
+                        json | error payloadData = eventData.payloadData;
+                        if (payloadData is json) {
+                            json | error ttl = payloadData.ttl;
+                            json | error revokedToken = payloadData.revokedToken;
+                            map<string> inputMap = {};
+                            if (ttl is string && revokedToken is string) {
+                                inputMap[revokedToken] = ttl;
+                                var status = addToRevokedTokenMap(inputMap);
+                                if (status is boolean) {
+                                    printDebug(KEY_TOKEN_REVOCATION_JMS, "Successfully added to revoked token map");
+                                } else {
+                                    printDebug(KEY_TOKEN_REVOCATION_JMS, "Error while ading revoked token to map");
+                                }
+                            } else {
+                                printDebug(KEY_TOKEN_REVOCATION_JMS, "No keys named revokedToken and ttl");
+                            }
+                        } else {
+                            printError(KEY_TOKEN_REVOCATION_JMS, "Error occurred while reading message");
+                        }
+                    } else {
+                        printError(KEY_TOKEN_REVOCATION_JMS, "Error occurred while reading message");
+                    }
+                } else {
+                    printError(KEY_TOKEN_REVOCATION_JMS, "Error occurred while reading message");
+                }
+            } else {
+                printError(KEY_TOKEN_REVOCATION_JMS, "Error occurred while reading message");
+            }
         } else {
             printError(KEY_TOKEN_REVOCATION_JMS, "Error occurred while reading message");
         }

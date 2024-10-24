@@ -114,6 +114,8 @@ public class ImportCmd implements LauncherCmd {
     private boolean isOverwriteRequired;
     private String restVersion;
     private String dcrVersion;
+    private String apimVersion;
+    private Boolean apim4xVersion;
 
     @Override
     public void execute() {
@@ -138,6 +140,10 @@ public class ImportCmd implements LauncherCmd {
         init(toolkitConfigPath);
         Config config = CmdUtils.getConfig();
         isOverwriteRequired = false;
+
+        //setup endpoints
+        Token configToken = config.getToken();
+        TokenBuilder configTokenValues = setEndpoints(configToken);
 
         validateAPIGetRequestParams(label, apiName, version);
         //Setup username
@@ -167,10 +173,6 @@ public class ImportCmd implements LauncherCmd {
                 }
             }
         }
-
-        //setup endpoints
-        Token configToken = config.getToken();
-        TokenBuilder configTokenValues = setEndpoints(configToken);
 
         //configure trust store
         String configuredTrustStore = config.getToken().getTrustStoreLocation();
@@ -256,12 +258,16 @@ public class ImportCmd implements LauncherCmd {
 
         List<ExtendedAPI> apis = new ArrayList<>();
         RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint, restVersion, isInsecure);
-        if (label != null) {
-            apis = service.getAPIs(label, accessToken);
+        if (apim4xVersion) {
+            apis = service.exportAPIs(apiName, version, label, accessToken, projectName);
         } else {
-            ExtendedAPI api = service.getAPI(apiName, version, accessToken);
-            if (api != null) {
-                apis.add(api);
+            if (label != null) {
+                apis = service.getAPIs(label, accessToken);
+            } else {
+                ExtendedAPI api = service.getAPI(apiName, version, accessToken);
+                if (api != null) {
+                    apis.add(api);
+                }
             }
         }
 
@@ -278,7 +284,7 @@ public class ImportCmd implements LauncherCmd {
         //delete the folder if an exception is thrown in following steps
         try {
             CmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis,
-                    !restVersion.startsWith(CliConstants.REST_API_V1_PREFIX));
+                    !restVersion.startsWith(CliConstants.REST_API_V1_PREFIX) && !apim4xVersion);
         } catch (Exception e) {
             throw new CLIInternalException("Exception occurred during codeGeneration process", e);
         }
@@ -297,6 +303,7 @@ public class ImportCmd implements LauncherCmd {
                     .setClientSecret(encryptedCS)
                     .setTrustStoreLocation(trustStoreLocation)
                     .setTrustStorePassword(encryptedTrustStorePass)
+                    .setApimVersion(apimVersion)
                     .build();
             newConfig.setToken(token);
             newConfig.setCorsConfiguration(config.getCorsConfiguration());
@@ -348,12 +355,24 @@ public class ImportCmd implements LauncherCmd {
      * @param version API version
      */
     private void validateAPIGetRequestParams(String label, String apiName, String version) {
-        if ((StringUtils.isEmpty(label) && (StringUtils.isEmpty(apiName) || StringUtils.isEmpty(version))) ||
-                StringUtils.isNotEmpty(label) && (StringUtils.isNotEmpty(apiName) || StringUtils.isNotEmpty(version)) ||
-                (StringUtils.isEmpty(apiName) && StringUtils.isNotEmpty(version)) ||
-                (StringUtils.isNotEmpty(apiName) && StringUtils.isEmpty(version))) {
-            throw CmdUtils.createUsageException(
-                    "Missing \"-l <label>\" or \"-a <api-name> -v <version>\" parameters");
+        if (apim4xVersion) {
+            if (StringUtils.isEmpty(label)) {
+                throw CmdUtils.createUsageException(
+                        "Missing \"-l <label>\" parameter");
+            } else if (StringUtils.isNotEmpty(apiName) && StringUtils.isEmpty(version)) {
+                throw CmdUtils.createUsageException("Missing \"-v <version>\" parameter");
+            } else if (StringUtils.isNotEmpty(version) && StringUtils.isEmpty(apiName)) {
+                throw CmdUtils.createUsageException("Missing \"-a <api-name>\" parameter");
+            }
+        } else {
+            if ((StringUtils.isEmpty(label) && (StringUtils.isEmpty(apiName) || StringUtils.isEmpty(version))) ||
+                    StringUtils.isNotEmpty(label) && (StringUtils.isNotEmpty(apiName) ||
+                            StringUtils.isNotEmpty(version)) || (StringUtils.isEmpty(apiName) &&
+                    StringUtils.isNotEmpty(version)) || (StringUtils.isNotEmpty(apiName) &&
+                    StringUtils.isEmpty(version))) {
+                throw CmdUtils.createUsageException(
+                        "Missing \"-l <label>\" or \"-a <api-name> -v <version>\" parameters");
+            }
         }
     }
 
@@ -377,6 +396,8 @@ public class ImportCmd implements LauncherCmd {
         adminEndpoint = token.getAdminEndpoint();
         registrationEndpoint = token.getRegistrationEndpoint();
         tokenEndpoint = token.getTokenEndpoint();
+        apimVersion = token.getApimVersion();
+        apim4xVersion = token.isApim4xVersion();
 
         //copy current token config values
         configTokenValues.setPublisherEndpoint(publisherEndpoint);
@@ -386,6 +407,7 @@ public class ImportCmd implements LauncherCmd {
         configTokenValues.setRestVersion(restVersion);
         configTokenValues.setDCRVersion(dcrVersion);
         configTokenValues.setBaseURL(token.getBaseURL());
+        configTokenValues.setApimVersion(apimVersion);
 
         isEndPointsNeeded = StringUtils.isEmpty(publisherEndpoint) || StringUtils.isEmpty(adminEndpoint) || StringUtils
                 .isEmpty(registrationEndpoint) || StringUtils.isEmpty(tokenEndpoint);

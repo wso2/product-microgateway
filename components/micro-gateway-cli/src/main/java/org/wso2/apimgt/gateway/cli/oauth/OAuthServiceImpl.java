@@ -69,8 +69,11 @@ public class OAuthServiceImpl implements OAuthService {
             urlConn.setDoOutput(true);
             String postBody = new OAuthTokenRequestBuilder().setClientKey(clientId)
                     .setClientSecret(clientSecret.toCharArray()).setGrantType(TokenManagementConstants.PASSWORD)
-                    .setPassword(password).setScopes(new String[]{TokenManagementConstants.POLICY_VIEW_TOKEN_SCOPE,
-                            TokenManagementConstants.VIEW_API_SCOPE}).setUsername(username).requestBody();
+                    .setPassword(password).setScopes(new String[]{
+                            TokenManagementConstants.POLICY_VIEW_TOKEN_SCOPE, TokenManagementConstants.VIEW_API_SCOPE,
+                            TokenManagementConstants.API_CREATE_SCOPE, TokenManagementConstants.API_PUBLISH_SCOPE,
+                            TokenManagementConstants.API_IMPORT_EXPORT_SCOPE, TokenManagementConstants.API_MANAGE_SCOPE
+                    }).setUsername(username).requestBody();
             urlConn.getOutputStream().write((postBody).getBytes(TokenManagementConstants.UTF_8));
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {

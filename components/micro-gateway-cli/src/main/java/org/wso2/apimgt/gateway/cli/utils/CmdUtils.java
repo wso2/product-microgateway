@@ -42,7 +42,7 @@ import org.wso2.apimgt.gateway.cli.exception.ConfigParserException;
 import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
-import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.common.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
 import java.io.BufferedReader;
@@ -316,7 +316,7 @@ public final class CmdUtils {
      * @param projectName name of the project
      * @return temp folder location
      */
-    private static String getProjectTempFolderLocation(String projectName) {
+    public static String getProjectTempFolderLocation(String projectName) {
         return getProjectDirectoryPath(projectName) + File.separator + CliConstants.TEMP_DIR_NAME;
     }
 
@@ -541,8 +541,9 @@ public final class CmdUtils {
 
     private static void saveSwaggerDefinitionForSingleAPI(String projectName, ExtendedAPI api, boolean isExpand) {
         String swaggerString = OpenAPICodegenUtils.generateSwaggerString(api, isExpand);
-        String apiId = HashUtils.generateAPIId(api.getName(), api.getVersion());
-        String extension = openAPISpec2.equals(OpenAPICodegenUtils.findSwaggerVersion(api.getApiDefinition(), false))
+        String apiId = HashUtils.generateAPIId(api.getApiInfo().getName(), api.getApiInfo().getVersion());
+        String extension = openAPISpec2.equals(OpenAPICodegenUtils
+                .findSwaggerVersion(api.getApiInfo().getApiDefinition(), false))
                 ? CliConstants.API_SWAGGER : CliConstants.API_OPENAPI_YAML;
         CmdUtils.saveSwaggerDefinition(projectName, swaggerString, apiId, extension);
     }
@@ -557,8 +558,8 @@ public final class CmdUtils {
             boolean isExpand) {
         for (ExtendedAPI api : apis) {
             saveSwaggerDefinitionForSingleAPI(projectName, api, isExpand);
-            OUT.println("ID for API with name " + api.getName() + " : "
-                    + HashUtils.generateAPIId(api.getName(), api.getVersion()));
+            OUT.println("ID for API with name " + api.getApiInfo().getName() + " : "
+                    + HashUtils.generateAPIId(api.getApiInfo().getName(), api.getApiInfo().getVersion()));
         }
     }
 

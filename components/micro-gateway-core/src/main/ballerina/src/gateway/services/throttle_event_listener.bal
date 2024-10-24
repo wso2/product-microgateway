@@ -44,48 +44,58 @@ service messageServ = service {
             string? | error blockingKey = message.getString(BLOCKING_CONDITION_KEY);
 
             if (keyTemplateValue is string) {
-                handleKeyTemplateMessage(message, keyTemplateValue);
+                string? | error keyTemplateState = message.getString(KEY_TEMPLATE_STATE);
+                handleKeyTemplateMessage(message, keyTemplateValue, keyTemplateState);
             } else if (throttleKey is string) {
                 boolean | error throttleEnable = message.getBoolean(IS_THROTTLED);
                 int | error expiryTime = message.getLong(EXPIRY_TIMESTAMP);
-                printDebug(KEY_THROTTLE_EVENT_LISTENER, "policy Key : " + throttleKey.toString() + " Throttle status : " +
-                throttleEnable.toString());
-                if (throttleEnable is boolean && expiryTime is int) {
-                    APICondition | error condition = extractAPIorResourceKey(throttleKey);
-                    GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
-                        policyKey: throttleKey,
-                        resetTimestamp: expiryTime,
-                        remainingQuota: remainingQuota,
-                        isThrottled: throttleEnable
-                    };
-
-                    if (globalThrottleStreamDtoTM.isThrottled == true) {
-                        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Adding to throttledata map.");
-                        putThrottleData(globalThrottleStreamDtoTM, throttleKey);
-
-                        if (condition is APICondition && evaluatedConditions is string) {
-                            string resourceKey = condition.resourceKey;
-                            string conditionKey = condition.name;
-                            ConditionDto[] conditions = extractConditionDto(evaluatedConditions);
-                            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Adding to conditiondata map.");
-                            putThrottledConditions(conditions, resourceKey, conditionKey);
-                        }
-                    } else {
-                        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Removing from throttledata map.");
-                        removeThrottleData(throttleKey);
-                        if (condition is APICondition) {
-                            string resourceKey = condition.resourceKey;
-                            string conditionKey = condition.name;
-                            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Removing from conditiondata map.");
-                            removeThrottledConditions(resourceKey, conditionKey);
-                        }
-                    }
-                } else {
-                    printDebug(KEY_THROTTLE_EVENT_LISTENER, "Throlling configs values are wrong.");
-                }
+                handleThrottleMessage(throttleKey, throttleEnable, expiryTime, remainingQuota, evaluatedConditions);
             } else if (blockingKey is string) {
                 printDebug(KEY_THROTTLE_EVENT_LISTENER, "Blocking condition retrieved : " + blockingKey);
-                handleBlockConditionMessage(message);
+                string? | error condition = message.getString(BLOCKING_CONDITION_KEY);
+                string? | error conditionValue = message.getString(BLOCKING_CONDITION_VALUE);
+                string? | error conditionState = message.getString(BLOCKING_CONDITION_STATE);
+                handleBlockConditionMessage(message, condition, conditionValue, conditionState);
+            }
+        } else if (message is jms:TextMessage) {
+            string? | error strMessage = message.getText();
+            if (strMessage is string) {
+                json | error jsonMessage = strMessage.fromJsonString();
+                if (jsonMessage is json) {
+                    json | error eventData = jsonMessage.event;
+                    if (eventData is json) {
+                        json | error payloadData = eventData.payloadData;
+                        if (payloadData is json) {
+                            json | error keyTemplateValue = payloadData.keyTemplateValue;
+                            json | error throttleKey = payloadData.throttleKey;
+                            json | error evaluatedConditions = payloadData.evaluatedConditions;
+                            int remainingQuota = 0;
+                            json | error blockingKey = payloadData.blockingKey;
+                            if (keyTemplateValue is string) {
+                                string | error keyTemplateState = payloadData.keyTemplateState.toString();
+                                handleKeyTemplateMessage(message, keyTemplateValue, keyTemplateState);
+                            } else if (throttleKey is string) {
+                                boolean | error throttleEnable = <boolean> payloadData.isThrottled;
+                                int | error expiryTimeStamp = <int> payloadData.expiryTimeStamp;
+                                handleThrottleMessage(throttleKey, throttleEnable, expiryTimeStamp, remainingQuota, evaluatedConditions.toString());
+                            } else if (blockingKey is string) {
+                                printDebug(KEY_THROTTLE_EVENT_LISTENER, "Blocking condition retrieved : " + blockingKey);
+                                string | error condition = payloadData.condition.toString();
+                                string | error conditionValue = payloadData.conditionValue.toString();
+                                string | error conditionState = payloadData.conditionState.toString();
+                                handleBlockConditionMessage(message, condition, conditionValue, conditionState, payloadData);
+                            }
+                        } else {
+                            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Error occurred while reading throttle message.");
+                        }
+                    } else {
+                        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Error occurred while reading throttle message.");
+                    }
+                } else {
+                    printDebug(KEY_THROTTLE_EVENT_LISTENER, "Error occurred while reading throttle message.");
+                }
+            } else {
+                printDebug(KEY_THROTTLE_EVENT_LISTENER, "Error occurred while reading throttle message.");
             }
         } else {
             printDebug(KEY_THROTTLE_EVENT_LISTENER, "Error occurred while reading throttle message.");
@@ -160,9 +170,8 @@ public function initiateThrottlingJmsListener() returns boolean {
     }
 }
 
-function handleKeyTemplateMessage(jms:MapMessage message, string keyTemplateValue) {
-    printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template value : " + keyTemplateValue.toString());
-    string? | error keyTemplateState = message.getString(KEY_TEMPLATE_STATE);
+function handleKeyTemplateMessage(jms:Message message, string keyTemplateValue, string?|error keyTemplateState) {
+    printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template value : " + keyTemplateValue);
     if (keyTemplateState is string) {
         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template state : " + keyTemplateState.toString());
         int timestamp = 0;
@@ -177,22 +186,56 @@ function handleKeyTemplateMessage(jms:MapMessage message, string keyTemplateValu
 
         if (stringutils:equalsIgnoreCase(KEY_TEMPLATE_ADD, keyTemplateState)) {
             addKeyTemplate(<@untainted>keyTemplateValue, timestamp);
-            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " and timestamp: " +
+            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue + " and timestamp: " +
                 timestamp.toString() + " added to the map");
         } else {
             KeyTemplate | () removedValue = removeKeyTemplate(keyTemplateValue, timestamp);
             if (removedValue is KeyTemplate) {
-                printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " with value : " +
+                printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue + " with value : " +
                 removedValue.toString() + " removed from the map");
             }
         }
     }
 }
 
-function handleBlockConditionMessage(jms:MapMessage m) {
-    string? | error condition = m.getString(BLOCKING_CONDITION_KEY);
-    string? | error conditionValue = m.getString(BLOCKING_CONDITION_VALUE);
-    string? | error conditionState = m.getString(BLOCKING_CONDITION_STATE);
+function handleThrottleMessage(string throttleKey, boolean|error throttleEnable, int|error expiryTimeStamp, int remainingQuota, string?|error evaluatedConditions) {
+    printDebug(KEY_THROTTLE_EVENT_LISTENER, "policy Key : " + throttleKey + " Throttle status : " + 
+    throttleEnable.toString());
+    if (throttleEnable is boolean && expiryTimeStamp is int) {
+        APICondition | error condition = extractAPIorResourceKey(throttleKey);
+        GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
+            policyKey: throttleKey,
+            resetTimestamp: expiryTimeStamp,
+            remainingQuota: remainingQuota,
+            isThrottled: throttleEnable
+        };
+
+        if (globalThrottleStreamDtoTM.isThrottled == true) {
+            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Adding to throttledata map.");
+            putThrottleData(globalThrottleStreamDtoTM, throttleKey);
+            if (condition is APICondition && evaluatedConditions is string) {
+                string resourceKey = condition.resourceKey;
+                string conditionKey = condition.name;
+                ConditionDto[] conditions = extractConditionDto(evaluatedConditions);
+                printDebug(KEY_THROTTLE_EVENT_LISTENER, "Adding to conditiondata map.");
+                putThrottledConditions(conditions, resourceKey, conditionKey);
+            }
+        } else {
+            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Removing from throttledata map.");
+            removeThrottleData(throttleKey);
+            if (condition is APICondition) {
+                string resourceKey = condition.resourceKey;
+                string conditionKey = condition.name;
+                printDebug(KEY_THROTTLE_EVENT_LISTENER, "Removing from conditiondata map.");
+                removeThrottledConditions(resourceKey, conditionKey);
+            }
+        }
+    } else {
+        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Throlling configs values are wrong.");
+    }
+}
+
+function handleBlockConditionMessage(jms:Message message, string?|error condition, string?|error conditionValue, string?|error conditionState, json payloadData = null) {
     if (condition is string && conditionValue is string) {
         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Block condition retrived with type : " + condition + " and value : " + conditionValue);
         if (conditionState is string && conditionState == TRUE) {
@@ -203,8 +246,15 @@ function handleBlockConditionMessage(jms:MapMessage m) {
                 json ip = checkpanic sr.readJson();
                 if (ip is map<json>) {
                     printDebug(KEY_THROTTLE_EVENT_LISTENER, "IP Blocking condition json : " + ip.toJsonString());
-                    int? | error conditionId = m.getInt(BLOCKING_CONDITION_ID);
-                    string? | error conditionTenant = m.getString(BLOCKING_CONDITION_TENANAT_DOMAIN);
+                    int? | error conditionId;
+                    string? | error conditionTenant;
+                    if (message is jms:MapMessage) {
+                        conditionId = message.getInt(BLOCKING_CONDITION_ID);
+                        conditionTenant = message.getString(BLOCKING_CONDITION_TENANAT_DOMAIN);
+                    } else {
+                        conditionId = <int> payloadData.id;
+                        conditionTenant = payloadData.tenantDomain.toString();
+                    } 
                     if (conditionId is int && conditionTenant is string) {
                         ip[BLOCKING_CONDITION_TYPE] = condition;
                         ip[BLOCKING_CONDITION_ID] = conditionId;
@@ -225,7 +275,12 @@ function handleBlockConditionMessage(jms:MapMessage m) {
         } else {
             if (stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP) ||
             stringutils:equalsIgnoreCase(condition, BLOCKING_CONDITION_IP_RANGE)) {
-                int? | error conditionId = m.getInt(BLOCKING_CONDITION_ID);
+                int? | error conditionId;
+                if (message is jms:MapMessage) {
+                    conditionId = message.getInt(BLOCKING_CONDITION_ID);
+                } else {
+                    conditionId = <int> payloadData.id;
+                }
                 if (conditionId is int) {
                     removeIpDataFromBlockConditionTable(conditionId);
                 } else {

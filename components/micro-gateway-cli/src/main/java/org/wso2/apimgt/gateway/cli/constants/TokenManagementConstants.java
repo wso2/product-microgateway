@@ -32,6 +32,10 @@ public class TokenManagementConstants {
     public static final String APPLICATION_CALLBACK_URL = "https://wso2.org";
     public static final String POLICY_VIEW_TOKEN_SCOPE = "apim:tier_view";
     public static final String VIEW_API_SCOPE = "apim:api_view";
+    public static final String API_CREATE_SCOPE = "apim:api_create";
+    public static final String API_PUBLISH_SCOPE = "apim:api_publish";
+    public static final String API_IMPORT_EXPORT_SCOPE = "apim:api_import_export";
+    public static final String API_MANAGE_SCOPE = "apim:api_manage";
     public static final String PASSWORD_GRANT_TYPE = "password";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";

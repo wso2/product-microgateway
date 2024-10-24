@@ -111,6 +111,7 @@ public const string ANALYTICS_FILTER = "ANALYTICS_FILTER";
 public const string MUTUAL_SSL_FILTER = "MUTUAL_SSL_FILTER";
 public const string VALIDATION_FILTER = "VALIDATION_FILTER";
 
+public const string SERVICE_NAME_ATTR = "SERVICE_NAME";
 public const string SERVICE_TYPE_ATTR = "SERVICE_TYPE";
 public const string KEY_TYPE_ATTR = "KEY_TYPE";
 public const string RESOURCE_NAME_ATTR = "RESOURCE_NAME";
@@ -184,7 +185,17 @@ public const string GRPC_ANALYTICS_ENABLE = "enable";
 public const string GRPC_ENDPOINT_URL = "endpointURL";
 public const string GRPC_RETRY_TIME_MILLISECONDS = "reconnectTimeInMillies";
 public const string GRPC_TIMEOUT_MILLISECONDS = "timeoutInMillis";
- 
+
+//ELK analytics related constants
+public const string ELK_ANALYTICS = "analytics.elkAnalytics";
+public const string ELK_ANALYTICS_ENABLE = "enable";
+
+//Choreo based analytics related constants
+public const string CHOREO_ANALYTICS = "analytics.choreoAnalytics";
+public const string CHOREO_ANALYTICS_ENABLE = "enable";
+public const string CHOREO_ANALYTICS_CONFIG_ENDPOINT = "configEndpoint";
+public const string CHOREO_ANALYTICS_AUTH_TOKEN = "authToken";
+
 //validation_filter related constatnts
 public const string PATHS = "paths";
 public const string PARAMETERS = "parameters";

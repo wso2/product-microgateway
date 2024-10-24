@@ -17,12 +17,16 @@
 
 
 public type RequestResponseExecutionDTO record {
+    boolean isAnonymous = true;
+    boolean isAuthenticated = false;
     string metaClientType = "";
     string applicationConsumerKey = "";
     string applicationName = "";
     string applicationId = "";
+    string applicationUUID = "";
     string applicationOwner = "";
     string apiContext = "";
+    string apiUUID = "";
     string apiName = "";
     string apiVersion = "";
     string apiResourcePath = "";
@@ -43,6 +47,7 @@ public type RequestResponseExecutionDTO record {
     int backendTime = 0;
     boolean responseCacheHit = false;
     int responseSize = 0;
+    string responseContentType = "";
     string protocol = "";
     int responseCode = 0;
     string destination = "";
@@ -73,8 +78,11 @@ public type ExecutionTimeDTO record {
 
 
 public type FaultDTO record {
+    boolean isAnonymous = true;
+    boolean isAuthenticated = false;
     string metaClientType = "";
     string consumerKey = "";
+    string apiUUID = "";
     string apiVersion = "";
     string apiName = "";
     string apiContext = "";
@@ -86,6 +94,7 @@ public type FaultDTO record {
     string apiCreatorTenantDomain = "";
     string hostName = "";
     string applicationId = "";
+    string applicationUUID = "";
     string applicationName = "";
     string protocol = "";
     int errorCode = 0;
@@ -94,6 +103,11 @@ public type FaultDTO record {
     string properties = "null"; // New 3.1.0
     string apiResourceTemplate = ""; // New 3.2.0
     string applicationOwner = ""; // New 3.2.0
+    string keyType = "";
+    string correlationId = "";
+    int responseSize = 0;
+    string responseContentType = "";
+    boolean responseCacheHit = false;
 };
 
 public type EventDTO record {
@@ -102,4 +116,41 @@ public type EventDTO record {
     string metaData = "";
     string correlationData = "";
     string payloadData = "";
+};
+
+// Analytics event for APIM 4.x versions
+public type Analytics4xEventData record {
+    boolean isFault = false;
+    boolean isAnonymous = false;
+    boolean isAuthenticated = true;
+    int responseCode = 0;
+    string apiUUID = "";
+    string apiType = "";
+    string apiName = "";
+    string apiVersion = "";
+    string apiContext = "";
+    string apiCreator = "";
+    string apiCreatorTenantDomain = "";
+    string organizationId = "";
+    string applicationUUID = "";
+    string applicationName = "";
+    string applicationOwner = "";
+    string applicationKeyType = "";
+    string httpMethod = "";
+    string apiResourceTemplate = "";
+    int targetResponseCode = 0;
+    boolean responseCacheHit = false;
+    string destination = "";
+    int requestTime = 0;
+    string correlationId = "";
+    string regionId = "";
+    string userAgentHeader = "";
+    string userName = "";
+    string endUserIP = "";
+    int backendLatency = 0;
+    int responseLatency = 0;
+    int errorCode = 0;
+    int responseSize = 0;
+    string responseContentType = "";
+    int proxyResponseCode = 0;
 };

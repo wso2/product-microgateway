@@ -86,6 +86,9 @@ public const string DEFAULT_AM_ANALYTICS_VERSION_310 = "3.1.0";
 public const string DEFAULT_GRPC_ENDPOINT_URL = "https://localhost:9806";
 public const int DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES = 6000;
 public const int DEFAULT_GRPC_TIMEOUT_IN_MILLIS = 2147483647;
+//constants for Choreo based analytics
+public const string DEFAULT_CHOREO_ANALYTICS_CONFIG_ENDPOINT = "https://analytics-event-auth.choreo.dev/auth/v1";
+public const string DEFAULT_CHOREO_ANALYTICS_AUTH_TOKEN = "";
 
 public const boolean DEFAULT_HTTP2_ENABLED = true;
 

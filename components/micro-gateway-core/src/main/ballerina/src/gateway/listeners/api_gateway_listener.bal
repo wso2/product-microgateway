@@ -116,6 +116,8 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
     //TODO : migrate this method and re enable
     initializeAnalytics();
     initializegRPCAnalytics();
+    initializeELKAnalytics();
+    initializeChoreoAnalytics();
 
     //Change the httpVersion
     if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, DEFAULT_HTTP2_ENABLED)) {

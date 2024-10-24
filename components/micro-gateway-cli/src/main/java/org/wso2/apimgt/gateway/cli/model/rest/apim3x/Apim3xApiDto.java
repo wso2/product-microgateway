@@ -1,19 +1,21 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.rest;
+package org.wso2.apimgt.gateway.cli.model.rest.apim3x;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,9 +23,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.swagger.annotations.ApiModel;
 import io.swagger.util.Json;
 import org.wso2.apimgt.gateway.cli.hashing.Hash;
+import org.wso2.apimgt.gateway.cli.model.rest.APIInfoBaseDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,12 +33,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of {@link APIInfoDTO} with extended set of
- * attributes.
+ * DTO for APIM 3.x API model
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(description = "")
-public class APIDetailedDTO extends APIInfoDTO {
+public class Apim3xApiDto extends APIInfoBaseDTO {
+
+    private String status = null;
+    private String thumbnailUri = null;
+    private TypeEnum type = TypeEnum.HTTP;
 
     /**
      * API Type.
@@ -65,60 +69,60 @@ public class APIDetailedDTO extends APIInfoDTO {
     public enum AccessControlEnum {
         NONE, RESTRICTED,
     }
-    
-    private String apiDefinition = null;
+
     private String wsdlUri = null;
     private String responseCaching = "Disabled";
-    private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
-    private Boolean isDefaultVersion = null;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private Json apiSwagger = null;
 
-    private TypeEnum type = TypeEnum.HTTP;
-    private List<String> transport = new ArrayList<String>();
-    private List<String> tags = new ArrayList<String>();
     private List<String> tiers = new ArrayList<String>();
     private String apiLevelPolicy = null;
-    private String authorizationHeader = null;
     private String apiSecurity = null;
-    private APIMaxTpsDTO maxTps = null;
-
     private VisibilityEnum visibility = null;
-    private List<String> visibleRoles = new ArrayList<String>();
-    private List<String> visibleTenants = new ArrayList<String>();
     private String endpointConfig = null;
     private APIEndpointSecurityDTO endpointSecurity = null;
     private String gatewayEnvironments = null;
     private List<LabelDTO> labels = new ArrayList<LabelDTO>();
     private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
-
     private SubscriptionAvailabilityEnum subscriptionAvailability = null;
-    private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     private Map<String, String> additionalProperties = new HashMap<String, String>();
-
-
     private AccessControlEnum accessControl = null;
-    private List<String> accessControlRoles = new ArrayList<String>();
-    private APIBusinessInformationDTO businessInformation = null;
-    private APICorsConfigurationDTO corsConfiguration = null;
-    //provider string (used to set x-wso2-ownerin swagger definition)
-    private String provider = null;
 
     /**
-     * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes.
+     * This describes in which status of the lifecycle the APIDetailedDTO is.
+     **/
+    @JsonProperty("status")
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @JsonProperty("thumbnailUri")
+    public String getThumbnailUri() {
+        return thumbnailUri;
+    }
+
+    public void setThumbnailUri(String thumbnailUri) {
+        this.thumbnailUri = thumbnailUri;
+    }
+
+    /**
+     * The transport to be set. Accepted values are HTTP, WS
      **/
     @Hash
-    @JsonProperty("apiDefinition")
-    public String getApiDefinition() {
-        return apiDefinition;
+    @JsonProperty("type")
+    public TypeEnum getType() {
+        return type;
     }
 
-    public void setApiDefinition(String apiDefinition) {
-        this.apiDefinition = apiDefinition;
+    public void setType(TypeEnum type) {
+        this.type = type;
     }
-
 
     /**
      * WSDL URL if the APIDetailedDTO is based on a WSDL endpoint.
@@ -134,24 +138,15 @@ public class APIDetailedDTO extends APIInfoDTO {
 
     @Hash
     @JsonProperty("responseCaching")
+    @Override
     public String getResponseCaching() {
         return responseCaching;
     }
 
+    @Override
     public void setResponseCaching(String responseCaching) {
         this.responseCaching = responseCaching;
     }
-
-    @Hash
-    @JsonProperty("cacheTimeout")
-    public Integer getCacheTimeout() {
-        return cacheTimeout;
-    }
-
-    public void setCacheTimeout(Integer cacheTimeout) {
-        this.cacheTimeout = cacheTimeout;
-    }
-
 
     @JsonProperty("destinationStatsEnabled")
     public String getDestinationStatsEnabled() {
@@ -162,57 +157,21 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.destinationStatsEnabled = destinationStatsEnabled;
     }
 
-    @Hash
-    @JsonProperty("isDefaultVersion")
-    public Boolean getIsDefaultVersion() {
-        return isDefaultVersion;
+    public JsonObject getApiSwagger() {
+        String swagger = getApiDefinition();
+        JsonParser parser = new JsonParser();
+        JsonObject jsonSwagger;
+        try {
+            jsonSwagger = parser.parse(swagger).getAsJsonObject();
+        } catch (JsonSyntaxException e) {
+            throw new JsonSyntaxException("Error occured while parsing the swagger to a JsonObject", e);
+        }
+        return jsonSwagger;
     }
 
-    public void setIsDefaultVersion(Boolean isDefaultVersion) {
-        this.isDefaultVersion = isDefaultVersion;
+    public void setApiSwagger(Json apiSwagger) {
+        this.apiSwagger = apiSwagger;
     }
-
-
-    /**
-     * The transport to be set. Accepted values are HTTP, WS
-     **/
-    @Hash
-    @JsonProperty("type")
-    public TypeEnum getType() {
-        return type;
-    }
-
-    public void setType(TypeEnum type) {
-        this.type = type;
-    }
-
-
-    /**
-     * Supported transports for the APIDetailedDTO (http and/or https).
-     **/
-    @Hash
-    @JsonProperty("transport")
-    public List<String> getTransport() {
-        return transport;
-    }
-
-    public void setTransport(List<String> transport) {
-        this.transport = transport;
-    }
-
-
-    /**
-     * Search keywords related to the APIDetailedDTO.
-     **/
-    @JsonProperty("tags")
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
 
     /**
      * The subscription tiers selected for the particular APIDetailedDTO.
@@ -227,30 +186,18 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.tiers = tiers;
     }
 
-
     /**
      * The policy selected for the particular APIDetailedDTO.
      **/
     @JsonProperty("apiLevelPolicy")
+    @Override
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
     }
 
+    @Override
     public void setApiLevelPolicy(String apiLevelPolicy) {
         this.apiLevelPolicy = apiLevelPolicy;
-    }
-
-    /**
-     * * The authorization header of the API.
-     **/
-    @Hash
-    @JsonProperty("authorizationHeader")
-    public String getAuthorizationHeader() {
-        return authorizationHeader;
-    }
-
-    public void setAuthorizationHeader(String authorizationHeader) {
-        this.authorizationHeader = authorizationHeader;
     }
 
     /**
@@ -266,15 +213,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.apiSecurity = apiSecurity;
     }
 
-    @JsonProperty("maxTps")
-    public APIMaxTpsDTO getMaxTps() {
-        return maxTps;
-    }
-
-    public void setMaxTps(APIMaxTpsDTO maxTps) {
-        this.maxTps = maxTps;
-    }
-
     /**
      * The visibility level of the APIDetailedDTO. Accepts one of the following. PUBLIC, PRIVATE,
      * RESTRICTED OR CONTROLLED.
@@ -288,35 +226,13 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.visibility = visibility;
     }
 
-
-    /**
-     * The user roles that are able to access the APIDetailedDTO.
-     **/
-    @JsonProperty("visibleRoles")
-    public List<String> getVisibleRoles() {
-        return visibleRoles;
-    }
-
-    public void setVisibleRoles(List<String> visibleRoles) {
-        this.visibleRoles = visibleRoles;
-    }
-
-    @JsonProperty("visibleTenants")
-    public List<String> getVisibleTenants() {
-        return visibleTenants;
-    }
-
-    public void setVisibleTenants(List<String> visibleTenants) {
-        this.visibleTenants = visibleTenants;
-    }
-
     @Hash
     @JsonProperty("endpointConfig")
-    public String getEndpointConfig() {
+    public String getEndpointConfigStr() {
         return endpointConfig;
     }
 
-    public void setEndpointConfig(String endpointConfig) {
+    public void setEndpointConfigStr(String endpointConfig) {
         this.endpointConfig = endpointConfig;
     }
 
@@ -375,15 +291,6 @@ public class APIDetailedDTO extends APIInfoDTO {
         this.subscriptionAvailability = subscriptionAvailability;
     }
 
-    @JsonProperty("subscriptionAvailableTenants")
-    public List<String> getSubscriptionAvailableTenants() {
-        return subscriptionAvailableTenants;
-    }
-
-    public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
-        this.subscriptionAvailableTenants = subscriptionAvailableTenants;
-    }
-
     /**
      * Map of custom properties of APIDetailedDTO.
      **/
@@ -409,63 +316,5 @@ public class APIDetailedDTO extends APIInfoDTO {
 
     public void setAccessControl(AccessControlEnum accessControl) {
         this.accessControl = accessControl;
-    }
-
-    /**
-     * The user roles that are able to view/modify as APIDetailedDTO publisher or creator.
-     **/
-    @JsonProperty("accessControlRoles")
-    public List<String> getAccessControlRoles() {
-        return accessControlRoles;
-    }
-
-    public void setAccessControlRoles(List<String> accessControlRoles) {
-        this.accessControlRoles = accessControlRoles;
-    }
-
-    @JsonProperty("businessInformation")
-    public APIBusinessInformationDTO getBusinessInformation() {
-        return businessInformation;
-    }
-
-    public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
-        this.businessInformation = businessInformation;
-    }
-
-    @Hash
-    @JsonProperty("corsConfiguration")
-    public APICorsConfigurationDTO getCorsConfiguration() {
-        return corsConfiguration;
-    }
-
-    public JsonObject getApiSwagger() {
-        String swagger = getApiDefinition();
-        JsonParser parser = new JsonParser();
-        JsonObject jsonSwagger;
-        try {
-            jsonSwagger = parser.parse(swagger).getAsJsonObject();
-        } catch (JsonSyntaxException e) {
-            throw new JsonSyntaxException("Error occured while parsing the swagger to a JsonObject", e);
-        }
-        return jsonSwagger;
-    }
-
-    public void setApiSwagger(Json apiSwagger) {
-        this.apiSwagger = apiSwagger;
-    }
-
-    public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
-        this.corsConfiguration = corsConfiguration;
-    }
-
-    /**
-     * Retrieves API creator &  assignes value.
-     **/
-    @JsonProperty("provider")
-    public String getProvider() {
-        return provider;
-    }
-    public void setProvider(String provider) {
-        this.provider = provider;
     }
 }

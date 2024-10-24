@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.rest;
+package org.wso2.apimgt.gateway.cli.model.rest.common;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

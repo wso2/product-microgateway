@@ -21,7 +21,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.servers.Server;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPIWrapper;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
     }
 
     @Override
-    public BallerinaPath buildContext(PathItem item, ExtendedAPI api) throws BallerinaServiceGenException,
+    public BallerinaPath buildContext(PathItem item, ExtendedAPIWrapper api) throws BallerinaServiceGenException,
             CLICompileTimeException {
         Map.Entry<String, BallerinaOperation> entry;
         BallerinaOperation operation;
@@ -212,13 +212,13 @@ public class BallerinaPath implements BallerinaOpenAPIObject<BallerinaPath, Path
         return buildContext(item, null);
     }
 
-    public BallerinaPath buildContext(PathItem item, ExtendedAPI api, Boolean generateApiFaultResponses)
+    public BallerinaPath buildContext(PathItem item, ExtendedAPIWrapper api, Boolean generateApiFaultResponses)
             throws BallerinaServiceGenException, CLICompileTimeException {
         this.generateApiFaultResponses = generateApiFaultResponses;
         return buildContext(item, api);
     }
 
-    public BallerinaPath buildContextForNotFound(ExtendedAPI api) throws BallerinaServiceGenException,
+    public BallerinaPath buildContextForNotFound(ExtendedAPIWrapper api) throws BallerinaServiceGenException,
             CLICompileTimeException {
         Map.Entry<String, BallerinaOperation> entry;
         BallerinaOperation operation;

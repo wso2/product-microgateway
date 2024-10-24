@@ -133,6 +133,66 @@
             <version>${org.wso2.carbon.analytics-common}</version>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
+            <version>${carbon.apimgt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.am.analytics.publisher</groupId>
+            <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+            <version>${analytics.event.publisher.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ua.parser.wso2</groupId>
+            <artifactId>ua-parser</artifactId>
+            <version>${ua_parser.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure</groupId>
+            <artifactId>azure-core</artifactId>
+            <version>${com.azure-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure</groupId>
+            <artifactId>azure-core-amqp</artifactId>
+            <version>${com.azure-core-amqp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure</groupId>
+            <artifactId>azure-messaging-eventhubs</artifactId>
+            <version>${com.azure-messaging-eventhubs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.reactivestreams</groupId>
+            <artifactId>reactive-streams</artifactId>
+            <version>${org.reactivestreams.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+            <version>${io.github.openfeign.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-slf4j</artifactId>
+            <version>${io.github.openfeign.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-gson</artifactId>
+            <version>${io.github.openfeign.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>${io.projectreactor.reactor-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>proton-j</artifactId>
+            <version>${org.apache.qpid.proton-j.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.orbit.com.lmax</groupId>
             <artifactId>disruptor</artifactId>
             <version>${org.wso2.orbit.com.lmax}</version>
@@ -270,10 +330,17 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
                             <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds,
-                                net.minidev, org.apache.logging.log4j, com.fasterxml.jackson.core
+                                net.minidev, org.apache.logging.log4j, com.fasterxml.jackson.core,
+                                org.wso2.carbon.apimgt, org.wso2.am.analytics.publisher, ua.parser.wso2,
+                                org.wso2.orbit.com.azure, org.reactivestreams, io.github.openfeign,
+                                org.wso2.orbit.io.projectreactor, org.apache.qpid
                             </includeGroupIds>
                             <includeArtifactIds>org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm,
-                                log4j-api, log4j-core, jackson-databind, jackson-core, jackson-annotations
+                                log4j-api, log4j-core, jackson-databind, jackson-core,
+                                jackson-annotations, org.wso2.carbon.apimgt.common.analytics,
+                                org.wso2.am.analytics.publisher.client, ua-parser, azure-core, azure-core-amqp,
+                                azure-messaging-eventhubs, reactive-streams, feign-core, feign-slf4j, feign-gson,
+                                reactor-core, proton-j
                             </includeArtifactIds>
                         </configuration>
                     </execution>

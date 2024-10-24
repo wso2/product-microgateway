@@ -200,6 +200,16 @@
     endpointURL = "https://localhost:9806"
     # Time interval in milliseconds for gRPC connection recovery task
     reconnectTimeInMillies = 6000
+  # Configurations for ELK analytics
+  [analytics.elkAnalytics]
+    enable = false
+  # Configurations for Choreo based analytics
+  [analytics.choreoAnalytics]
+    enable = false
+    # Configuration endpoint for Choreo
+    configEndpoint = ""https://analytics-event-auth.choreo.dev/auth/v1"
+    # On-premise auth key for Choreo
+    authToken = ""
 
 # User configuration for Basic auth
 [b7a.users]

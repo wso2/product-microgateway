@@ -17,7 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
-import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.common.APICorsConfigurationDTO;
 
 /**
  * Configuration data holder.
