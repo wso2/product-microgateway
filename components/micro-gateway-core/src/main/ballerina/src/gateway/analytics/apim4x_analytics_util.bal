@@ -90,7 +90,8 @@ function generateAnalytics4xEventData(http:Response response, http:FilterContext
             backendLatency: requestResponseExecutionDTO.backendTime,
             responseLatency: requestResponseExecutionDTO.responseTime,
             responseSize: requestResponseExecutionDTO.responseSize,
-            responseContentType: requestResponseExecutionDTO.responseContentType
+            responseContentType: requestResponseExecutionDTO.responseContentType,
+            proxyResponseCode: response.statusCode
         };
         return analyticsEvent;
     }
@@ -127,7 +128,9 @@ function generateFalut4xEventData(http:Response response, http:FilterContext con
             errorCode: faultDTO.errorCode,
             correlationId: <string> faultDTO.correlationId,
             responseSize: faultDTO.responseSize,
-            responseContentType: <string> faultDTO.responseContentType
+            responseContentType: <string> faultDTO.responseContentType,
+            proxyResponseCode: response.statusCode,
+            responseCacheHit: faultDTO.responseCacheHit
         };
         return analyticsEvent;
     }

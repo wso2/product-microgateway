@@ -107,6 +107,7 @@ public type FaultDTO record {
     string correlationId = "";
     int responseSize = 0;
     string responseContentType = "";
+    boolean responseCacheHit = false;
 };
 
 public type EventDTO record {
@@ -151,4 +152,5 @@ public type Analytics4xEventData record {
     int errorCode = 0;
     int responseSize = 0;
     string responseContentType = "";
+    int proxyResponseCode = 0;
 };

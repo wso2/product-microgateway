@@ -72,6 +72,7 @@ public class MGWAnalyticsDataProvider implements AnalyticsDataProvider {
     private final int errorCode;
     private final int responseSize;
     private final String responseContentType;
+    private final int proxyResponseCode;
 
     public MGWAnalyticsDataProvider(BMap<String, Object> eventData) {
         this.isFault = Boolean.parseBoolean(String.valueOf(eventData.get("isFault")));
@@ -106,6 +107,7 @@ public class MGWAnalyticsDataProvider implements AnalyticsDataProvider {
         this.errorCode = Integer.parseInt(String.valueOf(eventData.get("errorCode")));
         this.responseSize = Integer.parseInt(String.valueOf(eventData.get("responseSize")));
         this.responseContentType = String.valueOf(eventData.get("responseContentType"));
+        this.proxyResponseCode = Integer.parseInt(String.valueOf(eventData.get("proxyResponseCode")));
     }
 
     @Override
@@ -204,7 +206,7 @@ public class MGWAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public int getProxyResponseCode() {
-        return targetResponseCode;
+        return proxyResponseCode;
     }
 
     @Override
