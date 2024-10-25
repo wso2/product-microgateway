@@ -557,7 +557,7 @@ public class JWTAuthenticator implements Authenticator {
      * @param jwtToken          JWT Token
      * @throws APISecurityException in case of scope validation failure
      */
-    private void validateScopes(String apiContext, String apiVersion, ResourceConfig matchingResource,
+    protected void validateScopes(String apiContext, String apiVersion, ResourceConfig matchingResource,
             JWTValidationInfo jwtValidationInfo, SignedJWTInfo jwtToken) throws APISecurityException {
         try {
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
