@@ -94,28 +94,6 @@ public class Utils {
             return;
         }
 
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
-                .getSecuritySchemeDefinitions();
-        // API key headers are considered to be protected headers, such that the header
-        // would not be sent
-        // to backend and traffic manager.
-        // This would prevent leaking credentials, even if user is invoking unsecured
-        // resource with some
-        // credentials.
-        for (Map.Entry<String, SecuritySchemaConfig> entry : securitySchemeDefinitions.entrySet()) {
-            SecuritySchemaConfig schema = entry.getValue();
-            if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(schema.getType())) {
-                if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equals(schema.getIn())) {
-                    requestContext.getProtectedHeaders().add(schema.getName());
-                    requestContext.getRemoveHeaders().add(schema.getName());
-                    continue;
-                }
-                if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equals(schema.getIn())) {
-                    requestContext.getQueryParamsToRemove().add(schema.getName());
-                }
-            }
-        }
-
         // Internal-Key credential is considered to be protected headers, such that the
         // header would not be sent
         // to backend and traffic manager.

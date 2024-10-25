@@ -34,7 +34,6 @@ import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.InterceptorConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
-import org.wso2.choreo.connect.enforcer.security.jwt.ChoreoAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.UnsecuredAPIAuthenticator;
@@ -67,7 +66,6 @@ public class AuthFilter implements Filter {
         boolean isApiKeyProtected = false;
         boolean isMutualSSLMandatory = false;
         boolean isOAuthBasicAuthMandatory = false;
-        boolean isChoreoApiKeyProtected = false;
 
         // Set security conditions
         if (apiConfig.getSecuritySchemeDefinitions() == null) {
@@ -88,7 +86,6 @@ public class AuthFilter implements Filter {
                         equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                     isOAuthBasicAuthMandatory = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
-                    isChoreoApiKeyProtected = true;
                     isApiKeyProtected = true;
                 }
             }
@@ -101,13 +98,8 @@ public class AuthFilter implements Filter {
         }
 
         if (isApiKeyProtected) {
-            APIKeyAuthenticator apiKeyAuthenticator = new APIKeyAuthenticator();
-            authenticators.add(apiKeyAuthenticator);
-        }
-
-        if (isChoreoApiKeyProtected) {
-            ChoreoAPIKeyAuthenticator choreoAPIKeyAuthenticator = new ChoreoAPIKeyAuthenticator();
-            authenticators.add(choreoAPIKeyAuthenticator);
+            APIKeyAuthenticator APIKeyAuthenticator = new APIKeyAuthenticator();
+            authenticators.add(APIKeyAuthenticator);
         }
 
         Authenticator authenticator = new InternalAPIKeyAuthenticator(
