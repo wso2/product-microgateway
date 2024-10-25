@@ -73,8 +73,8 @@ public class Constants {
     public static final String DEFAULT_CON_FACTORY_JNDI_NAME = "TopicConnectionFactory";
 
     // keyword to identify API-Key sent in sec-websocket-protocol header
-    public static final String WS_API_KEY_IDENTIFIER = "choreo-internal-API-Key";
-    public static final String WS_OAUTH2_KEY_IDENTIFIED = "choreo-oauth2-key";
+    public static final String WS_API_KEY_IDENTIFIER = "choreo-api-key";
+    public static final String WS_OAUTH2_KEY_IDENTIFIED = "choreo-oauth2-token";
 
     // Modes for the temporary console test headers.
     public static final String TEMP_CONSOLE_TEST_HEADERS_MONITOR_MODE = "monitor";

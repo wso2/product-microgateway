@@ -66,8 +66,8 @@ public class InternalAPIKeyAuthenticatorTest {
         String secWebsocketProtocolHeader = "sec-websocket-protocol";
 
         // Test case to test for an Upgrade request sent from the choreo console
-        // The token will be set to the sec-websocket-protocol header with choreo-internal-API-Key keyword
-        // the value after choreo-internal-API-Key will be the token
+        // The token will be set to the sec-websocket-protocol header with choreo-api-key keyword
+        // the value after choreo-api-key will be the token
         RequestContext.Builder builder = new RequestContext.Builder("/pets");
         builder.matchedAPI(new APIConfig.Builder("Petstore")
                .basePath("/choreo")
@@ -76,7 +76,7 @@ public class InternalAPIKeyAuthenticatorTest {
         Map<String, String> headersMap = new HashMap<>();
         headersMap.put(
                 secWebsocketProtocolHeader,
-            "choreo-internal-API-Key," + mockToken);
+            "choreo-api-key," + mockToken);
         builder.headers(headersMap);
         RequestContext requestContext = builder.build();
         InternalAPIKeyAuthenticator internalAPIKeyAuthenticator = new InternalAPIKeyAuthenticator(securityParam);
@@ -128,7 +128,7 @@ public class InternalAPIKeyAuthenticatorTest {
         Map<String, String> headersMap = new HashMap<>();
         headersMap.put(
                 secWebsocketProtocolHeader,
-            "choreo-internal-API-Key, " + mockToken + ", " + "chat, bar");
+            "choreo-api-key, " + mockToken + ", " + "chat, bar");
         builder.headers(headersMap);
         RequestContext requestContext = builder.build();
         InternalAPIKeyAuthenticator internalAPIKeyAuthenticator = new InternalAPIKeyAuthenticator(securityParam);
