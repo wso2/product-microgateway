@@ -98,8 +98,8 @@ public class AuthFilter implements Filter {
         }
 
         if (isApiKeyProtected) {
-            APIKeyAuthenticator APIKeyAuthenticator = new APIKeyAuthenticator();
-            authenticators.add(APIKeyAuthenticator);
+            APIKeyAuthenticator apiKeyAuthenticator = new APIKeyAuthenticator();
+            authenticators.add(apiKeyAuthenticator);
         }
 
         Authenticator authenticator = new InternalAPIKeyAuthenticator(
