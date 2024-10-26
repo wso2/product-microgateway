@@ -119,8 +119,8 @@ public class JWTAuthenticatorTest {
 
         // Test case to test for an Upgrade request sent from the choreo console
         // The token will be set to the sec-websocket-protocol header with
-        // choreo-oauth2-key keyword
-        // the value after choreo-oauth2-key will be the token
+        // choreo-oauth2-token keyword
+        // the value after choreo-oauth2-token will be the token
         RequestContext.Builder builder = new RequestContext.Builder("/pets");
         builder.matchedAPI(new APIConfig.Builder("Petstore")
                 .basePath("/choreo")
@@ -129,7 +129,7 @@ public class JWTAuthenticatorTest {
         Map<String, String> headersMap = new HashMap<>();
         headersMap.put(
                 secWebsocketProtocolHeader,
-                "choreo-oauth2-key," + mockToken);
+                "choreo-oauth2-token," + mockToken);
         builder.headers(headersMap);
         RequestContext requestContext = builder.build();
         JWTAuthenticator jwtAuthenticator = new JWTAuthenticator();

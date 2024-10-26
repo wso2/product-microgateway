@@ -81,7 +81,7 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
 
             // Since the Choreo console/ Devportal sends the token in the
             // sec-websocket-protocol header, regardless of security enabled or not, we need
-            // to add the "choreo-internal-API-Key" to the sec-websocket-protocol response
+            // to add the "choreo-api-key" to the sec-websocket-protocol response
             // header.
             if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
                 String secProtocolHeader = requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
