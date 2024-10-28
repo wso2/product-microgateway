@@ -122,17 +122,18 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             }
         }
 
-        // If an API Key is not found, check for the API Key in the WebSocket protocol header
+        // If an API Key is not found, check for the API Key in the WebSocket protocol
+        // header
         if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET) &&
                 requestContext.getHeaders().containsKey(HttpConstants.WEBSOCKET_PROTOCOL_HEADER)) {
-                String apiKey = extractAPIKeyInWSProtocolHeader(requestContext);
-                if (apiKey != null && !apiKey.isEmpty()) {
-                    String protocols = getProtocolsToSetInRequestHeaders(requestContext);
-                    if (protocols != null) {
-                        requestContext.addOrModifyHeaders(HttpConstants.WEBSOCKET_PROTOCOL_HEADER, protocols);
-                    }
-                    return apiKey.trim();
+            String apiKey = extractAPIKeyInWSProtocolHeader(requestContext);
+            if (apiKey != null && !apiKey.isEmpty()) {
+                String protocols = getProtocolsToSetInRequestHeaders(requestContext);
+                if (protocols != null) {
+                    requestContext.addOrModifyHeaders(HttpConstants.WEBSOCKET_PROTOCOL_HEADER, protocols);
                 }
+                return apiKey.trim();
+            }
         }
 
         return "";
@@ -484,7 +485,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             String[] secProtocolHeaderValues = protocolHeader.split(",");
             if (secProtocolHeaderValues.length > 1 && secProtocolHeaderValues[0].equals(
                     Constants.WS_API_KEY_IDENTIFIER)) {
-                AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext, Constants.WS_API_KEY_IDENTIFIER);
+                AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
+                        Constants.WS_API_KEY_IDENTIFIER);
                 return secProtocolHeaderValues[1].trim();
             }
         }
@@ -493,7 +495,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     public static String getProtocolsToSetInRequestHeaders(RequestContext requestContext) {
         String[] secProtocolHeaderValues = requestContext.getHeaders().get(
-            HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",");
+                HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",");
         if (secProtocolHeaderValues.length > 2) {
             return Arrays.stream(secProtocolHeaderValues, 2, secProtocolHeaderValues.length)
                     .collect(Collectors.joining(",")).trim();
