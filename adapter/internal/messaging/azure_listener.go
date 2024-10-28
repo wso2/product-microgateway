@@ -23,6 +23,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"net"
 	"nhooyr.io/websocket"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -34,16 +36,89 @@ import (
 const (
 	componentName                = "adapter"
 	subscriptionIdleTimeDuration = "P0Y0M3DT0H0M0S"
+	notification                 = "notification"
+	tokenRevocation              = "tokenRevocation"
+	stepQuotaThreshold           = "thresholdEvent"
+	stepQuotaReset               = "billingCycleResetEvent"
+	organizationPurge            = "organizationPurge"
 )
+
+var topicNames = []string{tokenRevocation, notification, stepQuotaThreshold, stepQuotaReset}
+
+const orgPurgeEnabled = "ORG_PURGE_ENABLED"
+
+func init() {
+	// Temporarily disable reacting organization Purge
+	orgPurgeEnabled, envParseErr := strconv.ParseBool(os.Getenv(orgPurgeEnabled))
+
+	if envParseErr == nil {
+		if orgPurgeEnabled {
+			topicNames = append(topicNames, organizationPurge)
+		}
+	}
+}
 
 // InitiateAndProcessEvents to pass event consumption
 func InitiateAndProcessEvents(config *config.Config) {
-	var err error
-	var reconnectRetryCount = config.ControlPlane.BrokerConnectionParameters.ReconnectRetryCount
-	var reconnectInterval = config.ControlPlane.BrokerConnectionParameters.ReconnectInterval
+	if len(config.ControlPlane.ASBDataplaneTopics) > 0 {
+		for _, topic := range config.ControlPlane.ASBDataplaneTopics {
+			subscription, err := msg.InitiateBrokerConnectionAndValidate(
+				topic.ConnectionString,
+				topic.TopicName,
+				getAmqpClientOptions(config),
+				componentName,
+				topic.ReconnectRetryCount,
+				topic.ReconnectInterval*time.Millisecond,
+				subscriptionIdleTimeDuration)
+			if err != nil {
+				logger.LoggerMgw.Errorf("Error while initiating broker connection for topic %s: %v", topic.TopicName, err)
+				health.SetControlPlaneBrokerStatus(false)
+				return
+			}
+			msg.InitiateConsumer(subscription, topic.Type)
+			startChannelConsumer(topic.Type)
+			logger.LoggerMgw.Infof("Broker connection initiated and lsitening on topic %s...", topic.TopicName)
+		}
+		health.SetControlPlaneBrokerStatus(true)
+	} else {
+		for _, topic := range topicNames {
+			connectionString := config.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints[0]
+			reconnectRetryCount := config.ControlPlane.BrokerConnectionParameters.ReconnectRetryCount
+			reconnectInterval := config.ControlPlane.BrokerConnectionParameters.ReconnectInterval
 
-	connectionString := config.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints[0]
-	var clientOpts *azservicebus.ClientOptions
+			subscription, err := msg.InitiateBrokerConnectionAndValidate(
+				connectionString,
+				topic,
+				getAmqpClientOptions(config),
+				componentName,
+				reconnectRetryCount,
+				reconnectInterval*time.Millisecond,
+				subscriptionIdleTimeDuration)
+			if err != nil {
+				logger.LoggerMgw.Errorf("Error while initiating broker connection for topic %s: %v", topic, err)
+				health.SetControlPlaneBrokerStatus(false)
+				return
+			}
+			msg.InitiateConsumer(subscription, topic)
+			startChannelConsumer(topic)
+			logger.LoggerMgw.Infof("Broker connection initiated and lsitening on topic %s...", topic)
+		}
+		health.SetControlPlaneBrokerStatus(true)
+	}
+}
+
+func startChannelConsumer(consumerType string) {
+	switch consumerType {
+	case notification:
+		go handleAzureNotification()
+	case tokenRevocation:
+		go handleAzureTokenRevocation()
+	case organizationPurge:
+		go handleAzureOrganizationPurge()
+	}
+}
+
+func getAmqpClientOptions(config *config.Config) *azservicebus.ClientOptions {
 	if config.ControlPlane.BrokerConnectionParameters.AmqpOverWebsocketsEnabled {
 		logger.LoggerMgw.Info("AMQP over Websockets is enabled. Initiating brokers with AMQP over Websockets.")
 		newWebSocketConnFn := func(ctx context.Context, args azservicebus.NewWebSocketConnArgs) (net.Conn, error) {
@@ -54,20 +129,9 @@ func InitiateAndProcessEvents(config *config.Config) {
 			}
 			return websocket.NetConn(ctx, wssConn, websocket.MessageBinary), nil
 		}
-		clientOpts = &azservicebus.ClientOptions{
+		return &azservicebus.ClientOptions{
 			NewWebSocketConn: newWebSocketConnFn,
 		}
 	}
-
-	subscriptionMetaDataList, err := msg.InitiateBrokerConnectionAndValidate(connectionString, clientOpts, componentName,
-		reconnectRetryCount, reconnectInterval*time.Millisecond, subscriptionIdleTimeDuration)
-	health.SetControlPlaneBrokerStatus(err == nil)
-	if err == nil {
-		logger.LoggerMgw.Info("Service bus meta data successfully initialized.")
-		msg.InitiateConsumers(connectionString, clientOpts, subscriptionMetaDataList, reconnectInterval*time.Millisecond)
-		go handleAzureNotification()
-		go handleAzureTokenRevocation()
-		go handleAzureOrganizationPurge()
-	}
-
+	return nil
 }
