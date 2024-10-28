@@ -25,6 +25,8 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 
 import java.util.Base64;
@@ -73,17 +75,23 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
     }
 
     @Override
-    protected String retrieveTokenFromRequestCtx(RequestContext requestContext) {
+    protected String retrieveTokenFromRequestCtx(RequestContext requestContext) throws APISecurityException {
 
-        String apiKeyHeaderValue = getAPIKeyFromRequest(requestContext);
-        // Skipping the prefix(`chk_`) and checksum.
-        String apiKeyData = apiKeyHeaderValue.substring(4, apiKeyHeaderValue.length() - 6);
-        // Base 64 decode key data.
-        String decodedKeyData = new String(Base64.getDecoder().decode(apiKeyData));
-        // Convert data into JSON.
-        JSONObject jsonObject = (JSONObject) JSONValue.parse(decodedKeyData);
-        // Extracting the jwt token.
-        return jsonObject.getAsString(APIKeyConstants.API_KEY_JSON_KEY);
+        try {
+            String apiKeyHeaderValue = getAPIKeyFromRequest(requestContext).trim();
+            // Skipping the prefix(`chk_`) and checksum.
+            String apiKeyData = apiKeyHeaderValue.substring(4, apiKeyHeaderValue.length() - 6);
+            // Base 64 decode key data.
+            String decodedKeyData = new String(Base64.getDecoder().decode(apiKeyData));
+            // Convert data into JSON.
+            JSONObject jsonObject = (JSONObject) JSONValue.parse(decodedKeyData);
+            // Extracting the jwt token.
+            return jsonObject.getAsString(APIKeyConstants.API_KEY_JSON_KEY);
+        } catch (Exception e) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
     }
 
     @Override
