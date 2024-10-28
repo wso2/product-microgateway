@@ -93,7 +93,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
             if (internalKey == null) {
                 internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
             }
-            AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext, Constants.WS_API_KEY_IDENTIFIER);
+            AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext, Constants.WS_TEST_KEY_IDENTIFIER);
         }
 
         return isAPIKey(internalKey);
@@ -336,7 +336,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         if (protocolHeader != null) {
             String[] secProtocolHeaderValues = protocolHeader.split(",");
             if (secProtocolHeaderValues.length > 1 && secProtocolHeaderValues[0].equals(
-                    Constants.WS_API_KEY_IDENTIFIER)) {
+                    Constants.WS_TEST_KEY_IDENTIFIER)) {
                 return secProtocolHeaderValues[1].trim();
             }
         }
