@@ -51,7 +51,8 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
     public boolean canAuthenticate(RequestContext requestContext) {
 
         String apiKeyValue = getAPIKeyFromRequest(requestContext);
-        return apiKeyValue != null && apiKeyValue.startsWith(APIKeyConstants.API_KEY_PREFIX);
+        return apiKeyValue != null && apiKeyValue.startsWith(APIKeyConstants.API_KEY_PREFIX) &&
+                apiKeyValue.length() > 10;
     }
 
     @Override
@@ -72,9 +73,6 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
         // Update the header with the new API key data.
         String encodedKeyData = Base64.getEncoder().encodeToString(jsonObject.toJSONString().getBytes());
         String newAPIKeyHeaderValue = APIKeyConstants.API_KEY_PREFIX + encodedKeyData + checksum;
-        // Remove the existing header.
-        requestContext.getRemoveHeaders().add(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
-                .getApiKeyInternalHeader().toLowerCase());
         // Add the new header.
         requestContext.addOrModifyHeaders(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
                 .getApiKeyInternalHeader().toLowerCase(), newAPIKeyHeaderValue);
@@ -104,7 +102,7 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
     @Override
     protected String retrieveTokenFromRequestCtx(RequestContext requestContext) throws APISecurityException {
 
-        String apiKey = getAPIKeyFromRequest(requestContext);
+        String apiKey = getAPIKeyFromRequest(requestContext).trim();
         if (!APIKeyUtils.isValidAPIKey(apiKey)) {
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
