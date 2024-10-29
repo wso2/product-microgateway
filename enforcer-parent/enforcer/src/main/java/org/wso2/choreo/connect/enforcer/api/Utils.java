@@ -25,10 +25,8 @@ import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
-import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
@@ -92,28 +90,6 @@ public class Utils {
         if (requestContext.getMatchedResourcePath() != null &&
                 requestContext.getMatchedResourcePath().isDisableSecurity()) {
             return;
-        }
-
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
-                .getSecuritySchemeDefinitions();
-        // API key headers are considered to be protected headers, such that the header
-        // would not be sent
-        // to backend and traffic manager.
-        // This would prevent leaking credentials, even if user is invoking unsecured
-        // resource with some
-        // credentials.
-        for (Map.Entry<String, SecuritySchemaConfig> entry : securitySchemeDefinitions.entrySet()) {
-            SecuritySchemaConfig schema = entry.getValue();
-            if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(schema.getType())) {
-                if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equals(schema.getIn())) {
-                    requestContext.getProtectedHeaders().add(schema.getName());
-                    requestContext.getRemoveHeaders().add(schema.getName());
-                    continue;
-                }
-                if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equals(schema.getIn())) {
-                    requestContext.getQueryParamsToRemove().add(schema.getName());
-                }
-            }
         }
 
         // Internal-Key credential is considered to be protected headers, such that the

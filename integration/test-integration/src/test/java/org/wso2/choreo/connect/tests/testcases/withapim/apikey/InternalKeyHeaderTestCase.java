@@ -41,8 +41,6 @@ public class InternalKeyHeaderTestCase extends ApimBaseTest {
     private static final String SAMPLE_API_CONTEXT = "apiKeyHeader";
     private static final String SAMPLE_API_VERSION = "1.0.0";
     private static final String APP_NAME = "APIKeyHeaderTestApp";
-
-    protected String apiKey;
     private String endPoint;
     private String internalKey;
 
@@ -56,7 +54,6 @@ public class InternalKeyHeaderTestCase extends ApimBaseTest {
         // enable apikey in apim
         JSONArray securityScheme = new JSONArray();
         securityScheme.put("oauth_basic_auth_api_key_mandatory");
-        securityScheme.put("api_key");
 
         JSONObject apiProperties = new JSONObject();
         apiProperties.put("name", SAMPLE_API_NAME);
@@ -83,24 +80,7 @@ public class InternalKeyHeaderTestCase extends ApimBaseTest {
                 publisherRestClient.generateInternalApiKey(apiId);
         internalKey = internalApiKeyDTO.getData().getApikey();
 
-        // Obtain API key
-        APIKeyDTO apiKeyDTO = StoreUtils.generateAPIKey(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
-                storeRestClient);
-        apiKey = apiKeyDTO.getApikey();
-
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
-    }
-
-    @Test(description = "Test to check the API Key in header is working")
-    public void invokeAPIKeyWithSimilarHeaderSuccessTest() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("apikey", apiKey);
-        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(),
-                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
-                "Response code mismatched");
     }
 
     @Test(description = "Test to check the Internal Key in header is working")

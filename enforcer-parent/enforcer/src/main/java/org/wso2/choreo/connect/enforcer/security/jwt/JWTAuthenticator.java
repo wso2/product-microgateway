@@ -526,8 +526,8 @@ public class JWTAuthenticator implements Authenticator {
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
         }
-        String[] splitToken = authHeaderVal.split("\\s");
-        String token = authHeaderVal;
+        String token = authHeaderVal.trim();
+        String[] splitToken = token.split("\\s");
         // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
         if (splitToken.length > 1) {
             token = splitToken[1];
