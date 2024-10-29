@@ -22,15 +22,18 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.Base64;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * API Key authenticator.
@@ -38,14 +41,6 @@ import java.util.Map;
 public class APIKeyAuthenticator extends JWTAuthenticator {
 
     private static final Logger log = LogManager.getLogger(APIKeyAuthenticator.class);
-
-    private static boolean isAPIKeyEnabled = false;
-
-    static {
-        if (System.getenv("API_KEY_ENABLED") != null) {
-            isAPIKeyEnabled = Boolean.parseBoolean(System.getenv("API_KEY_ENABLED"));
-        }
-    }
 
     public APIKeyAuthenticator() {
         super();
@@ -55,17 +50,32 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
 
-        if (!isAPIKeyEnabled) {
-            return false;
-        }
         String apiKeyValue = getAPIKeyFromRequest(requestContext);
-        return apiKeyValue != null && apiKeyValue.startsWith(APIKeyConstants.API_KEY_PREFIX);
+        return apiKeyValue != null && apiKeyValue.startsWith(APIKeyConstants.API_KEY_PREFIX) &&
+                apiKeyValue.length() > 10;
     }
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
 
-        return super.authenticate(requestContext);
+        AuthenticationContext authCtx = super.authenticate(requestContext);
+        // Drop the API key data from the API key header.
+        dropAPIKeyDataFromAPIKeyHeader(requestContext);
+        return authCtx;
+    }
+
+    private void dropAPIKeyDataFromAPIKeyHeader(RequestContext requestContext) throws APISecurityException {
+
+        String apiKeyHeaderValue = getAPIKeyFromRequest(requestContext).trim();
+        String checksum = apiKeyHeaderValue.substring(apiKeyHeaderValue.length() - 6);
+        JSONObject jsonObject = getDecodedAPIKeyData(apiKeyHeaderValue);
+        jsonObject.remove(APIKeyConstants.API_KEY_JSON_KEY);
+        // Update the header with the new API key data.
+        String encodedKeyData = Base64.getEncoder().encodeToString(jsonObject.toJSONString().getBytes());
+        String newAPIKeyHeaderValue = APIKeyConstants.API_KEY_PREFIX + encodedKeyData + checksum;
+        // Add the new header.
+        requestContext.addOrModifyHeaders(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
+                .getApiKeyInternalHeader().toLowerCase(), newAPIKeyHeaderValue);
     }
 
     private String getAPIKeyFromRequest(RequestContext requestContext) {
@@ -74,24 +84,48 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
                 .getApiKeyInternalHeader().toLowerCase());
     }
 
-    @Override
-    protected String retrieveTokenFromRequestCtx(RequestContext requestContext) throws APISecurityException {
-
+    private JSONObject getDecodedAPIKeyData(String apiKeyHeaderValue) throws APISecurityException {
         try {
-            String apiKeyHeaderValue = getAPIKeyFromRequest(requestContext).trim();
             // Skipping the prefix(`chk_`) and checksum.
             String apiKeyData = apiKeyHeaderValue.substring(4, apiKeyHeaderValue.length() - 6);
             // Base 64 decode key data.
             String decodedKeyData = new String(Base64.getDecoder().decode(apiKeyData));
             // Convert data into JSON.
-            JSONObject jsonObject = (JSONObject) JSONValue.parse(decodedKeyData);
-            // Extracting the jwt token.
-            return jsonObject.getAsString(APIKeyConstants.API_KEY_JSON_KEY);
+            return (JSONObject) JSONValue.parse(decodedKeyData);
         } catch (Exception e) {
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         }
+    }
+
+    @Override
+    protected String retrieveTokenFromRequestCtx(RequestContext requestContext) throws APISecurityException {
+
+        String apiKey = getAPIKeyFromRequest(requestContext).trim();
+        if (!APIKeyUtils.isValidAPIKey(apiKey)) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+        String keyHash = APIKeyUtils.generateAPIKeyHash(apiKey);
+        Object cachedJWT = CacheProvider.getGatewayAPIKeyJWTCache().getIfPresent(keyHash);
+        if (cachedJWT != null && !APIKeyUtils.isJWTExpired((String) cachedJWT)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Token retrieved from the cache. Token: " + FilterUtils.getMaskedToken(keyHash));
+            }
+            return (String) cachedJWT;
+        }
+        // Exchange the API Key to a JWT token.
+        Optional<String> jwt = APIKeyUtils.exchangeAPIKeyToJWT(keyHash);
+        if (jwt.isEmpty()) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+        // Cache the JWT token.
+        CacheProvider.getGatewayAPIKeyJWTCache().put(keyHash, jwt.get());
+        return jwt.get();
     }
 
     @Override

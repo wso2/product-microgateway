@@ -53,6 +53,14 @@ public class AuthFilter implements Filter {
     private List<Authenticator> authenticators = new ArrayList<>();
     private static final Logger log = LogManager.getLogger(AuthFilter.class);
 
+    private static boolean isAPIKeyEnabled = false;
+
+    static {
+        if (System.getenv("API_KEY_ENABLED") != null) {
+            isAPIKeyEnabled = Boolean.parseBoolean(System.getenv("API_KEY_ENABLED"));
+        }
+    }
+
     @Override
     public void init(APIConfig apiConfig, Map<String, String> configProperties) {
         initializeAuthenticators(apiConfig);
@@ -85,7 +93,8 @@ public class AuthFilter implements Filter {
                 } else if (apiSecurityLevel.trim().
                         equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                     isOAuthBasicAuthMandatory = true;
-                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
+                } else if (isAPIKeyEnabled &&
+                        apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
                     isApiKeyProtected = true;
                 }
             }

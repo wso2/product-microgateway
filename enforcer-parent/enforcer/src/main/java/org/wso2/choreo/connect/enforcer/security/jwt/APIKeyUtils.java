@@ -35,6 +35,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.io.InputStream;
@@ -80,18 +83,24 @@ public class APIKeyUtils {
      * @param apiKey    API Key
      * @return key hash
      */
-    public static String generateAPIKeyHash(String apiKey) {
+    public static String generateAPIKeyHash(String apiKey) throws APISecurityException {
 
-        // Skipping the prefix(`chp_`) and checksum.
-        String keyData = apiKey.substring(4, apiKey.length() - 6);
-        // Base 64 decode key data.
-        String decodedKeyData = new String(Base64.getDecoder().decode(keyData));
-        // Convert data into JSON.
-        JSONObject jsonObject = (JSONObject) JSONValue.parse(decodedKeyData);
-        // Extracting the key.
-        String key = jsonObject.getAsString(APIKeyConstants.API_KEY_JSON_KEY);
-        // Return SHA256 hash of the key.
-        return DigestUtils.sha256Hex(key);
+        try {
+            // Skipping the prefix(`chp_`) and checksum.
+            String keyData = apiKey.substring(4, apiKey.length() - 6);
+            // Base 64 decode key data.
+            String decodedKeyData = new String(Base64.getDecoder().decode(keyData));
+            // Convert data into JSON.
+            JSONObject jsonObject = (JSONObject) JSONValue.parse(decodedKeyData);
+            // Extracting the key.
+            String key = jsonObject.getAsString(APIKeyConstants.API_KEY_JSON_KEY);
+            // Return SHA256 hash of the key.
+            return DigestUtils.sha256Hex(key);
+        } catch (Exception e) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
     }
 
     /**

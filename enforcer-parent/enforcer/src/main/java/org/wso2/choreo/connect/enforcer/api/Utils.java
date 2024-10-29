@@ -92,6 +92,13 @@ public class Utils {
             return;
         }
 
+        // Choreo-API-Key is considered as a protected header, hence header value should be treated
+        // same as other security headers.
+        if (ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeader() != null) {
+            requestContext.getProtectedHeaders().add(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
+                    .getApiKeyInternalHeader().toLowerCase());
+        }
+
         // Internal-Key credential is considered to be protected headers, such that the
         // header would not be sent
         // to backend and traffic manager.
