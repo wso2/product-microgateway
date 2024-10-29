@@ -86,9 +86,9 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
             if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
                 String secProtocolHeader = requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
                 if (secProtocolHeader != null) {
-                    if (secProtocolHeader.contains(Constants.WS_API_KEY_IDENTIFIER)) {
+                    if (secProtocolHeader.contains(Constants.WS_TEST_KEY_IDENTIFIER)) {
                         AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
-                                Constants.WS_API_KEY_IDENTIFIER);
+                                Constants.WS_TEST_KEY_IDENTIFIER);
                     } else if (secProtocolHeader.contains(Constants.WS_OAUTH2_KEY_IDENTIFIED)) {
                         AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
                                 Constants.WS_OAUTH2_KEY_IDENTIFIED);
