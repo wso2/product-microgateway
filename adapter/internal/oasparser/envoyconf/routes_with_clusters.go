@@ -514,7 +514,14 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 
 	addresses := []*corev3.Address{}
 
+	withinClusterEndpoint := false
+
 	for i, ep := range clusterDetails.Endpoints {
+
+		if ep.URLType == "http" && strings.HasSuffix(ep.Host, "svc.cluster.local") {
+			withinClusterEndpoint = true
+		}
+
 		// validating the basepath to be same for all upstreams of an api
 		if strings.TrimSuffix(ep.Basepath, "/") != basePath {
 			return nil, nil, errors.New("endpoint basepath mismatched for " + ep.RawURL + ". expected : " + basePath + " but found : " + ep.Basepath)
@@ -610,6 +617,26 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
 		TypedDnsResolverConfig: dnsResolverConf,
+	}
+
+	// If the endpoint is within the cluster, set the max requests per connection to 1
+	// This ensure cilium proxy will not reuse the connection
+	if withinClusterEndpoint && os.Getenv("ROUTER_DISABLE_IN_CLUSTER_CONNECTION_POOLING") == "true" {
+		config := &upstreams.HttpProtocolOptions{
+			CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
+				MaxRequestsPerConnection: wrapperspb.UInt32(1),
+			},
+		}
+
+		marshalledConfig, err := anypb.New(config)
+		if err != nil {
+			return nil, nil, errors.New("internal Error while marshalling the HTTP Protocol Options")
+		}
+
+		// Add to cluster's TypedExtensionProtocolOptions instead of deprecated fields
+		cluster.TypedExtensionProtocolOptions = map[string]*any.Any{
+			"envoy.extensions.upstreams.http.v3.HttpProtocolOptions": marshalledConfig,
+		}
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
