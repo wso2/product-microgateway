@@ -622,21 +622,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	// If the endpoint is within the cluster, set the max requests per connection to 1
 	// This ensure cilium proxy will not reuse the connection
 	if withinClusterEndpoint && os.Getenv("ROUTER_DISABLE_IN_CLUSTER_CONNECTION_POOLING") == "true" {
-		config := &upstreams.HttpProtocolOptions{
-			CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
-				MaxRequestsPerConnection: wrapperspb.UInt32(1),
-			},
-		}
-
-		marshalledConfig, err := anypb.New(config)
-		if err != nil {
-			return nil, nil, errors.New("internal Error while marshalling the HTTP Protocol Options")
-		}
-
-		// Add to cluster's TypedExtensionProtocolOptions instead of deprecated fields
-		cluster.TypedExtensionProtocolOptions = map[string]*any.Any{
-			"envoy.extensions.upstreams.http.v3.HttpProtocolOptions": marshalledConfig,
-		}
+		cluster.MaxRequestsPerConnection = wrapperspb.UInt32(1)
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
