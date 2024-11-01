@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -122,7 +123,7 @@ public final class ZipUtils {
         }
     }
 
-    private static void unzipFiles(final ZipInputStream zipInputStream, final Path unzipFilePath) throws IOException {
+    public static void unzipFiles(final ZipInputStream zipInputStream, final Path unzipFilePath) throws IOException {
 
         FileOutputStream fileOutStream = new FileOutputStream(unzipFilePath.toAbsolutePath().toString());
         try (BufferedOutputStream bos = new BufferedOutputStream(fileOutStream)) {
@@ -154,6 +155,33 @@ public final class ZipUtils {
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException |
                 InvocationTargetException | MalformedURLException e) {
             logger.error("Error while adding jar : " + jar.getName() + " to the class path", e);
+        }
+    }
+
+    /**
+     * Unzips the given input stream to the given directory path.
+     *
+     * @param unzipLocation     The path zip should be extracted to
+     * @param zipInputStream    Input stream of the zip file
+     * @throws IOException      Error while unzipping the file
+     */
+    public static void unzipFromInputStream(String unzipLocation, InputStream zipInputStream) throws IOException {
+        try (ZipInputStream zis = new ZipInputStream(zipInputStream)) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                File newFile = new File(unzipLocation, zipEntry.getName());
+                if (zipEntry.isDirectory()) {
+                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
+                        throw new IOException("Failed to create directory " + newFile);
+                    }
+                } else {
+                    File parent = newFile.getParentFile();
+                    if (!parent.isDirectory() && !parent.mkdirs()) {
+                        throw new IOException("Failed to create directory " + parent);
+                    }
+                    Files.copy(zis, newFile.toPath());
+                }
+            }
         }
     }
 }

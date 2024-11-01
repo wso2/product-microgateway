@@ -87,6 +87,11 @@ public class TokenBuilder {
         return this;
     }
 
+    public TokenBuilder setApimVersion(String apimVersion) {
+        this.token.setApimVersion(apimVersion);
+        return this;
+    }
+
     public Token build() {
         return token;
     }

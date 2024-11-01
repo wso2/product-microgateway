@@ -2,6 +2,7 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.wso2.apimgt.gateway.cli.model.rest.common.APICorsConfigurationDTO;
 
 /**
  * Data holder/mapper for API Metadata of WSO2 APIM APIs.

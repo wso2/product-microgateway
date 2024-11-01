@@ -119,4 +119,8 @@ public class CliConstants {
     public static final String PROJECT_GRPC_DEFINITIONS_DIR = "grpc_definitions";
     public static final String RESOURCES_GRPC_DIR = "grpc";
     public static final String MICROGW_PROJECT_PLACEHOLDER = "\\$MGW-PROJECT_HOME";
+    public static final String DEPLOYMENTS_JSON = "deployments.json";
+    public static final String API_JSON = "api.json";
+    public static final String EXPORTED_API = "exported-api";
+    public static final String DEFINITIONS_DIR = "Definitions";
 }

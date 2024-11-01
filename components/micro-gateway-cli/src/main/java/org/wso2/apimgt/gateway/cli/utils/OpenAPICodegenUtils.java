@@ -43,7 +43,8 @@ import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.apim3x.Apim3xApiDto;
+import org.wso2.apimgt.gateway.cli.model.rest.common.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
@@ -133,39 +134,41 @@ public class OpenAPICodegenUtils {
      */
     static String generateSwaggerString(ExtendedAPI api, boolean isExpand) {
 
-        String swaggerVersion = findSwaggerVersion(api.getApiDefinition(), false);
+        String swaggerVersion = findSwaggerVersion(api.getApiInfo().getApiDefinition(), false);
         RouteEndpointConfig mgwEndpointConfigDTO = null;
         if (isExpand) {
             try {
                 mgwEndpointConfigDTO = getEndpointObjectFromAPI(api);
             } catch (MalformedURLException e) {
                 //Providing API Name and version would be enough since this path is executed only if APIM 2.6.0 is used
-                throw new CLIRuntimeException("The provided endpoints in the imported API \"" + api.getName() + " : " +
-                        api.getVersion() + "\" are invalid.");
+                throw new CLIRuntimeException("The provided endpoints in the imported API \""
+                        + api.getApiInfo().getName() + " : " + api.getApiInfo().getVersion() + "\" are invalid.");
             } catch (CLICompileTimeException e) {
-                throw new CLIRuntimeException("The provided endpoints in the imported API \"" + api.getName() + " : " +
-                        api.getVersion() + "\" are invalid.\n\t-" + e.getTerminalMsg(), e);
+                throw new CLIRuntimeException("The provided endpoints in the imported API \""
+                        + api.getApiInfo().getName() + " : " + api.getApiInfo().getVersion() + "\" are invalid.\n\t-"
+                        + e.getTerminalMsg(), e);
             }
         }
 
         switch (swaggerVersion) {
             case "2":
-                Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
+                Swagger swagger = new SwaggerParser().parse(api.getApiInfo().getApiDefinition());
                 //Sets title name similar to API name in swagger definition.
                 //Without this modification, two seperate rows will be added to APIM analytics dashboard tables.
                 //(For APIM and Microgateway API invokes)
-                swagger.getInfo().setTitle(api.getName());
+                swagger.getInfo().setTitle(api.getApiInfo().getName());
                 if (isExpand) {
                     swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
                 }
                 return Json.pretty(swagger);
             case "3":
-                SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
+                SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiInfo()
+                        .getApiDefinition());
                 OpenAPI openAPI = swaggerParseResult.getOpenAPI();
                 //Sets title similar to API name in open API definition
                 //Without this modification, two seperate rows will be added to analytics dashboard tables.
                 //(For APIM and Microgateway API invokes)
-                openAPI.getInfo().setTitle(api.getName());
+                openAPI.getInfo().setTitle(api.getApiInfo().getName());
                 if (isExpand) {
                     openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
                 }
@@ -221,7 +224,7 @@ public class OpenAPICodegenUtils {
 
         private static Map<String, Object> getExtensionMap(ExtendedAPI api, RouteEndpointConfig mgwEndpointConfigDTO) {
         Map<String, Object> extensionsMap = new HashMap<>();
-        String basePath = api.getContext() + "/" + api.getVersion();
+        String basePath = api.getApiInfo().getContext() + "/" + api.getApiInfo().getVersion();
         extensionsMap.put(OpenAPIConstants.BASEPATH, basePath);
         if (mgwEndpointConfigDTO.getProdEndpointList() != null) {
             extensionsMap.put(OpenAPIConstants.PRODUCTION_ENDPOINTS, mgwEndpointConfigDTO.getProdEndpointList());
@@ -229,14 +232,14 @@ public class OpenAPICodegenUtils {
         if (mgwEndpointConfigDTO.getSandboxEndpointList() != null) {
             extensionsMap.put(OpenAPIConstants.SANDBOX_ENDPOINTS, mgwEndpointConfigDTO.getSandboxEndpointList());
         }
-        if (api.getCorsConfiguration() != null) {
-            extensionsMap.put(OpenAPIConstants.CORS, api.getCorsConfiguration());
+        if (api.getApiInfo().getCorsConfiguration() != null) {
+            extensionsMap.put(OpenAPIConstants.CORS, api.getApiInfo().getCorsConfiguration());
         }
-        if (api.getAuthorizationHeader() != null) {
-            extensionsMap.put(OpenAPIConstants.AUTHORIZATION_HEADER, api.getAuthorizationHeader());
+        if (api.getApiInfo().getAuthorizationHeader() != null) {
+            extensionsMap.put(OpenAPIConstants.AUTHORIZATION_HEADER, api.getApiInfo().getAuthorizationHeader());
         }
-        if (api.getProvider() != null) {
-            extensionsMap.put(OpenAPIConstants.API_OWNER, api.getProvider());
+        if (api.getApiInfo().getProvider() != null) {
+            extensionsMap.put(OpenAPIConstants.API_OWNER, api.getApiInfo().getProvider());
         }
 
         return extensionsMap;
@@ -244,7 +247,8 @@ public class OpenAPICodegenUtils {
 
     private static RouteEndpointConfig getEndpointObjectFromAPI(ExtendedAPI api)
             throws MalformedURLException, CLICompileTimeException {
-        return RouteUtils.parseEndpointConfig(api.getEndpointConfig(), api.getEndpointSecurity());
+        return RouteUtils.parseEndpointConfig(api.getApiInfo().getEndpointConfigStr(),
+                api.getApiInfo().getEndpointSecurity());
 
     }
 
@@ -257,7 +261,7 @@ public class OpenAPICodegenUtils {
     public static ExtendedAPI generateAPIFromOpenAPIDef(OpenAPI openAPI, String openAPIContent) throws IOException {
         ExtendedAPI api = generateAPIFromOpenAPI(openAPI);
         //open API content should be set in json in order to validation filter to work.
-        api.setApiDefinition(openAPIContent);
+        api.getApiInfo().setApiDefinition(openAPIContent);
         return api;
     }
 
@@ -276,10 +280,11 @@ public class OpenAPICodegenUtils {
 
     private static ExtendedAPI generateAPIFromOpenAPI(OpenAPI openAPI) {
         String apiId = HashUtils.generateAPIId(openAPI.getInfo().getTitle(), openAPI.getInfo().getVersion());
-        ExtendedAPI api = new ExtendedAPI();
-        api.setId(apiId);
-        api.setName(openAPI.getInfo().getTitle());
-        api.setVersion(openAPI.getInfo().getVersion());
+        Apim3xApiDto apiInfo = new Apim3xApiDto();
+        apiInfo.setId(apiId);
+        apiInfo.setName(openAPI.getInfo().getTitle());
+        apiInfo.setVersion(openAPI.getInfo().getVersion());
+        ExtendedAPI api = new ExtendedAPI(apiInfo);
         populateTransportSecurity(api, openAPI);
         return api;
     }
@@ -311,7 +316,7 @@ public class OpenAPICodegenUtils {
         if (transports.isEmpty()) {
             transports = Arrays.asList(OpenAPIConstants.TRANSPORT_HTTP, OpenAPIConstants.TRANSPORT_HTTPS);
         }
-        api.setTransport(transports);
+        api.getApiInfo().setTransport(transports);
     }
 
     private static List<String> validateTransports(Object transportExtension, String mutualSSL, OpenAPI openAPI)
@@ -372,7 +377,7 @@ public class OpenAPICodegenUtils {
         }
         // if endpoint name is empty set api id as the name
         if (prodEndpointListDTO != null && prodEndpointListDTO.getName() == null) {
-            prodEndpointListDTO.setName(api.getId());
+            prodEndpointListDTO.setName(api.getApiInfo().getId());
         }
         EndpointListRouteDTO sandEndpointListDTO = null;
         try {
@@ -385,7 +390,7 @@ public class OpenAPICodegenUtils {
                     e.getTerminalMsg(), e);
         }
         if (sandEndpointListDTO != null && sandEndpointListDTO.getName() == null) {
-            sandEndpointListDTO.setName(api.getId());
+            sandEndpointListDTO.setName(api.getApiInfo().getId());
         }
         MgwEndpointConfigDTO mgwEndpointConfigDTO = RouteUtils
                 .convertToMgwServiceMap(prodEndpointListDTO, sandEndpointListDTO);
@@ -395,19 +400,19 @@ public class OpenAPICodegenUtils {
         api.setSpecificBasepath(resolveTemplateBasePath(extensions, openAPI.getInfo().getVersion()));
         //assigns x-wso2-owner value to API provider
         if (extensions.containsKey(OpenAPIConstants.API_OWNER)) {
-            api.setProvider(extensions.get(OpenAPIConstants.API_OWNER).toString());
+            api.getApiInfo().setProvider(extensions.get(OpenAPIConstants.API_OWNER).toString());
         }
         try {
             if (extensions.get(OpenAPIConstants.CORS) != null) {
-                api.setCorsConfiguration(objectMapper.convertValue(extensions.get(OpenAPIConstants.CORS),
+                api.getApiInfo().setCorsConfiguration(objectMapper.convertValue(extensions.get(OpenAPIConstants.CORS),
                         APICorsConfigurationDTO.class));
                 // explicitly set the cors enabled value to true if cors config found in the open API definition
-                api.getCorsConfiguration().setCorsConfigurationEnabled(true);
+                api.getApiInfo().getCorsConfiguration().setCorsConfigurationEnabled(true);
             }
             // set authorization header from the open API extension
             Object authHeader = extensions.get(OpenAPIConstants.AUTHORIZATION_HEADER);
             if (authHeader != null) {
-                api.setAuthorizationHeader(authHeader.toString());
+                api.getApiInfo().setAuthorizationHeader(authHeader.toString());
             }
         } catch (IllegalArgumentException e) {
             throw new CLIRuntimeException("'" + OpenAPIConstants.CORS + "' property is not properly set for the " +
@@ -805,8 +810,8 @@ public class OpenAPICodegenUtils {
             logger.debug("Getting Application security by the extension for API '" + openAPI.getInfo().getTitle()
                     + "' version '" + openAPI.getInfo().getVersion() + "'");
         }
-        ApplicationSecurity appSecurityfromDef = populateApplicationSecurity(api.getName(), api.getVersion(),
-                openAPI.getExtensions(), api.getMutualSSL());
+        ApplicationSecurity appSecurityfromDef = populateApplicationSecurity(api.getApiInfo().getName(),
+                api.getApiInfo().getVersion(), openAPI.getExtensions(), api.getMutualSSL());
         api.setApplicationSecurity(appSecurityfromDef != null ? appSecurityfromDef : new ApplicationSecurity());
     }
 

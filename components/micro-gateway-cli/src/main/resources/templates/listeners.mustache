@@ -119,13 +119,13 @@ public function getFilters() returns (http:RequestFilter|http:ResponseFilter) []
     if (isObservable) {
         preAuthnFilter = new gateway:PreAuthnFilterWrapper();
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
-        analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
+        analyticsFilter = new gateway:AnalyticsRequestFilterWrapper();
         validationRequestFilter = new gateway:ValidationRequestFilterWrapper();
         validationResponseFilter = new gateway:ValidationResponseFilterWrapper();
     } else {
         preAuthnFilter = new gateway:PreAuthnFilter();
         throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
-        analyticsFilter =  new gateway:AnalyticsRequestFilter();
+        analyticsFilter = new gateway:AnalyticsRequestFilter();
         validationRequestFilter = new gateway:ValidationRequestFilter();
         validationResponseFilter = new gateway:ValidationResponseFilter();
     }

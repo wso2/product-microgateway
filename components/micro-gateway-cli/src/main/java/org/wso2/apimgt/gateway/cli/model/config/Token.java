@@ -17,6 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 
 import java.io.File;
@@ -27,6 +28,7 @@ import java.io.PrintStream;
  */
 public class Token {
 
+    private String apimVersion;
     private String baseURL;
     private String restVersion;
     private String dcrVersion;
@@ -149,5 +151,20 @@ public class Token {
 
     public void setDcrVersion(String dcrVersion) {
         this.dcrVersion = dcrVersion;
+    }
+
+    public String getApimVersion() {
+        return apimVersion;
+    }
+
+    public void setApimVersion(String apimVersion) {
+        this.apimVersion = apimVersion;
+    }
+
+    public Boolean isApim4xVersion() {
+        if (StringUtils.isNotEmpty(apimVersion)) {
+            return apimVersion.startsWith("4.");
+        }
+        return false;
     }
 }

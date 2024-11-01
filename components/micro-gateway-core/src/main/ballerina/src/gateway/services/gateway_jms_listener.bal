@@ -29,13 +29,41 @@ string notifyConnectionUsername = getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HU
 service gatewayNotificationService = service {
     resource function onMessage(jms:Message message) {
         if (message is jms:MapMessage) {
+            // Handles APIM 3.x versions as map message
             string? | error eventType = message.getString(NOTIFICATION_EVENT_TYPE);
             string? | error timestamp = message.getString(NOTIFICATION_EVENT_TIMESTAMP);
             string? | error event = message.getString(NOTIFICATION_EVENT);
 
             if (eventType is string && event is string) {
-                printInfo(KEY_NOTIFICATION_EVENT_LISTENER, "Recieved event with type : " + eventType);
+                printInfo(KEY_NOTIFICATION_EVENT_LISTENER, "Received event with type : " + eventType);
                 handleNotificationMessage(eventType, event);
+            } else {
+                printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while reading notification message.");
+            }
+        } else if (message is jms:TextMessage) {
+            // Handles APIM 4.x versions as text message
+            string? | error strMessage = message.getText();
+            if (strMessage is string) {
+                json | error jsonMessage = strMessage.fromJsonString();
+                if (jsonMessage is json) {
+                    json | error eventData = jsonMessage.event;
+                    if (eventData is json) {
+                        json | error payloadData = eventData.payloadData;
+                        if (payloadData is json) {
+                            string eventType = payloadData.eventType.toString();
+                            string timestamp = payloadData.timestamp.toString();
+                            string event = payloadData.event.toString();
+                            printInfo(KEY_NOTIFICATION_EVENT_LISTENER, "Received event with type : " + eventType);
+                            handleNotificationMessage(eventType, event);
+                        } else {
+                            printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while reading notification message.");
+                        }
+                    } else {
+                        printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while reading notification message.");
+                    }
+                } else {
+                    printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while reading notification message.");
+                }
             } else {
                 printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while reading notification message.");
             }

@@ -73,4 +73,15 @@ public interface RESTAPIService {
      * @return list of  client certificates
      */
     List<ClientCertMetadataDTO> getClientCertificates(String accessToken);
+
+    /**
+     * @param apiName      Name of the API
+     * @param apiVersion   Version of the API
+     * @param gatewayLabel Gateway label
+     * @param accessToken  Access token for the API invocation
+     * @param projectName  Name of the API project
+     * @return List of APIs belong to the given label
+     */
+    List<ExtendedAPI> exportAPIs(String apiName, String apiVersion, String gatewayLabel, String accessToken,
+                                 String projectName);
 }

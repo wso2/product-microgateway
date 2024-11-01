@@ -16,6 +16,7 @@
 
 import ballerina/config;
 import ballerina/http;
+import ballerina/lang.'int;
 import ballerina/runtime;
 import ballerina/time;
 import ballerina/stringutils;
@@ -23,6 +24,12 @@ import ballerina/stringutils;
 boolean isAnalyticsEnabled = false;
 boolean isOldAnalyticsEnabled = false;
 boolean configsRead = false;
+
+// ELK analytics configurations
+boolean isELKAnalyticsEnabled = false;
+
+// Choreo based analytics configurations
+boolean isChoreoAnalyticsEnabled = false;
 
 //gRPCConfigs
 boolean isGrpcAnalyticsEnabled = false;
@@ -209,6 +216,128 @@ function initializeAnalytics() {
     }
 }
 
+function initializeELKAnalytics() {
+    isELKAnalyticsEnabled = <boolean>getConfigBooleanValue(ELK_ANALYTICS, ELK_ANALYTICS_ENABLE, DEFAULT_ANALYTICS_ENABLED);
+}
+
+function initializeChoreoAnalytics() {
+    isChoreoAnalyticsEnabled = <boolean>getConfigBooleanValue(CHOREO_ANALYTICS, CHOREO_ANALYTICS_ENABLE, DEFAULT_ANALYTICS_ENABLED);
+}
+
 public function retrieveHostname(string key, string defaultHost) returns string {
     return config:getAsString(key, defaultHost);
+}
+
+// Populates fault event data for APIM 4.x analytics
+function populateFaultAnalytics4xDTO(http:Response response, http:FilterContext context) returns @tainted (FaultDTO | error) {
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+
+    boolean isSecured = <boolean>context.attributes[IS_SECURED];
+    FaultDTO eventDto = {};
+    time:Time time = time:currentTime();
+    int currentTimeMills = time.time;
+    map<json> metaInfo = {};
+
+    eventDto.apiContext = getContext(context);
+    eventDto.apiName = getApiName(context);
+    string resourceName = context.getResourceName();
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
+    if (httpResourceConfig is http:HttpResourceConfig) {
+        var resource_Path = httpResourceConfig.path;
+        eventDto.resourcePath = resource_Path;
+        eventDto.apiResourceTemplate = httpResourceConfig.path;
+    }
+    eventDto.method = <string> invocationContext.attributes[REQUEST_METHOD];
+    if (context.attributes.hasKey(ERROR_CODE)) {
+        eventDto.errorCode = <int> context.attributes[ERROR_CODE];
+        eventDto.errorMessage = <string> context.attributes[ERROR_MESSAGE];
+    } else if (invocationContext.attributes.hasKey(ERROR_CODE)) {
+        eventDto.errorCode = <int> invocationContext.attributes[ERROR_CODE];
+        eventDto.errorMessage = <string> invocationContext.attributes[ERROR_MESSAGE];
+    } else {
+        eventDto.errorCode = <int> invocationContext.attributes[ERROR_RESPONSE_CODE];
+        eventDto.errorMessage = <string> invocationContext.attributes[ERROR_RESPONSE];
+    }
+    eventDto.faultTime = currentTimeMills;
+    eventDto.apiCreatorTenantDomain = getTenantDomain(context);
+    eventDto.hostName = retrieveHostname(DATACENTER_ID, <string>context.attributes[HOSTNAME_PROPERTY]);
+    if (context.attributes[PROTOCOL_PROPERTY] is string) {
+        eventDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
+    }
+
+    // if response contains Content-Length header that value will be taken
+    if (response.hasHeader(CONTENT_LENGHT_HEADER)) {
+        var respSize = 'int:fromString(response.getHeader(CONTENT_LENGHT_HEADER));
+        if (respSize is int) {
+            eventDto.responseSize = respSize;
+            printDebug(KEY_ANALYTICS_FILTER, "Response content lenght header : " + respSize.toString());
+        } else {
+            eventDto.responseSize = 0;
+        }
+    } else {
+        eventDto.responseSize = 0;
+    }
+    // if response contains Content-Type header that value will be taken
+    if (response.getContentType() != "") {
+        eventDto.responseContentType = response.getContentType();
+    } else {
+        eventDto.responseContentType = UNKNOWN_VALUE;
+    }
+
+    if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
+        metaInfo["keyType"] = authContext.keyType;
+        eventDto.keyType = authContext.keyType;
+        eventDto.isAnonymous = false;
+        eventDto.isAuthenticated = true;
+        eventDto.consumerKey = authContext.consumerKey;
+        eventDto.userName = authContext.username;
+        eventDto.applicationName = authContext.applicationName;
+        eventDto.applicationId = authContext.applicationId;
+        eventDto.applicationUUID = authContext.applicationUuid;
+        eventDto.userTenantDomain = authContext.subscriberTenantDomain;
+        eventDto.apiCreator = authContext.apiPublisher;
+        eventDto.applicationOwner = authContext.subscriber;
+    } else {
+        metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
+        eventDto.keyType = PRODUCTION_KEY_TYPE;
+        eventDto.isAnonymous = true;
+        eventDto.isAuthenticated = false;
+        eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
+        eventDto.userName = END_USER_ANONYMOUS;
+        eventDto.applicationName = ANONYMOUS_APP_NAME;
+        eventDto.applicationId = ANONYMOUS_APP_ID;
+        eventDto.applicationUUID = ANONYMOUS_APP_ID;
+        eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
+        eventDto.applicationOwner = END_USER_ANONYMOUS;
+    }
+
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
+    if (apiConfig is APIConfiguration) {
+        var api_Version = apiConfig.apiVersion;
+        eventDto.apiVersion = api_Version;
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfig.publisher)
+                && stringutils:equalsIgnoreCase("", eventDto.apiCreator)) {
+            eventDto.apiCreator = <string>apiConfig.publisher;
+        } else if (stringutils:equalsIgnoreCase("", eventDto.apiCreator)) {
+            //sets API creator if x-wso2-owner extension not specified.
+            eventDto.apiCreator = UNKNOWN_VALUE;
+        }
+    }
+    metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
+    eventDto.correlationId = <string>context.attributes[MESSAGE_ID];
+    eventDto.metaClientType = metaInfo.toString();
+    if (invocationContext.attributes.hasKey(ADDITIONAL_ANALYTICS_PROPS) &&
+        invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS] is string) {
+        eventDto.properties = <string>invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS];
+    }
+    return eventDto;
+}
+
+function validateEvent(RequestResponseExecutionDTO requestResponseExecutionDTO) returns boolean {
+    //considered as a malformed even when request timestamp is less than or equal to zero
+    if(requestResponseExecutionDTO.requestTimestamp <= 0) {
+        return false;
+    }
+    return true;
 }

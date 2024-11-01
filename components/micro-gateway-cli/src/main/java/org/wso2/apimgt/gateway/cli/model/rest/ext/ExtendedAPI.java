@@ -17,12 +17,14 @@ package org.wso2.apimgt.gateway.cli.model.rest.ext;
 
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.APIDetailedDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.APIInfoBaseDTO;
 
 /**
  * Data mapper object defining a MGW API using OpenApi definition.
  */
-public class ExtendedAPI extends APIDetailedDTO {
+public class ExtendedAPI {
+    //API DTO information
+    private APIInfoBaseDTO apiInfo;
     //API Level endpoint configuration
     private MgwEndpointConfigDTO endpointConfigRepresentation = null;
     //Basepath
@@ -38,6 +40,18 @@ public class ExtendedAPI extends APIDetailedDTO {
     private ApplicationSecurity applicationSecurity = null;
     //support apim transport level security
     private String mutualSSL = null;
+
+    public ExtendedAPI(APIInfoBaseDTO apiInfo) {
+        this.apiInfo = apiInfo;
+    }
+
+    public APIInfoBaseDTO getApiInfo() {
+        return apiInfo;
+    }
+
+    public void setApiInfo(APIInfoBaseDTO apiInfo) {
+        this.apiInfo = apiInfo;
+    }
 
     public MgwEndpointConfigDTO getEndpointConfigRepresentation() {
         return endpointConfigRepresentation;

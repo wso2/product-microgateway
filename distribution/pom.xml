@@ -108,6 +108,21 @@
             <version>${org.wso2.carbon.analytics-common}</version>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
+            <version>${carbon.apimgt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.am.analytics.publisher</groupId>
+            <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+            <version>${analytics.event.publisher.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ua.parser.wso2</groupId>
+            <artifactId>ua-parser</artifactId>
+            <version>${ua_parser.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
@@ -193,8 +208,6 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw</includeGroupIds>
-                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, mgw-jwt-transformer</includeArtifactIds>
                             <includeGroupIds>
                                 org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw,
                                 org.wso2.carbon.analytics-common, org.wso2.orbit.com.lmax

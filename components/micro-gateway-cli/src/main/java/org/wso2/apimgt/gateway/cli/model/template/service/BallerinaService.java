@@ -34,7 +34,7 @@ import org.wso2.apimgt.gateway.cli.model.config.CodeGen;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPIWrapper;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -96,7 +96,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private boolean applicationSecurityOptional;
 
     @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
-    private ExtendedAPI api;
+    private ExtendedAPIWrapper api;
 
     /**
      * API level request interceptor name.
@@ -134,15 +134,18 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     }
 
     @Override
-    public BallerinaService buildContext(OpenAPI definition, ExtendedAPI api) throws BallerinaServiceGenException {
+    public BallerinaService buildContext(OpenAPI definition, ExtendedAPIWrapper api)
+            throws BallerinaServiceGenException {
         this.name = CodegenUtils.trim(api.getName());
         this.api = api;
         if (Character.isDigit(api.getName().charAt(0))) {
             this.qualifiedServiceName =
-                    CodegenUtils.trim("_" + api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
+                    CodegenUtils.trim("_" + api.getName()) + "__"
+                            + replaceAllNonAlphaNumeric(api.getVersion());
         } else {
             this.qualifiedServiceName =
-                    CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
+                    CodegenUtils.trim(api.getName()) + "__"
+                            + replaceAllNonAlphaNumeric(api.getVersion());
         }
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.isGrpc = api.isGrpc();
@@ -257,7 +260,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 }
             } catch (CLICompileTimeException e) {
                 throw new CLIRuntimeException("Error while parsing information under path:" + path.getKey() +
-                        "in the API \"" + api.getName() + ":" + api.getVersion() + "\".\n\t-" + e.getTerminalMsg(), e);
+                        "in the API \"" + api.getName() + ":" + api.getVersion() +
+                        "\".\n\t-" + e.getTerminalMsg(), e);
             }
             balPath.getOperations().forEach(op -> {
                 BallerinaOperation operation = op.getValue();
@@ -431,11 +435,11 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         this.endpointConfig = endpointConfig;
     }
 
-    public ExtendedAPI getApi() {
+    public ExtendedAPIWrapper getApi() {
         return api;
     }
 
-    public void setApi(ExtendedAPI api) {
+    public void setApi(ExtendedAPIWrapper api) {
         this.api = api;
     }
 
@@ -503,7 +507,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                     api.setResponseCaching(OpenAPIConstants.CACHE_ENABLED);
                     if (cacheObjectMap.containsKey(OpenAPIConstants.CACHE_TIMEOUT)) {
                         int cacheTimeout = (int) cacheObjectMap.get(OpenAPIConstants.CACHE_TIMEOUT);
-                        api.setCacheTimeout(cacheTimeout * 1000); //set the value in milli seconds.
+                        api.setCacheTimeout(cacheTimeout * 1000); //set the value in milliseconds.
                     }
                 } else {
                     api.setResponseCaching(OpenAPIConstants.DISABLED);

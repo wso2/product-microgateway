@@ -138,7 +138,7 @@ public class HashUtils {
             for (Object obj : objects) {
                 String hash = getAnnotatedHash(obj);
                 if (obj instanceof ExtendedAPI) {
-                    hashes.put(((ExtendedAPI) obj).getId(), hash);
+                    hashes.put(((ExtendedAPI) obj).getApiInfo().getId(), hash);
                 } else if (obj instanceof ThrottlePolicyDTO) {
                     hashes.put(((ThrottlePolicyDTO) obj).getPolicyId(), hash);
                 } else {
