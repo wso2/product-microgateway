@@ -30,6 +30,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.ChoreoComponentInfo;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
@@ -68,9 +69,13 @@ public class APIKeyAuthenticatorTest {
     public void retrieveTokenFromRequestCtxTest_invalidKey() {
 
         RequestContext.Builder requestContextBuilder = new RequestContext.Builder("/api-key");
+        ChoreoComponentInfo choreoComponentInfo = new ChoreoComponentInfo();
+        choreoComponentInfo.setComponentID("component_id");
         requestContextBuilder.matchedAPI(new APIConfig.Builder("Petstore")
                 .basePath("/test")
+                .uuid("6003a3b7-af0f-4fb3-853e-a6562b2345f2")
                 .apiType("REST")
+                .choreoComponentInfo(choreoComponentInfo)
                 .build());
         Map<String, String> headersMap = new HashMap<>();
         headersMap.put("choreo-api-key",
@@ -97,9 +102,13 @@ public class APIKeyAuthenticatorTest {
         PowerMockito.when(CacheProvider.getGatewayAPIKeyJWTCache()).thenReturn(gatewayAPIKeyJWTCache);
         PowerMockito.when(gatewayAPIKeyJWTCache.getIfPresent(Mockito.anyString())).thenReturn(mockJWT);
 
+        ChoreoComponentInfo choreoComponentInfo = new ChoreoComponentInfo();
+        choreoComponentInfo.setComponentID("component_id");
         RequestContext.Builder requestContextBuilder = new RequestContext.Builder("/api-key");
         requestContextBuilder.matchedAPI(new APIConfig.Builder("Petstore")
                 .basePath("/test")
+                .uuid("6003a3b7-af0f-4fb3-853e-a6562b2345f2")
+                .choreoComponentInfo(choreoComponentInfo)
                 .apiType("REST")
                 .build());
         Map<String, String> headersMap = new HashMap<>();
@@ -128,10 +137,14 @@ public class APIKeyAuthenticatorTest {
         PowerMockito.when(CacheProvider.getGatewayAPIKeyJWTCache()).thenReturn(gatewayAPIKeyJWTCache);
         PowerMockito.when(gatewayAPIKeyJWTCache.getIfPresent(Mockito.anyString())).thenReturn(null);
 
+        ChoreoComponentInfo choreoComponentInfo = new ChoreoComponentInfo();
+        choreoComponentInfo.setComponentID("component_id");
         RequestContext.Builder requestContextBuilder = new RequestContext.Builder("/api-key");
         requestContextBuilder.matchedAPI(new APIConfig.Builder("Petstore")
                 .basePath("/test")
+                .uuid("6003a3b7-af0f-4fb3-853e-a6562b2345f2")
                 .apiType("REST")
+                .choreoComponentInfo(choreoComponentInfo)
                 .build());
         Map<String, String> headersMap = new HashMap<>();
         headersMap.put("choreo-api-key",

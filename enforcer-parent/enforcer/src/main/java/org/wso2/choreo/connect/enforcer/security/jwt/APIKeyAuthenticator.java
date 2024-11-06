@@ -109,7 +109,12 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         }
         String keyHash = APIKeyUtils.generateAPIKeyHash(apiKey);
-        Object cachedJWT = CacheProvider.getGatewayAPIKeyJWTCache().getIfPresent(keyHash);
+        String componentId = requestContext.getMatchedAPI().getChoreoComponentInfo().getComponentID();
+        if (componentId == null) {
+            componentId = "";
+        }
+        String apiKeyId = keyHash + APIKeyConstants.API_KEY_ID_SEPARATOR + componentId;
+        Object cachedJWT = CacheProvider.getGatewayAPIKeyJWTCache().getIfPresent(apiKeyId);
         if (cachedJWT != null && !APIKeyUtils.isJWTExpired((String) cachedJWT)) {
             if (log.isDebugEnabled()) {
                 log.debug("Token retrieved from the cache. Token: " + FilterUtils.getMaskedToken(keyHash));
@@ -117,14 +122,14 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
             return (String) cachedJWT;
         }
         // Exchange the API Key to a JWT token.
-        Optional<String> jwt = APIKeyUtils.exchangeAPIKeyToJWT(keyHash);
+        Optional<String> jwt = APIKeyUtils.exchangeAPIKeyToJWT(apiKeyId);
         if (jwt.isEmpty()) {
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         }
         // Cache the JWT token.
-        CacheProvider.getGatewayAPIKeyJWTCache().put(keyHash, jwt.get());
+        CacheProvider.getGatewayAPIKeyJWTCache().put(apiKeyId, jwt.get());
         return jwt.get();
     }
 

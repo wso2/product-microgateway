@@ -142,12 +142,12 @@ public class APIKeyUtils {
     }
 
     /**
-     * Exchange a given API key hash to a JWT token.
+     * Exchange a given API key ID to a JWT token.
      *
-     * @param apiKeyHash    API Key Hash
+     * @param apiKeyId    API Key Hash + "#" + Target component ID.
      * @return JWT corresponding to given API Key.
      */
-    public static Optional<String> exchangeAPIKeyToJWT(String apiKeyHash) {
+    public static Optional<String> exchangeAPIKeyToJWT(String apiKeyId) {
 
         URL url = null;
         try {
@@ -162,7 +162,7 @@ public class APIKeyUtils {
             // Create a request to exchange API key to JWT.
             HttpPost exchangeRequest = new HttpPost(url.toURI());
             exchangeRequest.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
-            exchangeRequest.setEntity(new StringEntity(createKeyHashExchangeRequest(apiKeyHash)));
+            exchangeRequest.setEntity(new StringEntity(createKeyHashExchangeRequest(apiKeyId)));
             try (CloseableHttpResponse response = httpClient.execute(exchangeRequest)) {
                 if (response.getStatusLine().getStatusCode() == 200) {
                     HttpEntity entity = response.getEntity();

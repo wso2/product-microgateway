@@ -28,6 +28,8 @@ public class APIKeyConstants {
 
     public static final String API_KEY_JSON_KEY = "key";
 
+    public static final String API_KEY_ID_SEPARATOR = "#";
+
     public static final String PAT_EXCHANGE_ENDPOINT = "/internal/pat";
     public static final String API_KEY_EXCHANGE_ENDPOINT = "/internal/apiKey/token";
 }
