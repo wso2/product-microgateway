@@ -169,3 +169,39 @@ static_resources:
                     socket_address:
                       address: '${ENFORCER_HOST}'
                       port_value: 9001
+      - name: redis_cluster
+        connect_timeout: 5s
+        lb_policy: CLUSTER_PROVIDED
+        dns_lookup_family: V4_ONLY
+        load_assignment:
+          cluster_name: redis_cluster
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: ${REDIS_HOST}
+                    port_value: ${REDIS_PORT}
+        typed_extension_protocol_options:
+          envoy.filters.network.redis_proxy:
+            "@type": type.googleapis.com/envoy.extensions.filters.network.redis_proxy.v3.RedisProtocolOptions
+            auth_password:
+              inline_string: ${REDIS_PASSWORD}
+        cluster_type:
+          name: envoy.clusters.redis
+          typed_config:
+            "@type": type.googleapis.com/google.protobuf.Struct
+            value:
+              cluster_refresh_rate: 5s
+              cluster_refresh_timeout: 3s
+              redirect_refresh_interval: 5s
+              redirect_refresh_threshold: 5
+        health_checks:
+        - timeout: 1s
+          interval: 5s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          custom_health_check:
+            name: envoy.health_checkers.redis
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.health_checkers.redis.v3.Redis
