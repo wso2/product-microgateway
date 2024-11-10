@@ -10,7 +10,7 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 security:
-  - petstore_auth:
+  - default:
       - 'write:scopes'
 x-wso2-cors:
   accessControlAllowOrigins:
@@ -102,7 +102,7 @@ paths:
         '404':
           description: Pet not found
       security:
-        - petstore_auth: []
+        - default: []
   '/pets/findByTags':
     get:
       tags:
@@ -132,7 +132,7 @@ paths:
         '400':
           description: Invalid tag value
       security:
-        - petstore_auth:
+        - default:
             - 'write:scopes'
             - 'read:scopes'
       deprecated: true
@@ -141,7 +141,7 @@ securityDefinitions:
     type: apiKey
     name: api_key
     in: header
-  petstore_auth:
+  default:
     type: oauth2
     authorizationUrl: 'http://mockBackend:2380/oauth/authorize'
     flow: implicit
