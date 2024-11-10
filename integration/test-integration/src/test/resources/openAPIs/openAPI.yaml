@@ -81,7 +81,7 @@ paths:
           schema:
             $ref: '#/definitions/ApiResponse'
       security:
-        - petstore_auth:
+        - default:
             - 'write:pets'
             - 'read:pets'
   /pet:
@@ -108,7 +108,7 @@ paths:
         '405':
           description: Invalid input
       security:
-        - petstore_auth:
+        - default:
             - 'write:pets'
             - 'read:pets'
     put:
@@ -138,7 +138,7 @@ paths:
         '405':
           description: Validation exception
       security:
-        - petstore_auth:
+        - default:
             - 'write:pets'
             - 'read:pets'
   /pet/findByStatus:
@@ -175,7 +175,7 @@ paths:
         '400':
           description: Invalid status value
       security:
-        - petstore_auth:
+        - default:
             - 'write:pets'
   /pets/findByTags:
     get:
@@ -206,7 +206,7 @@ paths:
         '400':
           description: Invalid tag value
       security:
-        - petstore_auth:
+        - default:
             - 'write:pets'
             - 'read:pets'
       deprecated: true
@@ -268,7 +268,7 @@ paths:
         '405':
           description: Invalid input
       security:
-        - petstore_auth:
+        - default:
             - 'write:pets'
             - 'read:pets'
     delete:
@@ -297,7 +297,7 @@ paths:
         '404':
           description: Pet not found
       security:
-        - petstore_auth:
+        - default:
             - 'write:pets'
             - 'read:pets'
   /store/order:
@@ -601,7 +601,7 @@ paths:
         '400':
           description: Invalid status value
       security:
-        - petstore_auth: [ ]
+        - default: [ ]
   /jwttoken:
     get:
       summary: Get the backend jwt token
@@ -613,7 +613,7 @@ paths:
         '400':
           description: Invalid status value
       security:
-        - petstore_auth: [ ]
+        - default: [ ]
   /headers:
     get:
       summary: getHeaders
@@ -627,7 +627,7 @@ paths:
         '404':
           description: Resource not found
       security:
-        - petstore_auth: [ ]
+        - default: [ ]
   /headers/{headerId}.api:
     get:
       summary: getHeaders
@@ -641,13 +641,13 @@ paths:
         '404':
           description: Resource not found
       security:
-        - petstore_auth: [ ]
+        - default: [ ]
 securityDefinitions:
   api_key:
     type: apiKey
     name: api_key
     in: header
-  petstore_auth:
+  default:
     type: oauth2
     authorizationUrl: 'http://mockBackend:2380/oauth/authorize'
     flow: implicit

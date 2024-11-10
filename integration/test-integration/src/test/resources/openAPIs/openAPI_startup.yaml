@@ -76,14 +76,14 @@ paths:
         '400':
           description: Invalid status value
       security:
-        - petstore_auth:
+        - default:
             - 'write:pets'
 securityDefinitions:
   api_key:
     type: apiKey
     name: api_key
     in: header
-  petstore_auth:
+  default:
     type: oauth2
     authorizationUrl: 'http://mockBackend:2380/oauth/authorize'
     flow: implicit
