@@ -46,6 +46,7 @@ public class TokenValidationContext {
     private AccessTokenInfo tokenInfo;
     private String authorizationCode;
     private String tenantDomain;
+    private String securityScheme;
     private List<String> keyManagers = new ArrayList<>();
 
     public AccessTokenInfo getTokenInfo() {
@@ -178,6 +179,14 @@ public class TokenValidationContext {
     public void setKeyManagers(List<String> keyManagers) {
 
         this.keyManagers = keyManagers;
+    }
+
+    public String getSecurityScheme() {
+        return securityScheme;
+    }
+
+    public void setSecurityScheme(String securityScheme) {
+        this.securityScheme = securityScheme;
     }
 }
 

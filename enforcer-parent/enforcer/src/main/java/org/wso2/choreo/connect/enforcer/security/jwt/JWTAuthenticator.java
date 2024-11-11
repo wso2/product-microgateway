@@ -83,6 +83,7 @@ import java.util.UUID;
 public class JWTAuthenticator implements Authenticator {
 
     private static final Logger log = LogManager.getLogger(JWTAuthenticator.class);
+    private static final String SWAGGER_OAUTH2_SECURITY_SCHEME_NAME = "default";
     private final JWTValidator jwtValidator = new JWTValidator();
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
@@ -573,6 +574,7 @@ public class JWTAuthenticator implements Authenticator {
             tokenValidationContext.setMatchingResourceConfig(matchingResource);
             tokenValidationContext.setContext(apiContext);
             tokenValidationContext.setVersion(apiVersion);
+            tokenValidationContext.setSecurityScheme(SWAGGER_OAUTH2_SECURITY_SCHEME_NAME);
 
             boolean valid = KeyValidator.validateScopes(tokenValidationContext);
             if (valid) {

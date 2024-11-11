@@ -41,7 +41,6 @@ import org.wso2.choreo.connect.enforcer.util.SemanticVersionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -86,22 +85,13 @@ public class KeyValidator {
 
         ResourceConfig matchedResource = validationContext.getMatchingResourceConfig();
         boolean scopesValidated = false;
-        if (matchedResource.getSecuritySchemas().entrySet().size() > 0) {
-            for (Map.Entry<String, List<String>> pair : matchedResource.getSecuritySchemas().entrySet()) {
-                boolean validate = false;
-                if (pair.getValue() != null && pair.getValue().size() > 0) {
-                    scopesValidated = false;
-                    for (String scope : pair.getValue()) {
-                        if (scopesSet.contains(scope)) {
-                            scopesValidated = true;
-                            validate = true;
-                            break;
-                        }
-                    }
-                } else {
+
+        List<String> requiredScopes = matchedResource.getSecuritySchemas()
+                .get(validationContext.getSecurityScheme());
+        if (requiredScopes != null && !requiredScopes.isEmpty()) {
+            for (String scope : requiredScopes) {
+                if (scopesSet.contains(scope)) {
                     scopesValidated = true;
-                }
-                if (validate) {
                     break;
                 }
             }
