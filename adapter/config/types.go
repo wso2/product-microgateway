@@ -122,6 +122,7 @@ type envoy struct {
 	Connection                       connection
 	RateLimit                        rateLimit
 	MaximumResourcePathLengthInKB    int16
+	HeadersPreserveCase              bool
 }
 
 type connectionTimeouts struct {
