@@ -42,9 +42,9 @@ static_resources:
       connect_timeout: 1s
       upstream_connection_options:
         tcp_keepalive:
-          keepalive_probes: 3
-          keepalive_time: 300
-          keepalive_interval: 30
+          keepalive_probes: '${KEEPALIVE_PROBES}'
+          keepalive_time: '${KEEPALIVE_TIMEOUT}'
+          keepalive_interval: '${KEEPALIVE_INTERVAL}'
       load_assignment:
         cluster_name: xds_cluster
         endpoints:
