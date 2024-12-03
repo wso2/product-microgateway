@@ -130,7 +130,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			cluster, address, err := processEndpoints(apiLevelClusterNameProd, apiLevelEndpointProd,
 				upstreamCerts, timeout, apiLevelbasePath)
 			// assigns specified values for TCP keep-alive and HTTP timeout considering specific organizations
-			ok := slices.Contains(config.UpstreamConnectionConfEnabledOrgList, organizationID)
+			ok := slices.Contains(config.UpstreamConnectionConfEnabledOrgList, organizationID) || slices.Contains(config.UpstreamConnectionConfEnabledOrgList, "*")
 			if ok {
 				getKeepAliveConfigs(cluster, conf)
 			}
@@ -359,7 +359,7 @@ func getKeepAliveConfigs(cluster *clusterv3.Cluster, conf *config.Config) {
 
 	config := &upstreams.HttpProtocolOptions{
 		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
-			IdleTimeout:           durationpb.New(time.Duration(conf.Envoy.Upstream.HTTPConfigurations.IdleTimeoutInMillis) * time.Millisecond),
+			IdleTimeout: durationpb.New(time.Duration(conf.Envoy.Upstream.HTTPConfigurations.IdleTimeoutInMillis) * time.Millisecond),
 		},
 		UpstreamProtocolOptions: &upstreams.HttpProtocolOptions_UseDownstreamProtocolConfig{},
 	}
