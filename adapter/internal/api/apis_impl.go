@@ -166,7 +166,11 @@ func ProcessMountedAPIProjects() (err error) {
 
 func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error) {
 	apiYaml := apiProject.APIYaml.Data
-	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
+	if (apiProject.APIYaml.Data.OrganizationID != "") {
+		apiProject.OrganizationID = apiProject.APIYaml.Data.OrganizationID
+	} else {
+		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
+	}
 
 	// handle panic
 	defer func() {

@@ -157,6 +157,15 @@ var defaultConfig = &Config{
 					MaxRetries:         50,
 				},
 			},
+			TcpConfigurations: upstreamTcpConfigs{
+				KeepaliveTimeInMillis:     120000,
+				KeepaliveProbes:           9,
+				KeepaliveIntervalInMillis: 75,
+			},
+			HttpConfigurations: upstreamHttpConfigs{
+				IdleTimeoutInMillis:           120000,
+				MaxConnectionDurationInMillis: 120000,
+			},
 		},
 		Connection: connection{
 			Timeouts: connectionTimeouts{

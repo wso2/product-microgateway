@@ -235,12 +235,14 @@ type globalCors struct {
 // Envoy Upstream Related Configurations
 type envoyUpstream struct {
 	// UpstreamTLS related Configuration
-	TLS             upstreamTLS
-	Timeouts        upstreamTimeout
-	Health          upstreamHealth
-	DNS             upstreamDNS
-	Retry           upstreamRetry
-	CircuitBreakers []upstreamCircuitBreaker
+	TLS                upstreamTLS
+	Timeouts           upstreamTimeout
+	Health             upstreamHealth
+	DNS                upstreamDNS
+	Retry              upstreamRetry
+	CircuitBreakers    []upstreamCircuitBreaker
+	TcpConfigurations  upstreamTcpConfigs
+	HttpConfigurations upstreamHttpConfigs
 }
 
 type upstreamTLS struct {
@@ -274,6 +276,16 @@ type upstreamDNS struct {
 type dnsResolverConfig struct {
 	ResolverType dnsResolverType
 	CAres        cAres
+}
+
+type upstreamTcpConfigs struct {
+	KeepaliveTimeInMillis     uint32
+	KeepaliveProbes           uint32
+	KeepaliveIntervalInMillis uint32
+}
+type upstreamHttpConfigs struct {
+	IdleTimeoutInMillis           uint32
+	MaxConnectionDurationInMillis uint32
 }
 
 type dnsResolverType string

@@ -129,6 +129,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		if !strings.Contains(apiLevelEndpointProd.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
 			cluster, address, err := processEndpoints(apiLevelClusterNameProd, apiLevelEndpointProd,
 				upstreamCerts, timeout, apiLevelbasePath)
+			// assigns specified values for TCP keep-alive and HTTP timeout considering specific organizations
+			ok := slices.Contains(config.UpstreamConnectionConfEnabledOrgList, organizationID)
+			if ok {
+				getKeepAliveConfigs(cluster, conf)
+			}
 			if err != nil {
 				apiLevelClusterNameProd = ""
 				logger.LoggerOasparser.Errorf("Error while adding api level production endpoints for %s. %v , skipping api...", apiTitle, err.Error())
@@ -341,6 +346,34 @@ func getClusterName(epPrefix string, organizationID string, vHost string, swagge
 	}
 	return strings.TrimSpace(organizationID + "_" + epPrefix + "_" + vHost + "_" + strings.Replace(swaggerTitle, " ", "", -1) +
 		swaggerVersion)
+}
+
+func getKeepAliveConfigs(cluster *clusterv3.Cluster, conf *config.Config) {
+	cluster.UpstreamConnectionOptions = &clusterv3.UpstreamConnectionOptions{
+		TcpKeepalive: &corev3.TcpKeepalive{
+			KeepaliveProbes:   wrapperspb.UInt32(conf.Envoy.Upstream.TcpConfigurations.KeepaliveProbes),
+			KeepaliveInterval: wrapperspb.UInt32(conf.Envoy.Upstream.TcpConfigurations.KeepaliveIntervalInMillis),
+			KeepaliveTime:     wrapperspb.UInt32(conf.Envoy.Upstream.TcpConfigurations.KeepaliveTimeInMillis / 1000),
+		},
+	}
+
+	config := &upstreams.HttpProtocolOptions{
+		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
+			IdleTimeout:           durationpb.New(time.Duration(conf.Envoy.Upstream.HttpConfigurations.IdleTimeoutInMillis) * time.Millisecond),
+			MaxConnectionDuration: durationpb.New(time.Duration(conf.Envoy.Upstream.HttpConfigurations.MaxConnectionDurationInMillis) * time.Millisecond),
+		},
+		UpstreamProtocolOptions: &upstreams.HttpProtocolOptions_UseDownstreamProtocolConfig{},
+	}
+	MarshalledHTTPProtocolOptions, err := proto.Marshal(config)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error while marshalling the upstream TCP keep alive config")
+	}
+	cluster.TypedExtensionProtocolOptions = map[string]*anypb.Any{
+		"envoy.extensions.upstreams.http.v3.HttpProtocolOptions": {
+			TypeUrl: httpProtocolOptionsName,
+			Value:   MarshalledHTTPProtocolOptions,
+		},
+	}
 }
 
 // CreateLuaCluster creates lua cluster configuration.
