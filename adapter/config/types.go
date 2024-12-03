@@ -241,8 +241,8 @@ type envoyUpstream struct {
 	DNS                upstreamDNS
 	Retry              upstreamRetry
 	CircuitBreakers    []upstreamCircuitBreaker
-	TcpConfigurations  upstreamTcpConfigs
-	HttpConfigurations upstreamHttpConfigs
+	TCPConfigurations  upstreamTCPConfigs
+	HTTPConfigurations upstreamHTTPConfigs
 }
 
 type upstreamTLS struct {
@@ -278,14 +278,13 @@ type dnsResolverConfig struct {
 	CAres        cAres
 }
 
-type upstreamTcpConfigs struct {
+type upstreamTCPConfigs struct {
 	KeepaliveTimeInMillis     uint32
 	KeepaliveProbes           uint32
 	KeepaliveIntervalInMillis uint32
 }
-type upstreamHttpConfigs struct {
+type upstreamHTTPConfigs struct {
 	IdleTimeoutInMillis           uint32
-	MaxConnectionDurationInMillis uint32
 }
 
 type dnsResolverType string

@@ -39,6 +39,7 @@ var (
 	adapterConfig                        *Config
 	defaultVhost                         map[string]string
 	e                                    error
+	// UpstreamConnectionConfEnabledOrgList is the list of orgs that need to handle connection timeouts
 	UpstreamConnectionConfEnabledOrgList []string
 )
 
@@ -257,8 +258,8 @@ func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {
 	logger.Warnf("%s is deprecated. Use %s instead", deprecatedTerm, currentTerm)
 }
 
-// GetTcpKeepaliveEnabledOrgs returns the list of orgs that need to handle connection timeouts
-func GetTcpKeepaliveEnabledOrgs() {
+// GetTCPKeepaliveEnabledOrgs returns the list of orgs that need to handle connection timeouts
+func GetTCPKeepaliveEnabledOrgs() {
 	orgs := os.Getenv("TCP_KEEPALIVE_ENABLED_ORGS")
 	UpstreamConnectionConfEnabledOrgList = strings.Split(orgs, ",")
 	if len(UpstreamConnectionConfEnabledOrgList) == 0 {

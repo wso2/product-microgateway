@@ -190,20 +190,18 @@ retainKeys = ["self_validate_jwt", "issuer", "claim_mappings", "consumer_key_cla
   maxInterval = "500ms"
 
 # TCP configurations applicable with the upstream clusters
-[router.upstream.tcpConfigurations]
+[router.upstream.tCPConfigurations]
   # The number of milliseconds a connection needs to be idle before keep-alive probes start being sent
   keepaliveTimeInMillis = 120000
   # Maximum number of keep-alive probes to send without response before deciding the connection is dead
   keepaliveProbes = 9
   # The number of milliseconds between keep-alive probes
-  keepaliveIntervalInMillis = 75
+  keepaliveIntervalInMillis = 75000
 
 # HTTP configurations applicable with the upstream clusters
-[router.upstream.httpConfigurations]
+[router.upstream.hTTPConfigurations]
   # Idle timeout in milliseconds for connections
   idleTimeoutInMillis = 120000
-  # The maximum duration of a connection in milliseconds
-  maxConnectionDurationInMillis = 120000
 
 # Timeouts managed by the connection manager
 [router.connectionTimeout]

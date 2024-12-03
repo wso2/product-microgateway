@@ -42,7 +42,7 @@ func startMicroGateway() {
 		logger.Fatal("Error starting the adapter", err)
 	}
 	conf, errReadConfig := config.ReadConfigs()
-	config.GetTcpKeepaliveEnabledOrgs()
+	config.GetTCPKeepaliveEnabledOrgs()
 	if errReadConfig != nil {
 		logger.Fatal("Error loading configuration. ", errReadConfig)
 	}

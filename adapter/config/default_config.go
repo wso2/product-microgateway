@@ -157,14 +157,13 @@ var defaultConfig = &Config{
 					MaxRetries:         50,
 				},
 			},
-			TcpConfigurations: upstreamTcpConfigs{
+			TCPConfigurations: upstreamTCPConfigs{
 				KeepaliveTimeInMillis:     120000,
 				KeepaliveProbes:           9,
-				KeepaliveIntervalInMillis: 75,
+				KeepaliveIntervalInMillis: 75000,
 			},
-			HttpConfigurations: upstreamHttpConfigs{
+			HTTPConfigurations: upstreamHTTPConfigs{
 				IdleTimeoutInMillis:           120000,
-				MaxConnectionDurationInMillis: 120000,
 			},
 		},
 		Connection: connection{

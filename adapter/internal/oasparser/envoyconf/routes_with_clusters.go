@@ -351,16 +351,15 @@ func getClusterName(epPrefix string, organizationID string, vHost string, swagge
 func getKeepAliveConfigs(cluster *clusterv3.Cluster, conf *config.Config) {
 	cluster.UpstreamConnectionOptions = &clusterv3.UpstreamConnectionOptions{
 		TcpKeepalive: &corev3.TcpKeepalive{
-			KeepaliveProbes:   wrapperspb.UInt32(conf.Envoy.Upstream.TcpConfigurations.KeepaliveProbes),
-			KeepaliveInterval: wrapperspb.UInt32(conf.Envoy.Upstream.TcpConfigurations.KeepaliveIntervalInMillis),
-			KeepaliveTime:     wrapperspb.UInt32(conf.Envoy.Upstream.TcpConfigurations.KeepaliveTimeInMillis / 1000),
+			KeepaliveProbes:   wrapperspb.UInt32(conf.Envoy.Upstream.TCPConfigurations.KeepaliveProbes),
+			KeepaliveInterval: wrapperspb.UInt32(conf.Envoy.Upstream.TCPConfigurations.KeepaliveIntervalInMillis / 1000),
+			KeepaliveTime:     wrapperspb.UInt32(conf.Envoy.Upstream.TCPConfigurations.KeepaliveTimeInMillis / 1000),
 		},
 	}
 
 	config := &upstreams.HttpProtocolOptions{
 		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
-			IdleTimeout:           durationpb.New(time.Duration(conf.Envoy.Upstream.HttpConfigurations.IdleTimeoutInMillis) * time.Millisecond),
-			MaxConnectionDuration: durationpb.New(time.Duration(conf.Envoy.Upstream.HttpConfigurations.MaxConnectionDurationInMillis) * time.Millisecond),
+			IdleTimeout:           durationpb.New(time.Duration(conf.Envoy.Upstream.HTTPConfigurations.IdleTimeoutInMillis) * time.Millisecond),
 		},
 		UpstreamProtocolOptions: &upstreams.HttpProtocolOptions_UseDownstreamProtocolConfig{},
 	}
