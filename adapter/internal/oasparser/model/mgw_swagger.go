@@ -181,6 +181,7 @@ const prototypedAPI = "prototyped"
 
 // BasicCircuitBreaker is the name for free tier cluster level circuit breaker
 const BasicCircuitBreaker = "BasicCircuitBreaker"
+const EnhancedCircuitBreaker = "EnhancedCircuitBreaker"
 
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
@@ -686,8 +687,7 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 		var selectedCircuitBreaker *CircuitBreakers
 
 		for _, circuitBreaker := range conf.Envoy.Upstream.CircuitBreakers {
-			// check ispaidorg from here
-			if utills.GetIsOrganizationInList(orgID, circuitBreaker.Organizations) {
+			if isChoreoOrgPaid && circuitBreaker.CircuitBreakerName == EnhancedCircuitBreaker {
 				selectedCircuitBreaker = createCircuitBreaker(
 					circuitBreaker.MaxConnections,
 					circuitBreaker.MaxPendingRequests,
@@ -696,22 +696,15 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 					circuitBreaker.MaxConnectionPools,
 				)
 				break
-			}
-		}
-		if selectedCircuitBreaker == nil {
-			for _, circuitBreaker := range conf.Envoy.Upstream.CircuitBreakers {
-				// breaks from the first iteration
-				if circuitBreaker.CircuitBreakerName == BasicCircuitBreaker {
-					selectedCircuitBreaker = createCircuitBreaker(
-						circuitBreaker.MaxConnections,
-						circuitBreaker.MaxPendingRequests,
-						circuitBreaker.MaxRequests,
-						circuitBreaker.MaxRetries,
-						circuitBreaker.MaxConnectionPools,
-					)
-					break
-				}
-
+			} else if !isChoreoOrgPaid && circuitBreaker.CircuitBreakerName == BasicCircuitBreaker {
+				selectedCircuitBreaker = createCircuitBreaker(
+					circuitBreaker.MaxConnections,
+					circuitBreaker.MaxPendingRequests,
+					circuitBreaker.MaxRequests,
+					circuitBreaker.MaxRetries,
+					circuitBreaker.MaxConnectionPools,
+				)
+				break
 			}
 		}
 		endpointCluster.Config.CircuitBreakers = selectedCircuitBreaker
