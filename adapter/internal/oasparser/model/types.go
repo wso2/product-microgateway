@@ -152,10 +152,11 @@ type apiData struct {
 }
 
 type choreoComponentInfo struct {
-	OrganizationID string `json:"organizationId,omitempty"`
-	ProjectID      string `json:"projectId,omitempty"`
-	ComponentID    string `json:"componentId,omitempty"`
-	VersionID      string `json:"versionId,omitempty"`
+	OrganizationID  string `json:"organizationId,omitempty"`
+	ProjectID       string `json:"projectId,omitempty"`
+	ComponentID     string `json:"componentId,omitempty"`
+	VersionID       string `json:"versionId,omitempty"`
+	IsChoreoOrgPaid bool   `json:"isChoreoOrgPaid,omitempty"`
 }
 
 type backendJWTConfiguration struct {

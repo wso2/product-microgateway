@@ -95,6 +95,8 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 			return err
 		}
 
+		choreoComponentInfo := deployment.ChoreoComponentInfo
+
 		vhostToEnvsMap := make(map[string][]*synchronizer.GatewayLabel)
 		for index := range deployment.Environments {
 			env := deployment.Environments[index]
@@ -113,7 +115,7 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
 		var deployedRevisionList []*notifier.DeployedAPIRevision
-		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps, xdsOptions)
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps, xdsOptions, choreoComponentInfo)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		} else if deployedRevisionList != nil {
@@ -123,7 +125,7 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 
 	// TODO: (renuka) notify the revision deployment to the control plane once all chunks are deployed.
 	// This is not fixed as notify the control plane chunk by chunk (even though the chunk is not really applied to the Enforcer and Router) is not a drastic issue.
-    // This path is only happening when Adapter is restarting and at that time the deployed time is already updated in the control plane.
+	// This path is only happening when Adapter is restarting and at that time the deployed time is already updated in the control plane.
 	notifier.SendRevisionUpdate(deploymentList)
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(deploymentList))
 	// Error nil for successful execution

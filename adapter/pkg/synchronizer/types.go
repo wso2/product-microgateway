@@ -53,9 +53,10 @@ type APIDeployment struct {
 	APIFile      string         `json:"apiFile"`
 	Environments []GatewayLabel `json:"environments"`
 	// These properties are used by global Adapter
-	OrganizationID string `json:"organizationId"`
-	APIContext     string `json:"apiContext"`
-	Version        string `json:"version"`
+	OrganizationID      string              `json:"organizationId"`
+	ChoreoComponentInfo ChoreoComponentInfo `json:"choreoComponentInfo"`
+	APIContext          string              `json:"apiContext"`
+	Version             string              `json:"version"`
 }
 
 // GatewayLabel represents gateway environment name, vhost and deployedTimeStamp of an API project.
@@ -66,6 +67,14 @@ type GatewayLabel struct {
 	ID                string `json:"id"`
 	DeployedTimeStamp int64  `json:"deployedTimeStamp"`
 	DeploymentType    string `json:"deploymentType"`
+}
+
+type ChoreoComponentInfo struct {
+	OrganizationId  string `json:"organizationId"`
+	ProjectId       string `json:"projectId"`
+	ComponentId     string `json:"componentId"`
+	VersionId       string `json:"versionId"`
+	IsChoreoOrgPaid bool   `json:"isChoreoOrgPaid"` // isPaidOrg
 }
 
 // APIConfigs represents env properties belongs to the API

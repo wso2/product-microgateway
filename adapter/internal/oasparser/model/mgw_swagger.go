@@ -77,10 +77,11 @@ type MgwSwagger struct {
 
 // ChoreoComponentInfo represents the information of the Choreo component
 type ChoreoComponentInfo struct {
-	OrganizationID string
-	ProjectID      string
-	ComponentID    string
-	VersionID      string
+	OrganizationID  string
+	ProjectID       string
+	ComponentID     string
+	VersionID       string
+	IsChoreoOrgPaid bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -643,7 +644,7 @@ func (swagger *MgwSwagger) setXWso2Endpoints() error {
 }
 
 // SetEndpointsConfig set configs for Endpoints sent by api.yaml
-func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo, apiType string, orgID string) error {
+func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo, apiType string, orgID string, isChoreoOrgPaid bool) error {
 	if endpointInfos == nil || len(endpointInfos) == 0 {
 		return nil
 	}
@@ -685,6 +686,7 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 		var selectedCircuitBreaker *CircuitBreakers
 
 		for _, circuitBreaker := range conf.Envoy.Upstream.CircuitBreakers {
+			// check ispaidorg from here
 			if utills.GetIsOrganizationInList(orgID, circuitBreaker.Organizations) {
 				selectedCircuitBreaker = createCircuitBreaker(
 					circuitBreaker.MaxConnections,

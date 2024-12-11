@@ -223,7 +223,7 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		_, err = xds.UpdateAPI(vhost, apiProject, environments, common.XdsOptions{})
+		_, err = xds.UpdateAPI(vhost, apiProject, environments, common.XdsOptions{}, synchronizer.ChoreoComponentInfo{})
 		if err != nil {
 			return
 		}
@@ -238,6 +238,7 @@ func ApplyAPIProjectFromAPIM(
 	vhostToEnvsMap map[string][]*synchronizer.GatewayLabel,
 	apiEnvs map[string]map[string]synchronizer.APIEnvProps,
 	xdsOptions common.XdsOptions,
+	choreoComponentInfo synchronizer.ChoreoComponentInfo,
 ) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
@@ -283,7 +284,7 @@ func ApplyAPIProjectFromAPIM(
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			environments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		// first update the API for vhost
-		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, environments, xdsOptions)
+		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, environments, xdsOptions, choreoComponentInfo)
 		if err != nil {
 			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}
