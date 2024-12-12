@@ -273,7 +273,7 @@ func DeployReadinessAPI(envs []string) {
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
 func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*synchronizer.GatewayLabel,
-	xdsOptions common.XdsOptions) (*notifier.DeployedAPIRevision, error) {
+	xdsOptions common.XdsOptions, apiChoreoComponentInfo synchronizer.ChoreoComponentInfo) (*notifier.DeployedAPIRevision, error) {
 
 	var mgwSwagger mgw.MgwSwagger
 	var deployedRevision *notifier.DeployedAPIRevision
@@ -372,14 +372,14 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
 
 	if mgwSwagger.GetProdEndpoints() != nil {
-		mgwSwagger.GetProdEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.ProductionEndpoints, apiYaml.EndpointConfig.EndpointType, apiYaml.OrganizationID)
+		mgwSwagger.GetProdEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.ProductionEndpoints, apiYaml.EndpointConfig.EndpointType, apiYaml.OrganizationID, apiChoreoComponentInfo.IsChoreoOrgPaid)
 		if !mgwSwagger.GetProdEndpoints().SecurityConfig.Enabled && apiYaml.EndpointConfig.APIEndpointSecurity.Production.Enabled {
 			mgwSwagger.GetProdEndpoints().SecurityConfig = apiYaml.EndpointConfig.APIEndpointSecurity.Production
 		}
 	}
 
 	if mgwSwagger.GetSandEndpoints() != nil {
-		mgwSwagger.GetSandEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.SandBoxEndpoints, apiYaml.EndpointConfig.EndpointType, apiYaml.OrganizationID)
+		mgwSwagger.GetSandEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.SandBoxEndpoints, apiYaml.EndpointConfig.EndpointType, apiYaml.OrganizationID, apiChoreoComponentInfo.IsChoreoOrgPaid)
 		if !mgwSwagger.GetSandEndpoints().SecurityConfig.Enabled && apiYaml.EndpointConfig.APIEndpointSecurity.Sandbox.Enabled {
 			mgwSwagger.GetSandEndpoints().SecurityConfig = apiYaml.EndpointConfig.APIEndpointSecurity.Sandbox
 		}
