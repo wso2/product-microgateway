@@ -574,7 +574,7 @@
     </build>
 
     <properties>
-        <ballerina.platform.version>1.2.54</ballerina.platform.version>
+        <ballerina.platform.version>1.2.55</ballerina.platform.version>
         <broker.version>0.970.5</broker.version>
         <assembly.plugin.version>3.1.1</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
@@ -638,7 +638,7 @@
         <com.google.guava.version>32.1.1-jre</com.google.guava.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <org.apache.logging.log4j.version>2.17.0</org.apache.logging.log4j.version>
-        <commons-io.version>2.11.0</commons-io.version>
+        <commons-io.version>2.14.0</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <com.jayway.jsonpath.version>2.6.0.wso2v2</com.jayway.jsonpath.version>
         <everit.version>1.5.0.wso2.v1</everit.version>
