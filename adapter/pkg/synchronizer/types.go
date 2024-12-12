@@ -70,10 +70,10 @@ type GatewayLabel struct {
 }
 
 type ChoreoComponentInfo struct {
-	OrganizationId  string `json:"organizationId"`
-	ProjectId       string `json:"projectId"`
-	ComponentId     string `json:"componentId"`
-	VersionId       string `json:"versionId"`
+	OrganizationID  string `json:"organizationId"`
+	ProjectID       string `json:"projectId"`
+	ComponentID     string `json:"componentId"`
+	VersionID       string `json:"versionId"`
 	IsChoreoOrgPaid bool   `json:"isChoreoOrgPaid"` // isPaidOrg
 }
 

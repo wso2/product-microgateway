@@ -77,11 +77,10 @@ type MgwSwagger struct {
 
 // ChoreoComponentInfo represents the information of the Choreo component
 type ChoreoComponentInfo struct {
-	OrganizationID  string
-	ProjectID       string
-	ComponentID     string
-	VersionID       string
-	IsChoreoOrgPaid bool
+	OrganizationID string
+	ProjectID      string
+	ComponentID    string
+	VersionID      string
 }
 
 // EndpointCluster represent an upstream cluster
