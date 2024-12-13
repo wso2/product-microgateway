@@ -95,8 +95,6 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 			return err
 		}
 
-		choreoComponentInfo := deployment.ChoreoComponentInfo
-
 		vhostToEnvsMap := make(map[string][]*synchronizer.GatewayLabel)
 		for index := range deployment.Environments {
 			env := deployment.Environments[index]
@@ -115,7 +113,7 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
 		var deployedRevisionList []*notifier.DeployedAPIRevision
-		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps, xdsOptions, choreoComponentInfo)
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps, xdsOptions, deployment.ChoreoComponentInfo)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		} else if deployedRevisionList != nil {
