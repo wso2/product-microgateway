@@ -287,7 +287,9 @@ func Run(conf *config.Config) {
 		}
 
 		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
-		if strings.Contains(connectionURLList[0], amqpProtocol) {
+		if len(conf.ControlPlane.ASBDataplaneTopics) > 0 {
+			messaging.InitiateAndProcessEvents(conf)
+		} else if strings.Contains(connectionURLList[0], amqpProtocol) {
 			go messaging.ProcessEvents(conf)
 		} else {
 			messaging.InitiateAndProcessEvents(conf)
