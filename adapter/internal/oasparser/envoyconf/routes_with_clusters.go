@@ -944,10 +944,19 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if strings.Contains(resourcePath, "?") {
 		resourcePath = strings.Split(resourcePath, "?")[0]
 	}
-	resourceRegex := generatePathRegexSegment(resourcePath, false)
-	substitutionString := generateSubstitutionString(resourcePath, endpointBasepath)
-	if strings.HasSuffix(resourcePath, "/*") {
-		resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
+
+	var resourceRegex string
+	var substitutionString string
+	if resourcePath == "/*" && endpointBasepath == "" {
+		// If endpointBasepath is empty and resourcePath is "/*", enforce the path to be "/" to avoid setting empty path in upstream
+		resourceRegex = "/?"
+		substitutionString = "/"
+	} else {
+		resourceRegex = generatePathRegexSegment(resourcePath, false)
+		substitutionString = generateSubstitutionString(resourcePath, endpointBasepath)
+		if strings.HasSuffix(resourcePath, "/*") {
+			resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
+		}
 	}
 	pathRegex := "^" + regexp.QuoteMeta(basePath) + resourceRegex
 
