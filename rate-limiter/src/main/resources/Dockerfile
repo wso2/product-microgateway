@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM envoyproxy/ratelimit:19f2079f
+FROM envoyproxy/ratelimit:87adad26
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apk update && apk upgrade --no-cache
@@ -44,6 +44,8 @@ ENV CONFIG_GRPC_XDS_SERVER_USE_TLS=true
 ENV CONFIG_GRPC_XDS_CLIENT_TLS_KEY=/home/wso2/security/keystore/rate-limiter.key
 ENV CONFIG_GRPC_XDS_CLIENT_TLS_CERT=/home/wso2/security/keystore/rate-limiter.pem
 ENV CONFIG_GRPC_XDS_SERVER_TLS_CACERT=/home/wso2/security/truststore/mg.pem
+
+ENV XDS_CLIENT_MAX_MSG_SIZE_IN_BYTES=41943040
 
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\

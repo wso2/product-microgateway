@@ -952,15 +952,15 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		// Hence doing the special logic here.
 		if endpointBasepath == "" {
 			// If endpointBasepath is empty enforce the path to be "/" to avoid setting empty path to upstream.
-			//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://bachendhost/
-			//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://bachendhost/
+			//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://backendhost/
+			//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://backendhost/
 			resourceRegex = "/?"
 			substitutionString = "/"
 		} else {
 			// if endpointBasepath is not empty, enforce the path to be the endpointBasepath and allow the downnstream to handle trailing slash.
 			// if downstream sends the trailing slash, send the trailing slash to the upstream otherwise send the path without the trailing slash.
-			//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://bachendhost/context
-			//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://bachendhost/context/
+			//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://backendhost/context
+			//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://backendhost/context/
 			resourceRegex = ""
 			substitutionString = endpointBasepath
 		}
