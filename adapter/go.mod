@@ -25,7 +25,7 @@ require (
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/net v0.32.0
+	golang.org/x/net v0.33.0
 	golang.org/x/text v0.21.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98
 	google.golang.org/grpc v1.58.3
