@@ -947,10 +947,24 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	var resourceRegex string
 	var substitutionString string
-	if resourcePath == "/*" && endpointBasepath == "" {
-		// If endpointBasepath is empty and resourcePath is "/*", enforce the path to be "/" to avoid setting empty path in upstream
-		resourceRegex = "/?"
-		substitutionString = "/"
+	if resourcePath == "/*" || resourcePath == "/" {
+		// This logic is only applicable for substitution and rewrite regex (not applicable for route match regex).
+		// Hence doing the special logic here.
+		if endpointBasepath == "" {
+			// If endpointBasepath is empty enforce the path to be "/" to avoid setting empty path to upstream.
+			//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://bachendhost/
+			//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://bachendhost/
+			resourceRegex = "/?"
+			substitutionString = "/"
+		} else {
+			// if endpointBasepath is not empty, enforce the path to be the endpointBasepath and allow the downnstream to handle trailing slash.
+			// if downstream sends the trailing slash, send the trailing slash to the upstream otherwise send the path without the trailing slash.
+			//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://bachendhost/context
+			//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://bachendhost/context/
+			resourceRegex = ""
+			substitutionString = endpointBasepath
+		}
+
 	} else {
 		resourceRegex = generatePathRegexSegment(resourcePath, false)
 		substitutionString = generateSubstitutionString(resourcePath, endpointBasepath)
