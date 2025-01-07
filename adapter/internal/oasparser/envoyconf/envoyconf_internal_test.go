@@ -326,8 +326,8 @@ func TestCreateRouteClusterSpecifier(t *testing.T) {
 
 	// Test the same scenario with endpointBasePath as empty string and API Resource with root slash
 	// If endpointBasepath is empty enforce the path to be "/" to avoid setting empty path to upstream.
-	//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://bachendhost/
-	//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://bachendhost/
+	//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://backendhost/
+	//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://backendhost/
 	routeWithRootSlash := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, "",
 		"/", resourceWithGet.GetMethodList(), prodClusterName, nil, false))
 	assert.NotNil(t, routeWithRootSlash, "Route should not be null")
@@ -342,8 +342,8 @@ func TestCreateRouteClusterSpecifier(t *testing.T) {
 
 	// if endpointBasepath is not empty, enforce the path to be the endpointBasepath and allow the downnstream to handle trailing slash.
 	// if downstream sends the trailing slash, send the trailing slash to the upstream otherwise send the path without the trailing slash.
-	//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://bachendhost/context
-	//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://bachendhost/context/
+	//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://backendhost/context
+	//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://backendhost/context/
 	routeWithRootSlashNonEmptyEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, "/foo",
 		"/", resourceWithGet.GetMethodList(), prodClusterName, nil, false))
 	assert.NotNil(t, routeWithRootSlashNonEmptyEp, "Route should not be null")
