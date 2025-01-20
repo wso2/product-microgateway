@@ -180,6 +180,8 @@ const prototypedAPI = "prototyped"
 
 // BasicCircuitBreaker is the name for free tier cluster level circuit breaker
 const BasicCircuitBreaker = "BasicCircuitBreaker"
+
+// EnhancedCircuitBreaker is the name for the circuit breaker assigned for paid orgs
 const EnhancedCircuitBreaker = "EnhancedCircuitBreaker"
 
 // GetCorsConfig returns the CorsConfiguration Object.
