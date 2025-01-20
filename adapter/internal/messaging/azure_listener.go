@@ -65,7 +65,7 @@ func InitiateAndProcessEvents(config *config.Config) {
 			subscription, err := msg.InitiateBrokerConnectionAndValidate(
 				topic.ConnectionString,
 				topic.TopicName,
-				getAmqpClientOptions(config),
+				getAmqpClientOptions(topic.AmqpOverWebsocketsEnabled),
 				componentName,
 				topic.ReconnectRetryCount,
 				topic.ReconnectInterval*time.Millisecond,
@@ -89,7 +89,7 @@ func InitiateAndProcessEvents(config *config.Config) {
 			subscription, err := msg.InitiateBrokerConnectionAndValidate(
 				connectionString,
 				topic,
-				getAmqpClientOptions(config),
+				getAmqpClientOptions(config.ControlPlane.BrokerConnectionParameters.AmqpOverWebsocketsEnabled),
 				componentName,
 				reconnectRetryCount,
 				reconnectInterval*time.Millisecond,
@@ -118,8 +118,8 @@ func startChannelConsumer(consumerType string) {
 	}
 }
 
-func getAmqpClientOptions(config *config.Config) *azservicebus.ClientOptions {
-	if config.ControlPlane.BrokerConnectionParameters.AmqpOverWebsocketsEnabled {
+func getAmqpClientOptions(isAmqpOverWebsocketsEnabled bool) *azservicebus.ClientOptions {
+	if isAmqpOverWebsocketsEnabled {
 		logger.LoggerMgw.Info("AMQP over Websockets is enabled. Initiating brokers with AMQP over Websockets.")
 		newWebSocketConnFn := func(ctx context.Context, args azservicebus.NewWebSocketConnArgs) (net.Conn, error) {
 			opts := &websocket.DialOptions{Subprotocols: []string{"amqp"}}

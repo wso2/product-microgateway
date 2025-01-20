@@ -323,6 +323,38 @@ func TestCreateRouteClusterSpecifier(t *testing.T) {
 	assert.NotNil(t, routeWithProdSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
 	assert.Empty(t, routeWithProdSandEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
 	assert.Equal(t, clusterHeaderName, routeWithProdSandEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
+
+	// Test the same scenario with endpointBasePath as empty string and API Resource with root slash
+	// If endpointBasepath is empty enforce the path to be "/" to avoid setting empty path to upstream.
+	//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://backendhost/
+	//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://backendhost/
+	routeWithRootSlash := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, "",
+		"/", resourceWithGet.GetMethodList(), prodClusterName, nil, false))
+	assert.NotNil(t, routeWithRootSlash, "Route should not be null")
+	assert.Equal(t, "^/xWso2BasePath/?", routeWithRootSlash.GetRoute().GetRegexRewrite().Pattern.Regex)
+	assert.Equal(t, "/", routeWithRootSlash.GetRoute().GetRegexRewrite().Substitution)
+
+	routeWithRootSlashWithWildcard := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, "",
+		"/*", resourceWithGet.GetMethodList(), prodClusterName, nil, false))
+	assert.NotNil(t, routeWithRootSlashWithWildcard, "Route should not be null")
+	assert.Equal(t, "^/xWso2BasePath/?", routeWithRootSlashWithWildcard.GetRoute().GetRegexRewrite().Pattern.Regex)
+	assert.Equal(t, "/", routeWithRootSlashWithWildcard.GetRoute().GetRegexRewrite().Substitution)
+
+	// if endpointBasepath is not empty, enforce the path to be the endpointBasepath and allow the downnstream to handle trailing slash.
+	// if downstream sends the trailing slash, send the trailing slash to the upstream otherwise send the path without the trailing slash.
+	//   https://dev-us-east-azure/dlif/request-info/v1.0 -> https://backendhost/context
+	//   https://dev-us-east-azure/dlif/request-info/v1.0/ -> https://backendhost/context/
+	routeWithRootSlashNonEmptyEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, "/foo",
+		"/", resourceWithGet.GetMethodList(), prodClusterName, nil, false))
+	assert.NotNil(t, routeWithRootSlashNonEmptyEp, "Route should not be null")
+	assert.Equal(t, "^/xWso2BasePath", routeWithRootSlashNonEmptyEp.GetRoute().GetRegexRewrite().Pattern.Regex)
+	assert.Equal(t, "/foo", routeWithRootSlashNonEmptyEp.GetRoute().GetRegexRewrite().Substitution)
+
+	routeWithRootSlashWithWildcardNonEmptyEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, "/foo",
+		"/*", resourceWithGet.GetMethodList(), prodClusterName, nil, false))
+	assert.NotNil(t, routeWithRootSlashWithWildcardNonEmptyEp, "Route should not be null")
+	assert.Equal(t, "^/xWso2BasePath", routeWithRootSlashWithWildcardNonEmptyEp.GetRoute().GetRegexRewrite().Pattern.Regex)
+	assert.Equal(t, "/foo", routeWithRootSlashWithWildcardNonEmptyEp.GetRoute().GetRegexRewrite().Substitution)
 }
 
 func TestCreateRouteExtAuthzContext(t *testing.T) {
