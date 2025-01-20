@@ -54,7 +54,7 @@ type APIDeployment struct {
 	Environments []GatewayLabel `json:"environments"`
 	// These properties are used by global Adapter
 	OrganizationID      string              `json:"organizationId"`
-	ChoreoComponentInfo ChoreoComponentInfo `json:"choreoComponentInfo"`
+	IsPaidOrg			bool				`json:"isPaidOrg"`
 	APIContext          string              `json:"apiContext"`
 	Version             string              `json:"version"`
 }
@@ -74,7 +74,6 @@ type ChoreoComponentInfo struct {
 	ProjectID       string `json:"projectId"`
 	ComponentID     string `json:"componentId"`
 	VersionID       string `json:"versionId"`
-	IsChoreoOrgPaid bool   `json:"isChoreoOrgPaid"` // isPaidOrg
 }
 
 // APIConfigs represents env properties belongs to the API
