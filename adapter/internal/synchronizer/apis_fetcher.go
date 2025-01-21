@@ -114,8 +114,7 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
 		var deployedRevisionList []*notifier.DeployedAPIRevision
 
-		isPaidOrg := deploymentDescriptor.Data.Deployments[0].IsPaidOrg
-		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps, xdsOptions, isPaidOrg)
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps, xdsOptions, deployment.IsPaidOrg)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		} else if deployedRevisionList != nil {
