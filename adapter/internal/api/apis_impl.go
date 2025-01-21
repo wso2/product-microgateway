@@ -37,7 +37,6 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
-	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 // API Controller related constants
@@ -64,14 +63,6 @@ const (
 	zipExt                     string = ".zip"
 	apisArtifactDir            string = "apis"
 )
-
-func init() {
-	conf, _ := config.ReadConfigs()
-	sync.InitializeWorkerPool(conf.ControlPlane.RequestWorkerPool.PoolSize, conf.ControlPlane.RequestWorkerPool.QueueSizePerPool,
-		conf.ControlPlane.RequestWorkerPool.PauseTimeAfterFailure, conf.Adapter.Truststore.Location,
-		conf.ControlPlane.SkipSSLVerification, conf.ControlPlane.HTTPClient.RequestTimeOut, conf.ControlPlane.RetryInterval,
-		conf.ControlPlane.ServiceURL, conf.ControlPlane.Username, conf.ControlPlane.Password)
-}
 
 // extractAPIProject accepts the API project as a zip file and returns the extracted content.
 // The apictl project must be in zipped format.
@@ -108,7 +99,6 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 // ProcessMountedAPIProjects iterates through the api artifacts directory and apply the projects located within the directory.
 func ProcessMountedAPIProjects() (err error) {
 	conf, _ := config.ReadConfigs()
-	isPaidOrg := false
 	apisDirName := filepath.FromSlash(conf.Adapter.ArtifactsDirectory + "/" + apisArtifactDir)
 	files, err := ioutil.ReadDir((apisDirName))
 	if err != nil {
@@ -117,23 +107,6 @@ func ProcessMountedAPIProjects() (err error) {
 		if !conf.Adapter.Server.Enabled {
 			return err
 		}
-	}
-
-	payload, err := ioutil.ReadFile(apisDirName)
-	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
-	if err != nil {
-		loggers.LoggerSync.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
-		return err
-	}
-
-	deploymentDescriptor, _, err := sync.ReadRootFiles(zipReader)
-	if err != nil {
-		loggers.LoggerAPI.Error("Error occured while reading root files ", err)
-		return err
-	}
-
-	if len(deploymentDescriptor.Data.Deployments) > 0 {
-		isPaidOrg = deploymentDescriptor.Data.Deployments[0].IsPaidOrg
 	}
 
 	for _, apiProjectFile := range files {
@@ -164,8 +137,10 @@ func ProcessMountedAPIProjects() (err error) {
 				continue
 			}
 
+			// setting false as this feature is not in use
+			apiProject.IsPaidOrg = false
+
 			overrideValue := false
-			apiProject.IsPaidOrg = isPaidOrg
 			err = validateAndUpdateXds(apiProject, &overrideValue)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error while processing api artifact - %s during startup : %v", apiProjectFile.Name(), err)
@@ -251,7 +226,7 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		_, err = xds.UpdateAPI(vhost, apiProject, environments, common.XdsOptions{}, apiProject.IsPaidOrg)
+		_, err = xds.UpdateAPI(vhost, apiProject, environments, common.XdsOptions{})
 		if err != nil {
 			return
 		}
@@ -313,7 +288,7 @@ func ApplyAPIProjectFromAPIM(
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			environments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		// first update the API for vhost
-		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, environments, xdsOptions, apiProject.IsPaidOrg)
+		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, environments, xdsOptions)
 		if err != nil {
 			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}
@@ -332,6 +307,10 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error)
 	if err != nil {
 		return err
 	}
+
+	// setting false as this feature is not in use
+	apiProject.IsPaidOrg = false
+
 	return validateAndUpdateXds(apiProject, override)
 }
 

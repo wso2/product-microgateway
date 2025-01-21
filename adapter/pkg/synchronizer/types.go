@@ -50,13 +50,13 @@ type DeploymentData struct {
 // APIDeployment represents an API project that contains zip file name and
 // gateway environments (labels) that the project to be deployed
 type APIDeployment struct {
-	APIFile      string         	`json:"apiFile"`
-	Environments []GatewayLabel 	`json:"environments"`
+	APIFile      string         `json:"apiFile"`
+	Environments []GatewayLabel `json:"environments"`
 	// These properties are used by global Adapter
-	OrganizationID      string      `json:"organizationId"`
-	IsPaidOrg			bool		`json:"isPaidOrg"`
-	APIContext          string      `json:"apiContext"`
-	Version             string		`json:"version"`
+	OrganizationID string `json:"organizationId"`
+	IsPaidOrg      bool   `json:"isPaidOrg"`
+	APIContext     string `json:"apiContext"`
+	Version        string `json:"version"`
 }
 
 // GatewayLabel represents gateway environment name, vhost and deployedTimeStamp of an API project.
