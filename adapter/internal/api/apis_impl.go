@@ -250,7 +250,6 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 	}
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
-	// Step 1: Updating xds after going through each deployment.
 	for vhost, environments := range vhostToEnvsMap {
 		_, err = xds.UpdateAPI(vhost, apiProject, environments, common.XdsOptions{}, apiProject.IsPaidOrg)
 		if err != nil {
