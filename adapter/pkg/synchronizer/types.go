@@ -54,6 +54,7 @@ type APIDeployment struct {
 	Environments []GatewayLabel `json:"environments"`
 	// These properties are used by global Adapter
 	OrganizationID string `json:"organizationId"`
+	IsPaidOrg      bool   `json:"isPaidOrg"`
 	APIContext     string `json:"apiContext"`
 	Version        string `json:"version"`
 }

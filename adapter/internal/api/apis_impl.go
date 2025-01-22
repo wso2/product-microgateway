@@ -137,6 +137,9 @@ func ProcessMountedAPIProjects() (err error) {
 				continue
 			}
 
+			// setting false as this feature is not in use
+			apiProject.IsPaidOrg = false
+
 			overrideValue := false
 			err = validateAndUpdateXds(apiProject, &overrideValue)
 			if err != nil {
@@ -238,6 +241,7 @@ func ApplyAPIProjectFromAPIM(
 	vhostToEnvsMap map[string][]*synchronizer.GatewayLabel,
 	apiEnvs map[string]map[string]synchronizer.APIEnvProps,
 	xdsOptions common.XdsOptions,
+	isPaidOrg bool,
 ) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
@@ -260,7 +264,8 @@ func ApplyAPIProjectFromAPIM(
 	if apiProject.OrganizationID == "" {
 		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	}
-	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
+	apiProject.IsPaidOrg = isPaidOrg
+	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s ( isPaid: %v )", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID, isPaidOrg)
 
 	conf, _ := config.ReadConfigs()
 	currentEnv := conf.ControlPlane.EnvironmentLabels[0] // assumption - adapter has only one environment
@@ -302,6 +307,10 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error)
 	if err != nil {
 		return err
 	}
+
+	// setting false as this feature is not in use
+	apiProject.IsPaidOrg = false
+
 	return validateAndUpdateXds(apiProject, override)
 }
 

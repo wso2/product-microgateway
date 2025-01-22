@@ -206,18 +206,18 @@ retainKeys = ["self_validate_jwt", "issuer", "claim_mappings", "consumer_key_cla
 [[router.upstream.circuitBreakers]]
 organizations = "*"
 circuitBreakerName = "BasicCircuitBreaker"
-maxConnections = 3
-maxRequests = 3
-maxPendingRequests = 0
-maxConnectionPools = 3
+maxConnections = 1
+maxRequests = 1
+maxPendingRequests = 1
+maxConnectionPools = 1
 
 [[router.upstream.circuitBreakers]]
-organizations = "e0682456-2ba6-4c5f-8f36-3c5b6dc46913,4b9afefb-4bcc-4e63-85d3-ddd593841012,d3a7dfea-fb10-4371-b21d-85d1bc28667b"
+organizations = "e0682456-2ba6-4c5f-8f36-3c5b6dc46913,4b9afefb-4bcc-4e63-85d3-ddd593841012"
 circuitBreakerName = "EnhancedCircuitBreaker"
-maxConnections = 50
-maxRequests = 50
-maxPendingRequests = 0
-maxConnectionPools = 50
+maxConnections = 25
+maxRequests = 25
+maxPendingRequests = 1
+maxConnectionPools = 2
 
 # Configs relevant to the envoy rate-limit service
 [router.ratelimit]

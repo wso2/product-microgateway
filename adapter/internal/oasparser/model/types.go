@@ -66,6 +66,7 @@ type ProjectAPI struct {
 	APIType            string // read from api.yaml and formatted to upper case
 	APILifeCycleStatus string // read from api.yaml and formatted to upper case
 	OrganizationID     string // read from api.yaml or config
+	IsPaidOrg		   bool
 
 	//UpstreamCerts cert filename -> cert bytes
 	UpstreamCerts map[string][]byte
@@ -152,10 +153,10 @@ type apiData struct {
 }
 
 type choreoComponentInfo struct {
-	OrganizationID string `json:"organizationId,omitempty"`
-	ProjectID      string `json:"projectId,omitempty"`
-	ComponentID    string `json:"componentId,omitempty"`
-	VersionID      string `json:"versionId,omitempty"`
+	OrganizationID  string `json:"organizationId,omitempty"`
+	ProjectID       string `json:"projectId,omitempty"`
+	ComponentID     string `json:"componentId,omitempty"`
+	VersionID       string `json:"versionId,omitempty"`
 }
 
 type backendJWTConfiguration struct {
