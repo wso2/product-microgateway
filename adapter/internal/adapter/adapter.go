@@ -373,13 +373,9 @@ func fetchChunkedAPIsOnStartUp(conf *config.Config, apiUUIDList []string, xdsOpt
 		} else {
 			adapter.GetAPIs(c, nil, envs, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
 		}
-	} else {
-		if conf.ControlPlane.DynamicEnvironments.Enabled {
-			queryParamMap = common.PopulateQueryParamForDataPlane(queryParamMap)
-			adapter.GetAPIs(c, nil, nil, sync.RetrieveRuntimeArtifactEndpoint, true, apiUUIDList, queryParamMap)
-		} else {
-			adapter.GetAPIs(c, nil, envs, sync.APIArtifactEndpoint, true, apiUUIDList, queryParamMap)
-		}
+	} else if conf.ControlPlane.DynamicEnvironments.Enabled {
+		queryParamMap = common.PopulateQueryParamForDataPlane(queryParamMap)
+		adapter.GetAPIs(c, nil, nil, sync.RetrieveRuntimeArtifactEndpoint, true, apiUUIDList, queryParamMap)
 	}
 	for i := 0; i < 1; i++ {
 		data := <-c
