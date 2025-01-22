@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -36,6 +37,19 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
+
+var paidOrgsFromSubscriptionServiceEnabled bool
+
+func init() {
+    envIsPaidOrgsFromSubscriptionServiceEnabled := os.Getenv("ENABLE_PAID_ORGS_FROM_SUBSCRIPTION_SERVICE")
+
+    // Parse the environment variable to a boolean, defaulting to false if not set or if parsing fails
+    var err error
+    paidOrgsFromSubscriptionServiceEnabled, err = strconv.ParseBool(envIsPaidOrgsFromSubscriptionServiceEnabled)
+    if err != nil || envIsPaidOrgsFromSubscriptionServiceEnabled == "" {
+        paidOrgsFromSubscriptionServiceEnabled = false
+    }
+}
 
 // MgwSwagger represents the object structure holding the information related to the
 // openAPI object. The values are populated from the extensions/properties mentioned at
@@ -687,25 +701,54 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 		conf, _ := config.ReadConfigs()
 		var selectedCircuitBreaker *CircuitBreakers
 
-		for _, circuitBreaker := range conf.Envoy.Upstream.CircuitBreakers {
-			if isChoreoOrgPaid && circuitBreaker.CircuitBreakerName == EnhancedCircuitBreaker {
-				selectedCircuitBreaker = createCircuitBreaker(
-					circuitBreaker.MaxConnections,
-					circuitBreaker.MaxPendingRequests,
-					circuitBreaker.MaxRequests,
-					circuitBreaker.MaxRetries,
-					circuitBreaker.MaxConnectionPools,
-				)
-				break
-			} else if !isChoreoOrgPaid && circuitBreaker.CircuitBreakerName == BasicCircuitBreaker {
-				selectedCircuitBreaker = createCircuitBreaker(
-					circuitBreaker.MaxConnections,
-					circuitBreaker.MaxPendingRequests,
-					circuitBreaker.MaxRequests,
-					circuitBreaker.MaxRetries,
-					circuitBreaker.MaxConnectionPools,
-				)
-				break
+		if paidOrgsFromSubscriptionServiceEnabled {
+			for _, circuitBreaker := range conf.Envoy.Upstream.CircuitBreakers {
+				if isChoreoOrgPaid && circuitBreaker.CircuitBreakerName == EnhancedCircuitBreaker {
+					selectedCircuitBreaker = createCircuitBreaker(
+						circuitBreaker.MaxConnections,
+						circuitBreaker.MaxPendingRequests,
+						circuitBreaker.MaxRequests,
+						circuitBreaker.MaxRetries,
+						circuitBreaker.MaxConnectionPools,
+					)
+					break
+				} else if !isChoreoOrgPaid && circuitBreaker.CircuitBreakerName == BasicCircuitBreaker {
+					selectedCircuitBreaker = createCircuitBreaker(
+						circuitBreaker.MaxConnections,
+						circuitBreaker.MaxPendingRequests,
+						circuitBreaker.MaxRequests,
+						circuitBreaker.MaxRetries,
+						circuitBreaker.MaxConnectionPools,
+					)
+					break
+				}
+			}
+		} else {
+			for _, circuitBreaker := range conf.Envoy.Upstream.CircuitBreakers {
+				if utills.GetIsOrganizationInList(orgID, circuitBreaker.Organizations) {
+					selectedCircuitBreaker = createCircuitBreaker(
+						circuitBreaker.MaxConnections,
+						circuitBreaker.MaxPendingRequests,
+						circuitBreaker.MaxRequests,
+						circuitBreaker.MaxRetries,
+						circuitBreaker.MaxConnectionPools,
+					)
+					break
+				}
+			}
+			if selectedCircuitBreaker == nil {
+				for _, circuitBreaker := range conf.Envoy.Upstream.CircuitBreakers {
+					if circuitBreaker.CircuitBreakerName == BasicCircuitBreaker {
+						selectedCircuitBreaker = createCircuitBreaker(
+							circuitBreaker.MaxConnections,
+							circuitBreaker.MaxPendingRequests,
+							circuitBreaker.MaxRequests,
+							circuitBreaker.MaxRetries,
+							circuitBreaker.MaxConnectionPools,
+						)
+						break
+					}
+				}
 			}
 		}
 		endpointCluster.Config.CircuitBreakers = selectedCircuitBreaker
