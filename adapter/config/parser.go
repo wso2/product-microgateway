@@ -34,11 +34,13 @@ import (
 )
 
 var (
-	onceConfigRead      sync.Once
-	onceGetDefaultVhost sync.Once
-	adapterConfig       *Config
-	defaultVhost        map[string]string
-	e                   error
+	onceConfigRead                       sync.Once
+	onceGetDefaultVhost                  sync.Once
+	adapterConfig                        *Config
+	defaultVhost                         map[string]string
+	e                                    error
+	// UpstreamConnectionConfEnabledOrgList is the list of orgs that need to handle connection timeouts
+	UpstreamConnectionConfEnabledOrgList []string
 )
 
 // DefaultGatewayName represents the name of the default gateway
@@ -254,4 +256,13 @@ func (config *Config) validateConfig() error {
 
 func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {
 	logger.Warnf("%s is deprecated. Use %s instead", deprecatedTerm, currentTerm)
+}
+
+// GetTCPKeepaliveEnabledOrgs returns the list of orgs that need to handle connection timeouts
+func GetTCPKeepaliveEnabledOrgs() {
+	orgs := os.Getenv("TCP_KEEPALIVE_ENABLED_ORGS")
+	UpstreamConnectionConfEnabledOrgList = strings.Split(orgs, ",")
+	if len(UpstreamConnectionConfEnabledOrgList) == 0 {
+		UpstreamConnectionConfEnabledOrgList[0] = ""
+	}
 }
