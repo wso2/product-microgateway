@@ -82,6 +82,16 @@ local function handle_dynamic_endpoint(handle, interceptor_response_body, inv_co
     end
 end
 
+local function rewritePath(handle, interceptor_response_body)
+    if interceptor_response_body[RESPONSE.PATH] then
+        local path = interceptor_response_body[RESPONSE.PATH]
+        if path ~= nil then
+            handle:headers():replace(":path", path)
+            return
+        end
+    end
+end
+
 --- modify body
 ---@param handle table
 ---@param interceptor_response_body table
@@ -385,6 +395,8 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     -- handle this after update headers, in case if user modify the header "x-wso2-cluster-header"
     handle_dynamic_endpoint(request_handle, interceptor_response_body, inv_context)
     --#endregion
+
+    rewritePath(request_handle, interceptor_response_body);
 
     if interceptor_response_body[RESPONSE.INTCPT_CONTEXT] then
         request_handle:logDebug("Updating interceptor context for the request_id: " .. request_id)

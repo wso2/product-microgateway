@@ -74,7 +74,8 @@ RESPONSE = {
     TRAILERS_TO_REPLACE = "trailersToReplace",
     TRAILERS_TO_REMOVE = "trailersToRemove",
     INTCPT_CONTEXT = "interceptorContext",
-    DYNAMIC_ENDPOINT = "dynamicEndpoint"
+    DYNAMIC_ENDPOINT = "dynamicEndpoint",
+    PATH = "path"
 }
 
 DYNAMIC_ENDPOINT = {
