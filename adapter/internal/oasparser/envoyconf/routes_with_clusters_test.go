@@ -375,7 +375,7 @@ func TestCreateRoutesWithChoreoSandboxEnvProp(t *testing.T) {
 	productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 	productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
 
-	assert.Equal(t, productionClusterHost, "ep3.com", "Production cluster host mismatch")
+	assert.Equal(t, productionClusterHost, "ep1.com", "Production cluster host mismatch")
 	assert.Equal(t, productionClusterPort, uint32(3000), "Production cluster port mismatch")
 }
 

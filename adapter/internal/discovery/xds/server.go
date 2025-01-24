@@ -433,11 +433,8 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	// When the dynamicEnvironments support is enabled, it will be setting the xds cache under the
 	// common label(global label for gateway), which is obtained from conf.ControlPlane.EnvironmentLabels and
 	// it will always be in size 1 for choreo.
-	if conf.ControlPlane.DynamicEnvironments.Enabled {
-		routerLabels = conf.ControlPlane.EnvironmentLabels
-	} else {
-		routerLabels = environments
-	}
+	routerLabels = conf.ControlPlane.EnvironmentLabels
+
 	logger.LoggerXds.Infof("Added/Updated the content for Organization : %v under OpenAPI Key : %v", organizationID, apiIdentifier)
 	logger.LoggerXds.Debugf("Newly added labels for Organization : %v for the OpenAPI Key : %v are %v", organizationID, apiIdentifier, routerLabels)
 	oldLabels, _ := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
@@ -702,10 +699,8 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	// common label (which will be set in conf.ControlPlane.EnvironmentLabels), if the deployment of particular
 	// API is exists in orgIDOpenAPIEnvoyMap
 	// Note: In this case orgIDOpenAPIEnvoyMap eventually has same label for all the entries (APIs).
-	if conf.ControlPlane.DynamicEnvironments.Enabled {
-		if len(existingLabels) == 1 {
-			toBeDelEnvs = existingLabels
-		}
+	if len(existingLabels) == 1 {
+		toBeDelEnvs = existingLabels
 	} else {
 		toBeDelEnvs, toBeKeptEnvs = getEnvironmentsToBeDeleted(existingLabels, environments)
 	}

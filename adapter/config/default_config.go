@@ -361,7 +361,6 @@ var defaultConfig = &Config{
 		OrganizationID:       "",
 		EnvironmentLabels:    []string{"Default"},
 		DynamicEnvironments: dynamicEnvironments{
-			Enabled:                  false,
 			DataPlaneID:              "$env{data_plane_id}",
 			GatewayAccessibilityType: DefaultGatewayAccessibilityType,
 		},
