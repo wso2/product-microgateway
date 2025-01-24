@@ -262,20 +262,6 @@ func ApplyAPIProjectFromAPIM(
 	}
 	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
 
-	conf, _ := config.ReadConfigs()
-	currentEnv := conf.ControlPlane.EnvironmentLabels[0] // assumption - adapter has only one environment
-
-	if apiEnvs[apiProject.APIYaml.Data.ID][currentEnv].APIConfigs.SandboxEndpointChoreo != "" &&
-		!conf.ControlPlane.DynamicEnvironments.Enabled {
-		vhostToEnvsMap[conf.Adapter.SandboxVhost] = []*synchronizer.GatewayLabel{
-			{
-				Name:           currentEnv,
-				Vhost:          conf.Adapter.SandboxVhost,
-				DeploymentType: "SANDBOX",
-			},
-		}
-	}
-
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
 

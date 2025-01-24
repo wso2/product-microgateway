@@ -474,25 +474,9 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 	var productionUrls []Endpoint
 	var sandboxUrls []Endpoint
 
-	conf, _ := config.ReadConfigs()
-
-	if isChoreoSandbox {
-		if envProps.APIConfigs.SandboxEndpointChoreo != "" && !conf.ControlPlane.DynamicEnvironments.Enabled {
-			logger.LoggerOasparser.Infof("SandboxEndpointChoreo is found in env properties for %v : %v",
-				swagger.title, swagger.version)
-			endpoint, err := getHTTPEndpoint(envProps.APIConfigs.SandboxEndpointChoreo)
-			if err == nil {
-				productionUrls = append(productionUrls, *endpoint)
-			} else {
-				logger.LoggerOasparser.Errorf("Error encountered when parsing the Choreo sandbox endpoint for %v : %v. %v",
-					swagger.title, swagger.version, err.Error())
-			}
-		}
-
-		if len(productionUrls) > 0 {
-			logger.LoggerOasparser.Infof("Production endpoint is overridden by env property SandboxEndpointChoreo %v : %v", swagger.title, swagger.version)
-			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
-		}
+	if isChoreoSandbox && len(productionUrls) > 0 {
+		logger.LoggerOasparser.Infof("Production endpoint is overridden by env property SandboxEndpointChoreo %v : %v", swagger.title, swagger.version)
+		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 		return
 	}
 

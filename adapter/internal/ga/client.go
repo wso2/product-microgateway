@@ -139,7 +139,6 @@ func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
 }
 
 func watchAPIs() {
-	conf, _ := config.ReadConfigs()
 	for {
 		discoveryResponse, err := xdsStream.Recv()
 		if err == io.EOF {
@@ -166,11 +165,7 @@ func watchAPIs() {
 			logger.LoggerGA.Debugf("Discovery response is received : %s, size: %d", discoveryResponse.VersionInfo,
 				len(discoveryResponse.Resources))
 			// ToDO: (VajiraPrabuddhaka) remove this check once the dynamic environment changes are fully rolled out
-			if conf.ControlPlane.DynamicEnvironments.Enabled {
-				addAPIWithEnvToChannel(discoveryResponse)
-			} else {
-				addAPIToChannel(discoveryResponse)
-			}
+			addAPIWithEnvToChannel(discoveryResponse)
 			ack()
 		}
 	}
@@ -207,30 +202,22 @@ func nack(errorMessage string) {
 
 func getAdapterNode() *core.Node {
 	config, _ := config.ReadConfigs()
-	if config.ControlPlane.DynamicEnvironments.Enabled {
-		return &core.Node{
-			Id: fmt.Sprintf("%s-%s-%s",
-				config.ControlPlane.DynamicEnvironments.DataPlaneID,
-				config.ControlPlane.DynamicEnvironments.GatewayAccessibilityType,
-				config.GlobalAdapter.LocalLabel),
-		}
-	}
 	return &core.Node{
-		Id: config.GlobalAdapter.LocalLabel,
+		Id: fmt.Sprintf("%s-%s-%s",
+			config.ControlPlane.DynamicEnvironments.DataPlaneID,
+			config.ControlPlane.DynamicEnvironments.GatewayAccessibilityType,
+			config.GlobalAdapter.LocalLabel),
 	}
 }
 
 // InitGAClient initializes the connection to the global adapter.
 func InitGAClient() {
 	config, _ := config.ReadConfigs()
-	if config.ControlPlane.DynamicEnvironments.Enabled {
-		logger.LoggerGA.Infof("Starting the XDS Client connection for %s-%s-%s to Global Adapter.",
-			config.ControlPlane.DynamicEnvironments.DataPlaneID,
-			config.ControlPlane.DynamicEnvironments.GatewayAccessibilityType,
-			config.GlobalAdapter.LocalLabel)
-	} else {
-		logger.LoggerGA.Infof("Starting the XDS Client connection to Global Adapter.")
-	}
+	logger.LoggerGA.Infof("Starting the XDS Client connection for %s-%s-%s to Global Adapter.",
+		config.ControlPlane.DynamicEnvironments.DataPlaneID,
+		config.ControlPlane.DynamicEnvironments.GatewayAccessibilityType,
+		config.GlobalAdapter.LocalLabel)
+
 	go handleAPIEventsFromGA(GAAPIChannel)
 	conn := initializeAndWatch()
 	for retryTrueReceived := range connectionFaultChannel {

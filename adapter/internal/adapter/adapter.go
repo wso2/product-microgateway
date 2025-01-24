@@ -367,13 +367,10 @@ func fetchChunkedAPIsOnStartUp(conf *config.Config, apiUUIDList []string, xdsOpt
 	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 	// Get API details.
 	if apiUUIDList == nil {
-		if conf.ControlPlane.DynamicEnvironments.Enabled {
-			queryParamMap = common.PopulateQueryParamForDataPlane(queryParamMap)
-			adapter.GetAPIs(c, nil, nil, sync.RetrieveRuntimeArtifactEndpoint, true, nil, queryParamMap)
-		} else {
-			adapter.GetAPIs(c, nil, envs, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
-		}
-	} else if conf.ControlPlane.DynamicEnvironments.Enabled {
+		queryParamMap = common.PopulateQueryParamForDataPlane(queryParamMap)
+		adapter.GetAPIs(c, nil, nil, sync.RetrieveRuntimeArtifactEndpoint, true, nil, queryParamMap)
+
+	} else {
 		queryParamMap = common.PopulateQueryParamForDataPlane(queryParamMap)
 		adapter.GetAPIs(c, nil, nil, sync.RetrieveRuntimeArtifactEndpoint, true, apiUUIDList, queryParamMap)
 	}
@@ -397,11 +394,7 @@ func fetchChunkedAPIsOnStartUp(conf *config.Config, apiUUIDList []string, xdsOpt
 			i--
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
-			if conf.ControlPlane.DynamicEnvironments.Enabled {
-				sync.RetryFetchingAPIs(c, data, sync.RetrieveRuntimeArtifactEndpoint, true, queryParamMap, apiUUIDList)
-			} else {
-				sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap, apiUUIDList)
-			}
+			sync.RetryFetchingAPIs(c, data, sync.RetrieveRuntimeArtifactEndpoint, true, queryParamMap, apiUUIDList)
 		}
 	}
 }

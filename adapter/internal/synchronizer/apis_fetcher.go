@@ -123,7 +123,7 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 
 	// TODO: (renuka) notify the revision deployment to the control plane once all chunks are deployed.
 	// This is not fixed as notify the control plane chunk by chunk (even though the chunk is not really applied to the Enforcer and Router) is not a drastic issue.
-    // This path is only happening when Adapter is restarting and at that time the deployed time is already updated in the control plane.
+	// This path is only happening when Adapter is restarting and at that time the deployed time is already updated in the control plane.
 	notifier.SendRevisionUpdate(deploymentList)
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(deploymentList))
 	// Error nil for successful execution
@@ -175,38 +175,21 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 		// This has to be error. For debugging purpose info
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
-	configuredEnvs := conf.ControlPlane.EnvironmentLabels
+
 	//finalEnvs contains the actual environments that the adapter should update
 	var finalEnvs []string
 
-	// if the dynamic environment support feature enabled, finalEnvs should be the envs in envToDpMap,
+	// due to the dynamic environment support feature, finalEnvs should be the envs in envToDpMap,
 	// whose data plane ID matches with the data Plane ID defined in the gateway configs
-	if conf.ControlPlane.DynamicEnvironments.Enabled {
-		for gwEnv, dpID := range envToDpMap {
-			// following if condition checks whether the environment corresponds to the configured data-plane and
-			// gateway accessibility type (internal or external).
-			// it assumes that the envToDpMap and envToGwAccessibilityTypeMap are identical in gateway environments.
-			if strings.EqualFold(conf.ControlPlane.DynamicEnvironments.DataPlaneID, dpID) &&
-				strings.EqualFold(conf.ControlPlane.DynamicEnvironments.GatewayAccessibilityType,
-					envToGwAccessibilityTypeMap[gwEnv]) {
-				finalEnvs = append(finalEnvs, gwEnv)
-			}
-		}
-	} else {
-		if len(configuredEnvs) > 0 {
-			// If the configuration file contains environment list, then check if then check if the
-			// affected environments are present in the provided configs. If so, add that environment
-			// to the finalEnvs slice
-			for _, updatedEnv := range updatedEnvs {
-				for _, configuredEnv := range configuredEnvs {
-					if updatedEnv == configuredEnv {
-						finalEnvs = append(finalEnvs, updatedEnv)
-					}
-				}
-			}
-		} else {
-			// If the labels are not configured, publish the APIS to the default environment
-			finalEnvs = []string{config.DefaultGatewayName}
+
+	for gwEnv, dpID := range envToDpMap {
+		// following if condition checks whether the environment corresponds to the configured data-plane and
+		// gateway accessibility type (internal or external).
+		// it assumes that the envToDpMap and envToGwAccessibilityTypeMap are identical in gateway environments.
+		if strings.EqualFold(conf.ControlPlane.DynamicEnvironments.DataPlaneID, dpID) &&
+			strings.EqualFold(conf.ControlPlane.DynamicEnvironments.GatewayAccessibilityType,
+				envToGwAccessibilityTypeMap[gwEnv]) {
+			finalEnvs = append(finalEnvs, gwEnv)
 		}
 	}
 

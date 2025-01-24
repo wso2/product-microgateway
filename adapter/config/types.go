@@ -564,7 +564,6 @@ type asbDataplaneTopic struct {
 }
 
 type dynamicEnvironments struct {
-	Enabled                  bool
 	DataPlaneID              string
 	GatewayAccessibilityType string
 }
