@@ -113,7 +113,7 @@ components:
           $ref: "#/components/schemas/Trailers"
         trailersToRemove:
           $ref: "#/components/schemas/HeaderKeys"
-        path:
+        pathToRewrite:
           $ref: "#/components/schemas/Path"
         body:
           $ref: "#/components/schemas/Body"

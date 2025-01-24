@@ -83,12 +83,9 @@ local function handle_dynamic_endpoint(handle, interceptor_response_body, inv_co
 end
 
 local function rewritePath(handle, interceptor_response_body)
-    if interceptor_response_body[RESPONSE.PATH] then
-        local path = interceptor_response_body[RESPONSE.PATH]
-        if path ~= nil then
-            handle:headers():replace(":path", path)
-            return
-        end
+    if interceptor_response_body[RESPONSE.PATH_TO_REWRITE] then
+        local path = interceptor_response_body[RESPONSE.PATH_TO_REWRITE]
+        handle:headers():replace(":path", path)
     end
 end
 
