@@ -23,6 +23,8 @@ import (
 	"strings"
 	"testing"
 
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	upstreams "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
@@ -30,6 +32,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
 	envoy "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -152,6 +155,10 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string,
 	assert.Contains(t, []string{"^/pets(/{0,1})(\\?([^/]+))?$", "^/pets/([^/]+)(/{0,1})(\\?([^/]+))?$"}, routes[1].GetMatch().GetSafeRegex().Regex)
 	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
 		"The route regex for the two routes should not be the same")
+
+	for _, cluster := range clusters {
+		assert.Nil(t, cluster.TypedExtensionProtocolOptions)
+	}
 }
 
 func TestCreateRoutesWithClustersForEndpointRef(t *testing.T) {
@@ -545,6 +552,57 @@ func TestLoadBalancedCluster(t *testing.T) {
 	commonTestForClusterPrioritiesInWebSocketAPI(t, openapiFilePath)
 	commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t, openapiFilePath)
 }
+
+func TestClusterPreserveCase(t *testing.T) {
+	configToml, _ := config.ReadConfigs()
+
+	configToml.Envoy.HeadersPreserveCase = true
+	defer func() {
+		configToml.Envoy.HeadersPreserveCase = false
+	}()
+
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi.yaml"
+	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
+	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
+	mgwSwaggerForOpenapi := model.MgwSwagger{}
+	err = mgwSwaggerForOpenapi.GetMgwSwagger(openapiByteArr)
+	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
+	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, nil, "localhost", "carbon.super")
+
+	expectedHttpProtocolOptions := &upstreams.HttpProtocolOptions{
+		UpstreamProtocolOptions: &upstreams.HttpProtocolOptions_ExplicitHttpConfig_{
+			ExplicitHttpConfig: &upstreams.HttpProtocolOptions_ExplicitHttpConfig{
+				ProtocolConfig: &upstreams.HttpProtocolOptions_ExplicitHttpConfig_HttpProtocolOptions{
+					HttpProtocolOptions: &corev3.Http1ProtocolOptions{
+						HeaderKeyFormat: &corev3.Http1ProtocolOptions_HeaderKeyFormat{
+							HeaderFormat: &corev3.Http1ProtocolOptions_HeaderKeyFormat_StatefulFormatter{
+								StatefulFormatter: &corev3.TypedExtensionConfig{
+									Name: "preserve_case",
+									TypedConfig: &anypb.Any{
+										TypeUrl: "type.googleapis.com/envoy.extensions.http.header_formatters.preserve_case.v3.PreserveCaseFormatterConfig",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	expectedHttpProtocolOptionsPb, err := anypb.New(expectedHttpProtocolOptions)
+	assert.Nil(t, err, "Failed to marshal expectedHttpProtocolOptions into a protobuf Any message.")
+
+	for _, cluster := range clusters {
+		assert.NotNil(t, cluster.TypedExtensionProtocolOptions)
+		assert.Equal(t, len(cluster.TypedExtensionProtocolOptions), 1)
+		actualHttpProtocolOptionsPb, found := cluster.TypedExtensionProtocolOptions["envoy.extensions.upstreams.http.v3.HttpProtocolOptions"]
+		assert.True(t, found, "Expected TypedExtensionProtocolOptions to contain key: envoy.extensions.upstreams.http.v3.HttpProtocolOptions")
+		assert.Equal(t, expectedHttpProtocolOptionsPb, actualHttpProtocolOptionsPb)
+	}
+
+}
+
 func TestFailoverCluster(t *testing.T) {
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/ws_api_failover.yaml"
 	commonTestForClusterPrioritiesInWebSocketAPI(t, openapiFilePath)

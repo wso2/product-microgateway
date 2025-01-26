@@ -150,6 +150,21 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		}
 	}
 
+	if conf.Envoy.HeadersPreserveCase {
+		manager.HttpProtocolOptions = &corev3.Http1ProtocolOptions{
+			HeaderKeyFormat: &corev3.Http1ProtocolOptions_HeaderKeyFormat{
+				HeaderFormat: &corev3.Http1ProtocolOptions_HeaderKeyFormat_StatefulFormatter{
+					StatefulFormatter: &corev3.TypedExtensionConfig{
+						Name: perserveCaseFormatterName,
+						TypedConfig: &anypb.Any{
+							TypeUrl: perserveCaseFormatterConfigName,
+						},
+					},
+				},
+			},
+		}
+	}
+
 	pbst, err := anypb.New(manager)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)

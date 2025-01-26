@@ -20,11 +20,17 @@ package envoyconf
 import (
 	"testing"
 
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
+	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 func TestCreateListenerWithRds(t *testing.T) {
@@ -56,6 +62,11 @@ func TestCreateListenerWithRds(t *testing.T) {
 	assert.NotEmpty(t, nonSecuredListener.FilterChains, "Filter chain for listener should not be null.")
 	assert.Nil(t, nonSecuredListener.FilterChains[0].GetTransportSocket(),
 		"Transport Socket should be null for non-secured listener")
+
+	for _, listener := range listeners {
+		assert.Equal(t, isCasePreserveEnabled(t, listener), false)
+	}
+
 }
 
 func TestCreateVirtualHost(t *testing.T) {
@@ -100,6 +111,23 @@ func TestCreateRoutesConfigForRds(t *testing.T) {
 	}
 }
 
+func TestCasePreserveEnabledOnListener(t *testing.T) {
+	config, _ := config.ReadConfigs()
+
+	config.Envoy.HeadersPreserveCase = true
+	defer func() {
+		config.Envoy.HeadersPreserveCase = false
+	}()
+
+	listeners := createListeners(config)
+	assert.NotEmpty(t, listeners, "Listeners creation has been failed")
+	assert.Equal(t, 2, len(listeners), "Two listeners are not created.")
+
+	for _, listener := range listeners {
+		assert.Equal(t, isCasePreserveEnabled(t, listener), true)
+	}
+}
+
 // Create some routes to perform unit tests
 func testCreateRoutesForUnitTests(t *testing.T) []*routev3.Route {
 	//cors configuration
@@ -128,4 +156,43 @@ func testCreateRoutesForUnitTests(t *testing.T) []*routev3.Route {
 	}
 
 	return routes
+}
+
+func isCasePreserveEnabled(t *testing.T, listener *listenerv3.Listener) bool {
+	for _, filterChain := range listener.FilterChains {
+		for _, filter := range filterChain.Filters {
+			// only check connection manager filter
+			if filter.Name == httpConnectionManagerFilterName {
+				if isCasePreserveFormatterEnabled(t, filter) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func isCasePreserveFormatterEnabled(t *testing.T, filter *listenerv3.Filter) bool {
+	httpManager := &hcmv3.HttpConnectionManager{}
+	err := anypb.UnmarshalTo(filter.GetTypedConfig(), httpManager, proto.UnmarshalOptions{})
+	assert.NoError(t, err, "Failed to unmarshal HTTP connection manager")
+
+	if httpManager.HttpProtocolOptions == nil ||
+		httpManager.HttpProtocolOptions.HeaderKeyFormat == nil ||
+		httpManager.HttpProtocolOptions.HeaderKeyFormat.HeaderFormat == nil {
+		return false
+	}
+
+	return isStatefulFormatterEnabled(httpManager.HttpProtocolOptions.HeaderKeyFormat.HeaderFormat)
+}
+
+func isStatefulFormatterEnabled(headerFormat interface{}) bool {
+	statefulFormatter, ok := headerFormat.(*corev3.Http1ProtocolOptions_HeaderKeyFormat_StatefulFormatter)
+	if !ok {
+		return false
+	}
+	if statefulFormatter.StatefulFormatter != nil && statefulFormatter.StatefulFormatter.Name == perserveCaseFormatterName {
+		return true
+	}
+	return false
 }
