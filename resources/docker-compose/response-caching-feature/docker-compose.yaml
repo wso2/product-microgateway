@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  varnish:
+    image: varnish:stable
+    ports:
+      - "8080:80"
+    networks:
+      - varnish_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "500M"
+        reservations:
+          cpus: "0.5"
+          memory: "500M"
+    command: >
+      varnishd -F
+      -f /etc/varnish/default.vcl
+      -s malloc,1G
+      -s malloc,1G
+      -s malloc,1G
+    # find the vcl file under the resources/conf/default.vcl
+    volumes:
+      - ./varnish/default.vcl:/etc/varnish/default.vcl
+
+# connect to the same network where adapter, enforcer.. running
+networks:
+  varnish_network:
+    external: true

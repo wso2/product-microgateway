@@ -77,6 +77,8 @@ var defaultConfig = &Config{
 		ListenerPort:                     9090,
 		SecuredListenerHost:              "0.0.0.0",
 		SecuredListenerPort:              9095,
+		NewListenerHost:                  "0.0.0.0",
+		NewListenerPort:                  9096,
 		ClusterTimeoutInSeconds:          20,
 		EnforcerResponseTimeoutInSeconds: 20,
 		MaximumResourcePathLengthInKB:    -1,
@@ -182,6 +184,11 @@ var defaultConfig = &Config{
 			SSLCertSANHostname:     "",
 		},
 	},
+	Varnish: varnish{
+		Enabled: true,
+		Host:    "varnish",
+		Port:     80,
+	},	
 	Enforcer: enforcer{
 		Management: management{
 			Username: "admin",
