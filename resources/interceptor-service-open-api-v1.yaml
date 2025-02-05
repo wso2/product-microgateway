@@ -113,6 +113,8 @@ components:
           $ref: "#/components/schemas/Trailers"
         trailersToRemove:
           $ref: "#/components/schemas/HeaderKeys"
+        pathToRewrite:
+          $ref: "#/components/schemas/Path"
         body:
           $ref: "#/components/schemas/Body"
         interceptorContext:
@@ -248,6 +250,12 @@ components:
       example:
         content-type: application/xml
         content-length: "40"
+    Path:
+      title: Path
+      type: string
+      description: |
+        New path that should overwrite the original path
+      example: /hello/1.0.0/test?foo=bar
     Trailers:
       title: Trailers
       type: object
