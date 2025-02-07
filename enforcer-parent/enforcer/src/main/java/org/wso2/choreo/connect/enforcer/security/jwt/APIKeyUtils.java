@@ -34,6 +34,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -124,6 +125,8 @@ public class APIKeyUtils {
             // Create a request to exchange API key to JWT.
             HttpPost exchangeRequest = new HttpPost(url.toURI());
             exchangeRequest.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
+            exchangeRequest.addHeader(APIConstants.OAUTH_AGENT_TRACE_ID_HEADER,
+                    ThreadContext.get(APIConstants.LOG_TRACE_ID));
             exchangeRequest.setEntity(new StringEntity(createKeyHashExchangeRequest(patHash)));
             try (CloseableHttpResponse response = httpClient.execute(exchangeRequest)) {
                 if (response.getStatusLine().getStatusCode() == 200) {
@@ -162,6 +165,8 @@ public class APIKeyUtils {
             // Create a request to exchange API key to JWT.
             HttpPost exchangeRequest = new HttpPost(url.toURI());
             exchangeRequest.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
+            exchangeRequest.addHeader(APIConstants.OAUTH_AGENT_TRACE_ID_HEADER,
+                    ThreadContext.get(APIConstants.LOG_TRACE_ID));
             exchangeRequest.setEntity(new StringEntity(createKeyHashExchangeRequest(apiKeyId)));
             try (CloseableHttpResponse response = httpClient.execute(exchangeRequest)) {
                 if (response.getStatusLine().getStatusCode() == 200) {
