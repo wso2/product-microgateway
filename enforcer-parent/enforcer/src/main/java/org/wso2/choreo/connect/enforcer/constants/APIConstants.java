@@ -68,6 +68,7 @@ public class APIConstants {
     public static final String PATH_HEADER = ":path";
 
     public static final String LOG_TRACE_ID = "traceId";
+    public static final String OAUTH_AGENT_TRACE_ID_HEADER = "x-correlation-id";
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
