@@ -98,6 +98,7 @@ services:
       - LOG_LEVEL=INFO
       - LOCAL_CACHE_SIZE_IN_BYTES=1024000
       - LIMIT_RESPONSE_HEADERS_ENABLED=false
+      - DISABLE_STATS=true
       # Redis
       - REDIS_SOCKET_TYPE=tcp
       - REDIS_URL=redis:6379
