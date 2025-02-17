@@ -48,6 +48,8 @@ spec:
               value: "false"
             - name: LOG_LEVEL
               value: "DEBUG"
+            - name: DISABLE_STATS
+              value: "true"
             - name: LOCAL_CACHE_SIZE_IN_BYTES
               value: "1024000"
             - name: LIMIT_RESPONSE_HEADERS_ENABLED

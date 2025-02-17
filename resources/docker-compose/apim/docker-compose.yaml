@@ -110,6 +110,7 @@ services:
       - PORT=8090
       - USE_STATSD=false
       - LOG_LEVEL=INFO
+      - DISABLE_STATS=true
       - LOCAL_CACHE_SIZE_IN_BYTES=1024000
       - LIMIT_RESPONSE_HEADERS_ENABLED=false
       # Redis
