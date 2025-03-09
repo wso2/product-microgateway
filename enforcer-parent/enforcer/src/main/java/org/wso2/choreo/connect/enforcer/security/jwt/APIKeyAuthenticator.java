@@ -33,6 +33,7 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.Base64;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -70,18 +71,22 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
         String checksum = apiKeyHeaderValue.substring(apiKeyHeaderValue.length() - 6);
         JSONObject jsonObject = getDecodedAPIKeyData(apiKeyHeaderValue);
         jsonObject.remove(APIKeyConstants.API_KEY_JSON_KEY);
-        // Update the header with the new API key data.
-        String encodedKeyData = Base64.getEncoder().encodeToString(jsonObject.toJSONString().getBytes());
-        String newAPIKeyHeaderValue = APIKeyConstants.API_KEY_PREFIX + encodedKeyData + checksum;
-        // Add the new header.
-        requestContext.addOrModifyHeaders(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
-                .getApiKeyInternalHeader().toLowerCase(), newAPIKeyHeaderValue);
+        // Update the header with the new API key value.
+        if (!jsonObject.isEmpty()) {
+            String encodedKeyData = Base64.getEncoder().encodeToString(jsonObject.toJSONString().getBytes());
+            String newAPIKeyHeaderValue = APIKeyConstants.API_KEY_PREFIX + encodedKeyData + checksum;
+            // Add the new header.
+            requestContext.addOrModifyHeaders(APIKeyConstants.INTERNAL_API_KEY_HEADER, newAPIKeyHeaderValue);
+        }
     }
 
     private String getAPIKeyFromRequest(RequestContext requestContext) {
         Map<String, String> headers = requestContext.getHeaders();
-        return headers.get(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
-                .getApiKeyInternalHeader().toLowerCase());
+        return ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeaders().stream()
+                .map(headers::get)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     private JSONObject getDecodedAPIKeyData(String apiKeyHeaderValue) throws APISecurityException {

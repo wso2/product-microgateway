@@ -39,6 +39,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,7 +57,7 @@ public class APIKeyAuthenticatorTest {
         APIKeyDTO apiKeyDTO = PowerMockito.mock(APIKeyDTO.class);
         PowerMockito.when(enforcerConfig.getApiKeyConfig()).thenReturn(apiKeyDTO);
         PowerMockito.when(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
-                .getApiKeyInternalHeader()).thenReturn("choreo-api-key");
+                .getApiKeyInternalHeaders()).thenReturn(List.of("choreo-api-key"));
         CacheDto cacheDto = Mockito.mock(CacheDto.class);
         Mockito.when(cacheDto.isEnabled()).thenReturn(true);
         Mockito.when(enforcerConfig.getCacheDto()).thenReturn(cacheDto);

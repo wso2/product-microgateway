@@ -32,4 +32,5 @@ public class APIKeyConstants {
 
     public static final String PAT_EXCHANGE_ENDPOINT = "/internal/pat";
     public static final String API_KEY_EXCHANGE_ENDPOINT = "/internal/apiKey/token";
+    public static final String INTERNAL_API_KEY_HEADER = "choreo-api-key";
 }

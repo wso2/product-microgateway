@@ -9,5 +9,5 @@ option java_multiple_files = true;
 
 message APIKeyConfig {
     string oauthAgentURL = 1;
-    string internalAPIKeyHeader = 2;
+    repeated string internalAPIKeyHeaders = 2;
 }

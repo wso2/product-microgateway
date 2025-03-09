@@ -20,14 +20,27 @@ public interface APIKeyConfigOrBuilder extends
       getOauthAgentURLBytes();
 
   /**
-   * <code>string internalAPIKeyHeader = 2;</code>
-   * @return The internalAPIKeyHeader.
+   * <code>repeated string internalAPIKeyHeaders = 2;</code>
+   * @return A list containing the internalAPIKeyHeaders.
    */
-  java.lang.String getInternalAPIKeyHeader();
+  java.util.List<java.lang.String>
+      getInternalAPIKeyHeadersList();
   /**
-   * <code>string internalAPIKeyHeader = 2;</code>
-   * @return The bytes for internalAPIKeyHeader.
+   * <code>repeated string internalAPIKeyHeaders = 2;</code>
+   * @return The count of internalAPIKeyHeaders.
+   */
+  int getInternalAPIKeyHeadersCount();
+  /**
+   * <code>repeated string internalAPIKeyHeaders = 2;</code>
+   * @param index The index of the element to return.
+   * @return The internalAPIKeyHeaders at the given index.
+   */
+  java.lang.String getInternalAPIKeyHeaders(int index);
+  /**
+   * <code>repeated string internalAPIKeyHeaders = 2;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the internalAPIKeyHeaders at the given index.
    */
   com.google.protobuf.ByteString
-      getInternalAPIKeyHeaderBytes();
+      getInternalAPIKeyHeadersBytes(int index);
 }

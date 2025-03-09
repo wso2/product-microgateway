@@ -18,20 +18,22 @@
 
 package org.wso2.choreo.connect.enforcer.config.dto;
 
+import java.util.List;
+
 /**
  * This class represents the API Key DTO.
  */
 public class APIKeyDTO {
 
-    private String apiKeyInternalHeader;
+    private List<String> apiKeyInternalHeaders;
     private String oauthAgentURL;
 
-    public String getApiKeyInternalHeader() {
-        return apiKeyInternalHeader;
+    public List<String> getApiKeyInternalHeaders() {
+        return apiKeyInternalHeaders;
     }
 
-    public void setApiKeyInternalHeader(String apiKeyInternalHeader) {
-        this.apiKeyInternalHeader = apiKeyInternalHeader;
+    public void setApiKeyInternalHeaders(List<String> apiKeyInternalHeaders) {
+        this.apiKeyInternalHeaders = apiKeyInternalHeaders;
     }
 
     public String getOauthAgentURL() {
