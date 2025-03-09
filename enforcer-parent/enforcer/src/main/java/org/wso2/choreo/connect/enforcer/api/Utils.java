@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Utility Methods used across different APIs.
@@ -94,9 +95,9 @@ public class Utils {
 
         // Choreo-API-Key is considered as a protected header, hence header value should be treated
         // same as other security headers.
-        if (ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeader() != null) {
-            requestContext.getProtectedHeaders().add(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
-                    .getApiKeyInternalHeader().toLowerCase());
+        if (ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeaders() != null) {
+            requestContext.getProtectedHeaders().addAll(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
+                    .getApiKeyInternalHeaders().stream().map(String::toLowerCase).collect(Collectors.toList()));
         }
 
         // Internal-Key credential is considered to be protected headers, such that the

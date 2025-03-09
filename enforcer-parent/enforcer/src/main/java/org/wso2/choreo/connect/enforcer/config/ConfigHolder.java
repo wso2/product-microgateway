@@ -224,7 +224,7 @@ public class ConfigHolder {
 
     private void populateAPIKeyConfigs(APIKeyConfig apiKeyConfig) {
         APIKeyDTO apiKeyDTO = new APIKeyDTO();
-        apiKeyDTO.setApiKeyInternalHeader(apiKeyConfig.getInternalAPIKeyHeader());
+        apiKeyDTO.setApiKeyInternalHeaders(apiKeyConfig.getInternalAPIKeyHeadersList());
         apiKeyDTO.setOauthAgentURL(apiKeyConfig.getOauthAgentURL());
         config.setApiKeyConfig(apiKeyDTO);
     }
