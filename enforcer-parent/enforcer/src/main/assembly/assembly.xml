@@ -63,6 +63,11 @@
             <outputDirectory/>
         </file>
         <file>
+            <source>src/main/resources/docker-entrypoint.sh</source>
+            <outputDirectory/>
+            <destName>docker-entrypoint.sh</destName>
+        </file>
+        <file>
             <source>target/grpc_health_probe-linux-amd64</source>
             <outputDirectory>/</outputDirectory>
         </file>

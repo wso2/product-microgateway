@@ -71,6 +71,7 @@ COPY maven/conf/log4j2.properties conf/log4j2.properties
 COPY maven/security security
 COPY maven/check_health.sh .
 COPY maven/LICENSE.txt .
+COPY maven/docker-entrypoint.sh .
 
 #todo add applicationinsights.json file and point it to the appInsightsAgent jar
 #Add the agent using JVM arg -javaagent:/home/wso2/conf/applicationinsights-agent-3.1.1.jar
@@ -78,4 +79,4 @@ COPY maven/LICENSE.txt .
 
 EXPOSE 8081 9001
 
-CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -DtracingEnabled="true" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer
+ENTRYPOINT ["/home/wso2/docker-entrypoint.sh"]
