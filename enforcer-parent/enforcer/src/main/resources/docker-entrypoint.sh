@@ -34,12 +34,8 @@ _term() {
 
 trap _term TERM
 
-# For Debug purpose. Remove this after debug is done.
-for sig in INT TERM HUP QUIT KILL; do
-    trap 'echo "[DEBUG] Received signal: $sig"; kill -"$sig" "$ENFORCER_PID"' "$sig"
-done
-
 wait $ENFORCER_PID
-EXIT_CODE=$?
-echo "Enforcer process exited with code $EXIT_CODE"
-exit $EXIT_CODE
+ENFORCER_EXIT_CODE=$?
+
+echo "Choreo Connect Enforcer stopped with exit code: $ENFORCER_EXIT_CODE"
+exit $ENFORCER_EXIT_CODE
