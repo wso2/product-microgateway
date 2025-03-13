@@ -305,14 +305,17 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
     private void validateScopes(RequestContext requestContext, JWTClaimsSet payload) throws APISecurityException {
 
+        // If the test key is dev portal and required scopes from any security scheme,
+        // then the scope validation should fail.
         ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
+        if (!isDevPortalTestKey(payload) || matchingResource.getSecuritySchemas() == null
+                || matchingResource.getSecuritySchemas().values() == null) {
+            return;
+        }
         List<String> requiredScopes = matchingResource.getSecuritySchemas().values().stream()
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-
-        // If the test key is dev portal and required scopes from any security scheme,
-        // then the scope validation should fail.
-        if (isDevPortalTestKey(payload) && !requiredScopes.isEmpty()) {
+        if (!requiredScopes.isEmpty()) {
             log.error("Scope validation failed for the token");
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.INVALID_SCOPE, APISecurityConstants.INVALID_SCOPE_MESSAGE);
