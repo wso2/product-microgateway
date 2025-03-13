@@ -22,6 +22,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.opentelemetry.context.Scope;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.ThreadContext;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -59,6 +61,7 @@ import java.util.stream.Collectors;
 public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
     private static final Log log = LogFactory.getLog(InternalAPIKeyAuthenticator.class);
+    private static final String DEV_PORTAL_TEST_ISSUER_PREFIX = "/api/am/devportal/v2/apis/test-key";
     private String securityParam;
     private List<String> tempConsoleTestHeaders;
     private String tempTestConsoleHeadersMode;
@@ -232,6 +235,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     try {
                         api = validateAPISubscription(apiContext, apiVersion, payload, splitToken,
                                 false);
+                        validateScopes(requestContext, payload);
                     } finally {
                         log.debug("Internal Key authentication successful.");
                         if (Utils.tracingEnabled()) {
@@ -297,6 +301,28 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         validationInfoDTO.setApiName(requestContext.getMatchedAPI().getName());
         validationInfoDTO.setApiVersion(requestContext.getMatchedAPI().getVersion());
         return validationInfoDTO;
+    }
+
+    private void validateScopes(RequestContext requestContext, JWTClaimsSet payload) throws APISecurityException {
+
+        ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
+        List<String> requiredScopes = matchingResource.getSecuritySchemas().values().stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        // If the test key is dev portal and required scopes from any security scheme,
+        // then the scope validation should fail.
+        if (isDevPortalTestKey(payload) && !requiredScopes.isEmpty()) {
+            log.error("Scope validation failed for the token");
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.INVALID_SCOPE, APISecurityConstants.INVALID_SCOPE_MESSAGE);
+        }
+    }
+
+    private boolean isDevPortalTestKey(JWTClaimsSet payload) {
+
+        String issuer = payload.getIssuer();
+        return StringUtils.isEmpty(issuer) || issuer.endsWith(DEV_PORTAL_TEST_ISSUER_PREFIX);
     }
 
     @Override
