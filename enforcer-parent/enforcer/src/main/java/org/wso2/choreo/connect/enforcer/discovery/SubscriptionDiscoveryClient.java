@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
+import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStoreImpl;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 
@@ -46,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with Subscription discovery service at the adapter.
  */
-public class SubscriptionDiscoveryClient implements Runnable {
+public class SubscriptionDiscoveryClient implements Runnable, DiscoveryClient {
     private static final Logger logger = LogManager.getLogger(SubscriptionDiscoveryClient.class);
     private static SubscriptionDiscoveryClient instance;
     private ManagedChannel channel;
@@ -77,6 +78,7 @@ public class SubscriptionDiscoveryClient implements Runnable {
      * Node struct for the discovery client
      */
     private final Node node;
+    private boolean initialFetchCompleted = false;
 
     private SubscriptionDiscoveryClient(String host, int port) {
         this.host = host;
@@ -116,6 +118,7 @@ public class SubscriptionDiscoveryClient implements Runnable {
     }
 
     public void run() {
+        HealthService.registerDiscoveryClient("SubscriptionDiscoveryClient", this);
         initConnection();
         watchSubscriptions();
     }
@@ -144,7 +147,7 @@ public class SubscriptionDiscoveryClient implements Runnable {
                     subscriptionDataStore.addSubscriptions(subscriptionList);
                     logger.info("Number of subscriptions received : " + subscriptionList.size());
                     ack();
-
+                    initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
                     onError(e);
@@ -204,5 +207,10 @@ public class SubscriptionDiscoveryClient implements Runnable {
                 .setErrorDetail(Status.newBuilder().setMessage(e.getMessage()))
                 .build();
         reqObserver.onNext(req);
+    }
+
+    @Override
+    public boolean isInitialFetchCompleted() {
+        return initialFetchCompleted;
     }
 }

@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with ThrottleData discovery service at the adapter.
  */
-public class ThrottleDataDiscoveryClient implements Runnable {
+public class ThrottleDataDiscoveryClient implements Runnable, DiscoveryClient {
     private static final Logger logger = LogManager.getLogger(ThrottleDataDiscoveryClient.class);
     private static ThrottleDataDiscoveryClient instance;
     private ManagedChannel channel;
@@ -75,6 +75,7 @@ public class ThrottleDataDiscoveryClient implements Runnable {
      * Node struct for the discovery client
      */
     private final Node node;
+    private boolean initialFetchCompleted = false;
 
     private ThrottleDataDiscoveryClient(String host, int port) {
         this.host = host;
@@ -114,6 +115,7 @@ public class ThrottleDataDiscoveryClient implements Runnable {
     }
 
     public void run() {
+        // Skip registering this discovery client for health checking since this is not in use
         initConnection();
         watchThrottleData();
     }
@@ -137,6 +139,7 @@ public class ThrottleDataDiscoveryClient implements Runnable {
                         try {
                             handleResponse(response);
                             ack();
+                            initialFetchCompleted = true;
                         } catch (Exception e) {
                             // catching generic error here to wrap any grpc communication errors in the runtime
                             onError(e);
@@ -207,5 +210,10 @@ public class ThrottleDataDiscoveryClient implements Runnable {
 
     public void shutdown() throws InterruptedException {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public boolean isInitialFetchCompleted() {
+        return initialFetchCompleted;
     }
 }

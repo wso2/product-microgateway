@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with Application Policy discovery service at the adapter.
  */
-public class ApplicationPolicyDiscoveryClient implements Runnable {
+public class ApplicationPolicyDiscoveryClient implements Runnable, DiscoveryClient {
     private static final Logger logger = LogManager.getLogger(ApplicationPolicyDiscoveryClient.class);
     private static ApplicationPolicyDiscoveryClient instance;
     private ManagedChannel channel;
@@ -78,6 +78,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
      * Node struct for the discovery client
      */
     private final Node node;
+    private boolean initialFetchCompleted = false;
 
     private ApplicationPolicyDiscoveryClient(String host, int port) {
         this.host = host;
@@ -117,6 +118,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
     }
 
     public void run() {
+        // Skip registering this discovery client for health checking since this is not in use
         initConnection();
         watchApplicationPolicies();
     }
@@ -145,6 +147,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
                     subscriptionDataStore.addApplicationPolicies(applicationPolicyList);
                     logger.info("Number of application policies received : " + applicationPolicyList.size());
                     ack();
+                    initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
                     onError(e);
@@ -204,5 +207,10 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
                 .setErrorDetail(Status.newBuilder().setMessage(e.getMessage()))
                 .build();
         reqObserver.onNext(req);
+    }
+
+    @Override
+    public boolean isInitialFetchCompleted() {
+        return initialFetchCompleted;
     }
 }

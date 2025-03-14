@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
+import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStoreImpl;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 
@@ -46,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with Application Key Mapping discovery service at the adapter.
  */
-public class ApplicationKeyMappingDiscoveryClient implements Runnable {
+public class ApplicationKeyMappingDiscoveryClient implements Runnable, DiscoveryClient {
     private static final Logger logger = LogManager.getLogger(ApplicationKeyMappingDiscoveryClient.class);
     private static ApplicationKeyMappingDiscoveryClient instance;
     private ManagedChannel channel;
@@ -78,6 +79,7 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable {
      * Node struct for the discovery client
      */
     private final Node node;
+    private boolean initialFetchCompleted = false;
 
     private ApplicationKeyMappingDiscoveryClient(String host, int port) {
         this.host = host;
@@ -117,6 +119,7 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable {
     }
 
     public void run() {
+        HealthService.registerDiscoveryClient("ApplicationKeyMappingDiscoveryClient", this);
         initConnection();
         watchApplicationKeyMappings();
     }
@@ -145,6 +148,7 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable {
                     subscriptionDataStore.addApplicationKeyMappings(applicationKeyMappingLis);
                     logger.info("Number of application key mappings received : " + applicationKeyMappingLis.size());
                     ack();
+                    initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
                     onError(e);
@@ -204,5 +208,10 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable {
                 .setErrorDetail(Status.newBuilder().setMessage(e.getMessage()))
                 .build();
         reqObserver.onNext(req);
+    }
+
+    @Override
+    public boolean isInitialFetchCompleted() {
+        return initialFetchCompleted;
     }
 }
