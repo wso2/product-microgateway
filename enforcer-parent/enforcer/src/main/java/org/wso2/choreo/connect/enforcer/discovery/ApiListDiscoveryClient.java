@@ -113,11 +113,11 @@ public class ApiListDiscoveryClient implements Runnable, DiscoveryClient {
             int sdsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new ApiListDiscoveryClient(sdsHost, sdsPort);
         }
+        // Skip registering this discovery client for health checking since this is not in use
         return instance;
     }
 
     public void run() {
-        // Skip registering this discovery client for health checking since this is not in use
         initConnection();
         watchApiList();
     }

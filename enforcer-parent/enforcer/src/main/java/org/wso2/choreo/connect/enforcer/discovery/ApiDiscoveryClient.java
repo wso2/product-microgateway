@@ -112,11 +112,11 @@ public class ApiDiscoveryClient implements Runnable, DiscoveryClient {
             int adsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new ApiDiscoveryClient(adsHost, adsPort);
         }
+        HealthService.registerDiscoveryClient("ApiDiscoveryClient", instance);
         return instance;
     }
 
     public void run() {
-        HealthService.registerDiscoveryClient("ApiDiscoveryClient", this);
         initConnection();
         watchApis();
     }

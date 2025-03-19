@@ -115,11 +115,11 @@ public class ApplicationDiscoveryClient implements Runnable, DiscoveryClient {
             int sdsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new ApplicationDiscoveryClient(sdsHost, sdsPort);
         }
+        HealthService.registerDiscoveryClient("ApplicationDiscoveryClient", instance);
         return instance;
     }
 
     public void run() {
-        HealthService.registerDiscoveryClient("ApplicationDiscoveryClient", this);
         initConnection();
         watchApplications();
     }

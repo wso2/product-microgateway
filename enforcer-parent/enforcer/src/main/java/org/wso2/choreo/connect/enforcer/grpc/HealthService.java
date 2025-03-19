@@ -45,13 +45,19 @@ public class HealthService extends HealthGrpc.HealthImplBase {
      * @param discoveryClient the discovery client to be registered
      */
     public static void registerDiscoveryClient(String name, DiscoveryClient discoveryClient) {
-        logger.info("Registering discovery client: {}", discoveryClient.getClass().getName());
+        logger.info("Registering discovery client: {}", name);
+        isDiscoveryClientsInitialFetchCompleted = false;
         discoveryClients.put(name, discoveryClient);
     }
 
     @Override
     public void check(HealthCheckRequest request, StreamObserver<HealthCheckResponse> responseObserver) {
         if (!checkDiscoveryClientsHealth(responseObserver)) {
+            logger.info("Responding health state of Enforcer as NOT_SERVING");
+            HealthCheckResponse response = HealthCheckResponse.newBuilder()
+                    .setStatus(HealthCheckResponse.ServingStatus.NOT_SERVING).build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
             return;
         }
 
@@ -72,6 +78,7 @@ public class HealthService extends HealthGrpc.HealthImplBase {
      */
     private static boolean checkDiscoveryClientsHealth(StreamObserver<HealthCheckResponse> responseObserver) {
         if (!isDiscoveryClientsInitialFetchCompleted) {
+            logger.info("Checking health of discovery clients");
             boolean initialized = true;
             for (String clientName : discoveryClients.keySet()) {
                 DiscoveryClient discoveryClient = discoveryClients.get(clientName);
@@ -79,19 +86,19 @@ public class HealthService extends HealthGrpc.HealthImplBase {
                     logger.info("Discovery client: {} has not completed initial fetch", clientName);
                     initialized = false;
                     break;
+                } else {
+                    logger.debug("Discovery client: {} has completed initial fetch", clientName);
                 }
             }
             isDiscoveryClientsInitialFetchCompleted = initialized;
         }
 
         if (!isDiscoveryClientsInitialFetchCompleted) {
-            logger.info("Responding health state of Enforcer as NOT_SERVING");
-            HealthCheckResponse response = HealthCheckResponse.newBuilder()
-                    .setStatus(HealthCheckResponse.ServingStatus.NOT_SERVING).build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+            logger.info("Discovery clients are not healthy");
             return false;
         }
+
+        logger.debug("All discovery clients are healthy");
         return true;
     }
 }

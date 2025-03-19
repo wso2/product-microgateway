@@ -114,11 +114,11 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable, DiscoveryCli
             int sdsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new SubscriptionPolicyDiscoveryClient(sdsHost, sdsPort);
         }
+        HealthService.registerDiscoveryClient("SubscriptionPolicyDiscoveryClient", instance);
         return instance;
     }
 
     public void run() {
-        HealthService.registerDiscoveryClient("SubscriptionPolicyDiscoveryClient", this);
         initConnection();
         watchSubscriptionPolicies();
     }

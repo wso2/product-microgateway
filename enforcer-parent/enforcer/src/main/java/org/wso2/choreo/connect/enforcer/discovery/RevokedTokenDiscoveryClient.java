@@ -117,11 +117,11 @@ public class RevokedTokenDiscoveryClient implements Runnable, DiscoveryClient {
             int adsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new RevokedTokenDiscoveryClient(adsHost, adsPort);
         }
+        HealthService.registerDiscoveryClient("RevokedTokenDiscoveryClient", instance);
         return instance;
     }
 
     public void run() {
-        HealthService.registerDiscoveryClient("RevokedTokenDiscoveryClient", this);
         initConnection();
         watchRevokedTokens();
     }

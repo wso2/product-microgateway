@@ -114,11 +114,11 @@ public class KeyManagerDiscoveryClient implements Runnable, DiscoveryClient {
             int adsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new KeyManagerDiscoveryClient(adsHost, adsPort);
         }
+        HealthService.registerDiscoveryClient("KeyManagerDiscoveryClient", instance);
         return instance;
     }
 
     public void run() {
-        HealthService.registerDiscoveryClient("KeyManagerDiscoveryClient", this);
         initConnection();
         watchKeyManagers();
     }

@@ -114,11 +114,11 @@ public class ApplicationPolicyDiscoveryClient implements Runnable, DiscoveryClie
             int sdsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new ApplicationPolicyDiscoveryClient(sdsHost, sdsPort);
         }
+        // Skip registering this discovery client for health checking since this is not in use
         return instance;
     }
 
     public void run() {
-        // Skip registering this discovery client for health checking since this is not in use
         initConnection();
         watchApplicationPolicies();
     }

@@ -111,11 +111,11 @@ public class ThrottleDataDiscoveryClient implements Runnable, DiscoveryClient {
             int adsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new ThrottleDataDiscoveryClient(adsHost, adsPort);
         }
+        // Skip registering this discovery client for health checking since this is not in use
         return instance;
     }
 
     public void run() {
-        // Skip registering this discovery client for health checking since this is not in use
         initConnection();
         watchThrottleData();
     }

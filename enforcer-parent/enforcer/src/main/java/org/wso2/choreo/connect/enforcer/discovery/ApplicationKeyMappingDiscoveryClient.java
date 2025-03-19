@@ -115,11 +115,11 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable, Discovery
             int sdsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new ApplicationKeyMappingDiscoveryClient(sdsHost, sdsPort);
         }
+        HealthService.registerDiscoveryClient("ApplicationKeyMappingDiscoveryClient", instance);
         return instance;
     }
 
     public void run() {
-        HealthService.registerDiscoveryClient("ApplicationKeyMappingDiscoveryClient", this);
         initConnection();
         watchApplicationKeyMappings();
     }
