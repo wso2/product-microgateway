@@ -34,17 +34,17 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.security.cert.CertificateException;
 
 import javax.net.ssl.SSLException;
 
 /**
  * Netty server which handles Admin, Testkey and backend JWKS endpoints
  */
-public class RestServer {
+public class RestServer implements Runnable {
     private static final Logger logger = LogManager.getLogger(RestServer.class);
     static final int SERVER_PORT = 9001;
-    public void initServer() throws SSLException, CertificateException, InterruptedException {
+    private Channel tokenChannel;
+    public void initServer() throws SSLException, InterruptedException {
 
         // Configure SSL
         final SslContext sslCtx;
@@ -67,13 +67,27 @@ public class RestServer {
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new RestServerInitializer(sslCtx));
-            Channel tokenChannel = tokenServer.bind(SERVER_PORT).sync().channel();
+            tokenChannel = tokenServer.bind(SERVER_PORT).sync().channel();
             logger.info("Utility REST server started on port: " + SERVER_PORT);
             // Wait until server socket is closed
             tokenChannel.closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
+        }
+    }
+
+    public void shutDown() {
+        tokenChannel.close();
+    }
+
+    @Override
+    public void run() {
+        try {
+            initServer();
+        } catch (SSLException | InterruptedException e) {
+            logger.error("Error while starting the REST server", e);
+            System.exit(1);
         }
     }
 }
