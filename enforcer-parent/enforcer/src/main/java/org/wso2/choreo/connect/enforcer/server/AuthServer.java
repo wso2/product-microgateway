@@ -131,7 +131,7 @@ public class AuthServer {
 
             // Start the server
             server.start();
-            logger.info("Sever started Listening in port : " + 8081);
+            logger.info("gRPC Sever started Listening in port : " + 8081);
 
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
@@ -141,8 +141,9 @@ public class AuthServer {
 
             // Create a new server to listen on port 8082
             RestServer restServer = new RestServer();
-            restServer.initServer();
+            new Thread(restServer).start();
 
+            handleShutdown(server, restServer);
             // Don't exit the main thread. Wait until server is terminated.
             server.awaitTermination();
         } catch (IOException e) {
@@ -178,5 +179,21 @@ public class AuthServer {
                 .executor(enforcerWorkerPool.getExecutor())
                 .sslContext(TLSUtils.buildGRPCServerSSLContext())
                 .build();
+    }
+
+    private static void handleShutdown(Server grpcServer, RestServer restServer) {
+        // shutdown hook to handle server shutdown
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("Received SIGTERM. Shutting down the server.");
+            grpcServer.shutdown();
+            try {
+                grpcServer.awaitTermination();
+            } catch (InterruptedException e) {
+                logger.error("Error while shutting down the gRPC server.", e);
+            }
+
+            restServer.shutDown();
+            logger.info("Enforcer shut down completed.");
+        }));
     }
 }

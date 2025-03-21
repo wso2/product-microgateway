@@ -71,7 +71,7 @@ ENV ENVOY_UID=0
 ENV ENVOY_GID=0
 
 COPY maven/LICENSE.txt .
-COPY maven/wasm /home/wso2/wasm
+COPY --from=wso2/choreo-connect-router:1.2.0 ${MG_USER_HOME}/wasm ${MG_USER_HOME}/wasm
 COPY maven/security/truststore/ca-certificates.crt /etc/ssl/certs
 COPY maven/interceptor /home/wso2/interceptor
 COPY maven/envoy.yaml /etc/envoy/envoy.yaml

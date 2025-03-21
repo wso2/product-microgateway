@@ -15,8 +15,6 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-set -e
-
 echo "Starting Choreo Connect Enforcer"
 java -XX:+HeapDumpOnOutOfMemoryError \
     -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" \
@@ -30,12 +28,11 @@ ENFORCER_PID=$!
 _term() {
     echo "Stopping Choreo Connect Enforcer..."
     kill -SIGTERM $ENFORCER_PID
+    wait $ENFORCER_PID
+    ENFORCER_EXIT_CODE=$?
+    echo "Choreo Connect Enforcer stopped with exit code: $ENFORCER_EXIT_CODE"
+    exit 0 # exit ok
 }
 
 trap _term TERM
-
 wait $ENFORCER_PID
-ENFORCER_EXIT_CODE=$?
-
-echo "Choreo Connect Enforcer stopped with exit code: $ENFORCER_EXIT_CODE"
-exit $ENFORCER_EXIT_CODE
