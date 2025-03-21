@@ -91,6 +91,7 @@ public class HealthService extends HealthGrpc.HealthImplBase {
                 }
             }
             isDiscoveryClientsInitialFetchCompleted = initialized;
+            logger.info("All initial discovery client fetches are completed");
         }
 
         if (!isDiscoveryClientsInitialFetchCompleted) {
