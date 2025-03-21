@@ -34,7 +34,6 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 
 import java.io.File;
 import java.nio.file.Paths;
-
 import javax.net.ssl.SSLException;
 
 /**
