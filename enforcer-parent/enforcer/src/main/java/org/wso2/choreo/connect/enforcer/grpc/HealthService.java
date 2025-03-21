@@ -83,22 +83,22 @@ public class HealthService extends HealthGrpc.HealthImplBase {
             for (String clientName : discoveryClients.keySet()) {
                 DiscoveryClient discoveryClient = discoveryClients.get(clientName);
                 if (!discoveryClient.isInitialFetchCompleted()) {
-                    logger.info("Discovery client: {} has not completed initial fetch", clientName);
+                    logger.info("Discovery client: {} has not completed its initial fetch yet", clientName);
                     initialized = false;
                     break;
                 } else {
-                    logger.debug("Discovery client: {} has completed initial fetch", clientName);
+                    logger.debug("Discovery client: {} has completed its initial fetch", clientName);
                 }
             }
             isDiscoveryClientsInitialFetchCompleted = initialized;
         }
 
         if (!isDiscoveryClientsInitialFetchCompleted) {
-            logger.info("Discovery clients are not healthy");
+            logger.info("The initial discovery client fetches are not completed yet");
             return false;
         }
 
-        logger.debug("All discovery clients are healthy");
+        logger.debug("All initial discovery client fetches are completed");
         return true;
     }
 }
