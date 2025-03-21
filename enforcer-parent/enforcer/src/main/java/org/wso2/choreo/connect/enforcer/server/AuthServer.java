@@ -193,7 +193,7 @@ public class AuthServer {
             }
 
             restServer.shutDown();
-            logger.info("Server shut down.");
+            logger.info("Enforcer shut down completed.");
         }));
     }
 }
