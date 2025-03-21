@@ -625,6 +625,16 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		cluster.MaxRequestsPerConnection = wrapperspb.UInt32(1)
 	}
 
+	// If the endpoint is within the cluster, set the set max connection duration for given env variable
+	if withinClusterEndpoint && os.Getenv("ROUTER_MAX_CONNECTION_DURATION_SECONDS") != "" {
+		maxConnectionDuration, err := strconv.Atoi(os.Getenv("ROUTER_MAX_CONNECTION_DURATION_SECONDS"))
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while converting max connection duration to int. ", err)
+		} else {
+			cluster.CommonHttpProtocolOptions.MaxConnectionDuration = durationpb.New(time.Duration(maxConnectionDuration) * time.Second)
+		}
+	}
+
 	if len(clusterDetails.Endpoints) > 1 {
 		cluster.HealthChecks = createHealthCheck()
 	}
