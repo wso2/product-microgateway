@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
+import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 
@@ -46,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with API discovery service at the adapter.
  */
-public class KeyManagerDiscoveryClient implements Runnable {
+public class KeyManagerDiscoveryClient implements Runnable, DiscoveryClient {
     private static KeyManagerDiscoveryClient instance;
     private ManagedChannel channel;
     private KMDiscoveryServiceGrpc.KMDiscoveryServiceStub stub;
@@ -77,6 +78,7 @@ public class KeyManagerDiscoveryClient implements Runnable {
      * Node struct for the discovery client
      */
     private final Node node;
+    private boolean initialFetchCompleted = false;
 
     private KeyManagerDiscoveryClient(String host, int port) {
         this.host = host;
@@ -112,6 +114,7 @@ public class KeyManagerDiscoveryClient implements Runnable {
             int adsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new KeyManagerDiscoveryClient(adsHost, adsPort);
         }
+        HealthService.registerDiscoveryClient("KeyManagerDiscoveryClient", instance);
         return instance;
     }
 
@@ -141,6 +144,7 @@ public class KeyManagerDiscoveryClient implements Runnable {
                     logger.info("Number of key managers received : " + keyManagerConfig.size());
                     // TODO: fix recursive ack on ack failure
                     ack();
+                    initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
                     onError(e);
@@ -210,5 +214,10 @@ public class KeyManagerDiscoveryClient implements Runnable {
 
     public void shutdown() throws InterruptedException {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public boolean isInitialFetchCompleted() {
+        return initialFetchCompleted;
     }
 }

@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
+import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with API discovery service at the adapter.
  */
-public class ApiDiscoveryClient implements Runnable {
+public class ApiDiscoveryClient implements Runnable, DiscoveryClient {
     private static final Logger logger = LogManager.getLogger(ApiDiscoveryClient.class);
     private static ApiDiscoveryClient instance;
     private final APIFactory apiFactory;
@@ -75,6 +76,7 @@ public class ApiDiscoveryClient implements Runnable {
      * Node struct for the discovery client
      */
     private final Node node;
+    private boolean initialFetchCompleted = false;
 
     private ApiDiscoveryClient(String host, int port) {
         this.host = host;
@@ -110,6 +112,7 @@ public class ApiDiscoveryClient implements Runnable {
             int adsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new ApiDiscoveryClient(adsHost, adsPort);
         }
+        HealthService.registerDiscoveryClient("ApiDiscoveryClient", instance);
         return instance;
     }
 
@@ -138,6 +141,7 @@ public class ApiDiscoveryClient implements Runnable {
                     logger.info("Number of API artifacts received : " + apis.size());
                     // TODO: (Praminda) fix recursive ack on ack failure
                     ack();
+                    initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
                     onError(e);
@@ -207,5 +211,10 @@ public class ApiDiscoveryClient implements Runnable {
 
     public void shutdown() throws InterruptedException {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public boolean isInitialFetchCompleted() {
+        return initialFetchCompleted;
     }
 }

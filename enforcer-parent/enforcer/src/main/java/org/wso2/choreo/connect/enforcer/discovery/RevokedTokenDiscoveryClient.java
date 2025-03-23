@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
+import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 
@@ -45,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with API discovery service at the adapter.
  */
-public class RevokedTokenDiscoveryClient implements Runnable {
+public class RevokedTokenDiscoveryClient implements Runnable, DiscoveryClient {
 
     private static RevokedTokenDiscoveryClient instance;
     private ManagedChannel channel;
@@ -77,6 +78,7 @@ public class RevokedTokenDiscoveryClient implements Runnable {
      * Node struct for the discovery client
      */
     private final Node node;
+    private boolean initialFetchCompleted = false;
 
     private RevokedTokenDiscoveryClient(String host, int port) {
         this.host = host;
@@ -115,6 +117,7 @@ public class RevokedTokenDiscoveryClient implements Runnable {
             int adsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new RevokedTokenDiscoveryClient(adsHost, adsPort);
         }
+        HealthService.registerDiscoveryClient("RevokedTokenDiscoveryClient", instance);
         return instance;
     }
 
@@ -143,6 +146,7 @@ public class RevokedTokenDiscoveryClient implements Runnable {
                     handleRevokedTokens(tokens);
                     // TODO: (Praminda) fix recursive ack on ack failure
                     ack();
+                    initialFetchCompleted = true;
                 } catch (Exception e) {
                     logger.info(e);
                     // catching generic error here to wrap any grpc communication errors in the runtime
@@ -221,5 +225,10 @@ public class RevokedTokenDiscoveryClient implements Runnable {
 
     public void shutdown() throws InterruptedException {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public boolean isInitialFetchCompleted() {
+        return initialFetchCompleted;
     }
 }
