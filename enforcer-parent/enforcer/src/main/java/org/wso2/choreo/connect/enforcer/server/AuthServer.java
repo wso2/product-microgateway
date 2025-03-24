@@ -185,15 +185,15 @@ public class AuthServer {
         // shutdown hook to handle server shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Received SIGTERM. Shutting down the server.");
-            grpcServer.shutdown();
             try {
+                grpcServer.shutdown();
                 grpcServer.awaitTermination();
             } catch (InterruptedException e) {
                 logger.error("Error while shutting down the gRPC server.", e);
+            } finally {
+                restServer.shutDown();
+                logger.info("Enforcer shut down completed.");
             }
-
-            restServer.shutDown();
-            logger.info("Enforcer shut down completed.");
         }));
     }
 }
