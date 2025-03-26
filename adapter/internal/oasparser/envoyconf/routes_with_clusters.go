@@ -536,18 +536,34 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		}
 		addresses = append(addresses, address)
 
-		// create loadbalance / failover endpoints
-		localityLbEndpoints := &endpointv3.LocalityLbEndpoints{
-			Priority: uint32(priority),
-			LbEndpoints: []*endpointv3.LbEndpoint{
-				{
-					HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
-						Endpoint: &endpointv3.Endpoint{
-							Address: address,
-						},
+		var lbEndpoint *endpointv3.LbEndpoint
+		if withinClusterEndpoint {
+			// If the endpoint is within the cluster, set the address to the hostname.
+			// Hostname is used for the auto host rewrite feature to set the host header.
+			lbEndpoint = &endpointv3.LbEndpoint{
+				HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+					Endpoint: &endpointv3.Endpoint{
+						Address:  address,
+						Hostname: fmt.Sprintf("%s:%d", ep.Host, ep.Port),
 					},
 				},
-			},
+			}
+		} else {
+			// If the endpoint is not within the cluster, set the address only.
+			// Auto host rewrite uses the address to set the host header.
+			lbEndpoint = &endpointv3.LbEndpoint{
+				HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+					Endpoint: &endpointv3.Endpoint{
+						Address: address,
+					},
+				},
+			}
+		}
+
+		// create loadbalance / failover endpoints
+		localityLbEndpoints := &endpointv3.LocalityLbEndpoints{
+			Priority:    uint32(priority),
+			LbEndpoints: []*endpointv3.LbEndpoint{lbEndpoint},
 		}
 
 		// create tls configs
