@@ -71,6 +71,7 @@ var defaultConfig = &Config{
 		SandboxVhost:                "sandbox.host",
 		SandboxEnvName:              "sandbox",
 		IsIntelligentRoutingEnabled: false,
+		IncludePortInHostHeader:     true,
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",
