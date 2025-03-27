@@ -104,6 +104,8 @@ type adapter struct {
 	SandboxEnvName string
 	// Feature flag to enable semantic version based intelligent routing
 	IsIntelligentRoutingEnabled bool
+	// Feature flag to include port in host header
+	IncludePortInHostHeader bool
 }
 
 // Envoy Listener Component related configurations.

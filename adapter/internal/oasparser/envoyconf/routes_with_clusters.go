@@ -515,6 +515,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	addresses := []*corev3.Address{}
 
 	withinClusterEndpoint := false
+	conf, _ := config.ReadConfigs()
 
 	for i, ep := range clusterDetails.Endpoints {
 
@@ -537,7 +538,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		addresses = append(addresses, address)
 
 		var lbEndpoint *endpointv3.LbEndpoint
-		if withinClusterEndpoint {
+		if withinClusterEndpoint && conf.Adapter.IncludePortInHostHeader {
 			// If the endpoint is within the cluster, set the address to the hostname.
 			// Hostname is used for the auto host rewrite feature to set the host header.
 			lbEndpoint = &endpointv3.LbEndpoint{
@@ -612,7 +613,6 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			priority = priority + 1
 		}
 	}
-	conf, _ := config.ReadConfigs()
 
 	dnsResolverConf, err := getDNSResolverConf()
 	if err != nil {
