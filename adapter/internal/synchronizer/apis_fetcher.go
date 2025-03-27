@@ -27,6 +27,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -94,11 +95,25 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 			logger.LoggerSync.Errorf("API file not found: %v", err)
 			return err
 		}
-
+		gaProvidedAPIEnvMap := xdsOptions.ApiIDEnvMap
 		vhostToEnvsMap := make(map[string][]*synchronizer.GatewayLabel)
 		for index := range deployment.Environments {
 			env := deployment.Environments[index]
+			if os.Getenv("FEATURE_ENV_BASED_FILTERING_IN_STARTUP") == "true" {
+				if gaProvidedAPIEnvMap != nil {
+					apiID := strings.Split(file.Name, "-")[0]
+					if gaProvidedAPIEnvMap[apiID] == nil || gaProvidedAPIEnvMap[apiID][env.Name] == nil {
+						continue
+					}
+				}
+			}
 			vhostToEnvsMap[env.Vhost] = append(vhostToEnvsMap[env.Vhost], &env)
+		}
+
+		// If VhostToEnvsMap is empty, then there is nothing to deploy.
+		if len(vhostToEnvsMap) == 0 {
+			logger.LoggerSync.Infof("Drop api from file (API_ID:REVISION_ID).zip : %v due to not applicable environments", file.Name)
+			continue
 		}
 
 		logger.LoggerSync.Infof("Start deploying api from file (API_ID:REVISION_ID).zip : %v", file.Name)

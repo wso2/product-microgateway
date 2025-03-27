@@ -22,11 +22,11 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
-	"github.com/golang/protobuf/ptypes"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -59,6 +59,8 @@ var (
 	isFirstResponse bool
 	// gaAPIChannelStart is used to block the GAAPIChannel consuming until the startup is completed.
 	gaAPIChannelStart chan bool
+	// gaAPIChannelInitialMap is used to send the Initial API UUID Map to fetch APIs from controlplane as a bulk.
+	GAAPIChannelInitialMap chan map[string]map[string]*ga_model.Api
 	// Last Received Response from the global adapter
 	// Last Recieved Response is always is equal to the lastAckedResponse according to current implementation as there is no
 	// validation performed on successfully recieved response.
@@ -92,6 +94,7 @@ func init() {
 	connectionFaultChannel = make(chan bool)
 	GAAPIChannel = make(chan APIEvent, 10)
 	gaAPIChannelStart = make(chan bool)
+	GAAPIChannelInitialMap = make(chan map[string]map[string]*ga_model.Api)
 	isFirstResponse = true
 }
 
@@ -265,7 +268,7 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 	startupAPIEventArray = make([]*APIEvent, 0)
 	for _, res := range resp.Resources {
 		api := &ga_model.Api{}
-		err := ptypes.UnmarshalAny(res, api)
+		err := res.UnmarshalTo(api)
 
 		if err != nil {
 			logger.LoggerGA.Errorf("Error while unmarshalling: %s\n", err.Error())
@@ -341,7 +344,7 @@ func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
 	startupAPIEventArray = make([]*APIEvent, 0)
 	for _, res := range resp.Resources {
 		api := &ga_model.Api{}
-		err := ptypes.UnmarshalAny(res, api)
+		err := res.UnmarshalTo(api)
 
 		if err != nil {
 			logger.LoggerGA.Errorf("Error while unmarshalling: %s\n", err.Error())
@@ -386,6 +389,9 @@ func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
 	if isFirstResponse {
 		initialAPIEventArray = startupAPIEventArray
 		isFirstResponse = false
+		if os.Getenv("FEATURE_ENV_BASED_FILTERING_IN_STARTUP") == "true" {
+			GAAPIChannelInitialMap <- apiEnvRevisionMap
+		}
 		return
 	}
 
@@ -452,10 +458,13 @@ func getGRPCConnection() (*grpc.ClientConn, error) {
 }
 
 // FetchAPIsFromGA returns the initial state of GA APIs within Adapter
-func FetchAPIsFromGA() []*APIEvent {
+func FetchAPIsFromGA() ([]*APIEvent, map[string]map[string]*ga_model.Api) {
 	for {
 		if initialAPIEventArray != nil {
-			return initialAPIEventArray
+			if os.Getenv("FEATURE_ENV_BASED_FILTERING_IN_STARTUP") == "true" {
+				return initialAPIEventArray, <-GAAPIChannelInitialMap
+			}
+			return initialAPIEventArray, nil
 		}
 		time.Sleep(1 * time.Second)
 	}
