@@ -456,6 +456,8 @@ public class JWTAuthenticator implements Authenticator {
         }
 
         if (keyType.equalsIgnoreCase(matchedAPI.getDeploymentType())) {
+            log.debug("Deployment type: {} matched for the API: {} when handling the token.",
+                    matchedAPI.getDeploymentType(), matchedAPI.getUuid());
             return;
         }
 
