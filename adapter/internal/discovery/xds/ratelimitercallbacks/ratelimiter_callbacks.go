@@ -52,7 +52,7 @@ func (cb *Callbacks) OnStreamClosed(id int64, node *core.Node) {
 
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
-	nodeIdentifier := common.GetNodeIdentifier(request) // TODO: (renuka) set metadata instanceIdentifier from rate limiter (have to add in ADS Client impl)
+	nodeIdentifier := common.GetNodeIdentifier(request)
 	if nodeQueueInstance.IsNewNode(nodeIdentifier) {
 		logger.LoggerRateLimiterXdsCallbacks.Infof("stream request on stream id: %d, from node: %s, version: %s",
 			id, nodeIdentifier, request.VersionInfo)
