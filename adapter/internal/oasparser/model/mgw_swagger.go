@@ -173,6 +173,7 @@ type CorsConfig struct {
 	AccessControlAllowMethods     []string `mapstructure:"accessControlAllowMethods"`
 	AccessControlAllowOrigins     []string `mapstructure:"accessControlAllowOrigins"`
 	AccessControlExposeHeaders    []string `mapstructure:"accessControlExposeHeaders"`
+	Override                      bool     `mapstructure:"override"`
 }
 
 // InterceptEndpoint contains the parameters of endpoint security
@@ -1112,12 +1113,8 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 				logger.LoggerOasparser.Errorf("Error while parsing %v: "+err.Error(), xWso2Cors)
 				return
 			}
-			if corsConfig.Enabled {
-				logger.LoggerOasparser.Debugf("API Level Cors Configuration is applied : %+v\n", corsConfig)
-				swagger.xWso2Cors = corsConfig
-				return
-			}
-			swagger.xWso2Cors = generateGlobalCors()
+			logger.LoggerOasparser.Debugf("API Level Cors Configuration is applied : %+v\n", corsConfig)
+			swagger.xWso2Cors = corsConfig
 			return
 		}
 		logger.LoggerOasparser.Errorf("Error while parsing %v .", xWso2Cors)
