@@ -173,7 +173,6 @@ type CorsConfig struct {
 	AccessControlAllowMethods     []string `mapstructure:"accessControlAllowMethods"`
 	AccessControlAllowOrigins     []string `mapstructure:"accessControlAllowOrigins"`
 	AccessControlExposeHeaders    []string `mapstructure:"accessControlExposeHeaders"`
-	Override                      bool     `mapstructure:"override"`
 }
 
 // InterceptEndpoint contains the parameters of endpoint security
