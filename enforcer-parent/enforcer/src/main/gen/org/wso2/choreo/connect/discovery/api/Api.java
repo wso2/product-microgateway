@@ -32,6 +32,7 @@ private static final long serialVersionUID = 0L;
     securityScheme_ = java.util.Collections.emptyList();
     security_ = java.util.Collections.emptyList();
     authorizationHeader_ = "";
+    apiKeyHeader_ = "";
     vhost_ = "";
     organizationId_ = "";
     apiProvider_ = "";
@@ -191,53 +192,59 @@ private static final long serialVersionUID = 0L;
             authorizationHeader_ = s;
             break;
           }
-          case 128: {
-
-            disableSecurity_ = input.readBool();
-            break;
-          }
-          case 138: {
+          case 130: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            vhost_ = s;
+            apiKeyHeader_ = s;
+            break;
+          }
+          case 136: {
+
+            disableSecurity_ = input.readBool();
             break;
           }
           case 146: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            organizationId_ = s;
+            vhost_ = s;
             break;
           }
           case 154: {
             java.lang.String s = input.readStringRequireUtf8();
 
+            organizationId_ = s;
+            break;
+          }
+          case 162: {
+            java.lang.String s = input.readStringRequireUtf8();
+
             apiProvider_ = s;
             break;
           }
-          case 160: {
+          case 168: {
 
             enableBackendJWT_ = input.readBool();
-            break;
-          }
-          case 170: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            deploymentType_ = s;
             break;
           }
           case 178: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            environmentId_ = s;
+            deploymentType_ = s;
             break;
           }
           case 186: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            environmentName_ = s;
+            environmentId_ = s;
             break;
           }
           case 194: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            environmentName_ = s;
+            break;
+          }
+          case 202: {
             org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder subBuilder = null;
             if (backendJWTConfiguration_ != null) {
               subBuilder = backendJWTConfiguration_.toBuilder();
@@ -250,7 +257,7 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
-          case 202: {
+          case 210: {
             org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder subBuilder = null;
             if (choreoComponentInfo_ != null) {
               subBuilder = choreoComponentInfo_.toBuilder();
@@ -844,10 +851,48 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int DISABLESECURITY_FIELD_NUMBER = 16;
+  public static final int APIKEYHEADER_FIELD_NUMBER = 16;
+  private volatile java.lang.Object apiKeyHeader_;
+  /**
+   * <code>string apiKeyHeader = 16;</code>
+   * @return The apiKeyHeader.
+   */
+  @java.lang.Override
+  public java.lang.String getApiKeyHeader() {
+    java.lang.Object ref = apiKeyHeader_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      apiKeyHeader_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string apiKeyHeader = 16;</code>
+   * @return The bytes for apiKeyHeader.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getApiKeyHeaderBytes() {
+    java.lang.Object ref = apiKeyHeader_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      apiKeyHeader_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int DISABLESECURITY_FIELD_NUMBER = 17;
   private boolean disableSecurity_;
   /**
-   * <code>bool disableSecurity = 16;</code>
+   * <code>bool disableSecurity = 17;</code>
    * @return The disableSecurity.
    */
   @java.lang.Override
@@ -855,10 +900,10 @@ private static final long serialVersionUID = 0L;
     return disableSecurity_;
   }
 
-  public static final int VHOST_FIELD_NUMBER = 17;
+  public static final int VHOST_FIELD_NUMBER = 18;
   private volatile java.lang.Object vhost_;
   /**
-   * <code>string vhost = 17;</code>
+   * <code>string vhost = 18;</code>
    * @return The vhost.
    */
   @java.lang.Override
@@ -875,7 +920,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string vhost = 17;</code>
+   * <code>string vhost = 18;</code>
    * @return The bytes for vhost.
    */
   @java.lang.Override
@@ -893,10 +938,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int ORGANIZATIONID_FIELD_NUMBER = 18;
+  public static final int ORGANIZATIONID_FIELD_NUMBER = 19;
   private volatile java.lang.Object organizationId_;
   /**
-   * <code>string organizationId = 18;</code>
+   * <code>string organizationId = 19;</code>
    * @return The organizationId.
    */
   @java.lang.Override
@@ -913,7 +958,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string organizationId = 18;</code>
+   * <code>string organizationId = 19;</code>
    * @return The bytes for organizationId.
    */
   @java.lang.Override
@@ -931,10 +976,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int APIPROVIDER_FIELD_NUMBER = 19;
+  public static final int APIPROVIDER_FIELD_NUMBER = 20;
   private volatile java.lang.Object apiProvider_;
   /**
-   * <code>string apiProvider = 19;</code>
+   * <code>string apiProvider = 20;</code>
    * @return The apiProvider.
    */
   @java.lang.Override
@@ -951,7 +996,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string apiProvider = 19;</code>
+   * <code>string apiProvider = 20;</code>
    * @return The bytes for apiProvider.
    */
   @java.lang.Override
@@ -969,10 +1014,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int ENABLEBACKENDJWT_FIELD_NUMBER = 20;
+  public static final int ENABLEBACKENDJWT_FIELD_NUMBER = 21;
   private boolean enableBackendJWT_;
   /**
-   * <code>bool enableBackendJWT = 20;</code>
+   * <code>bool enableBackendJWT = 21;</code>
    * @return The enableBackendJWT.
    */
   @java.lang.Override
@@ -980,10 +1025,10 @@ private static final long serialVersionUID = 0L;
     return enableBackendJWT_;
   }
 
-  public static final int DEPLOYMENTTYPE_FIELD_NUMBER = 21;
+  public static final int DEPLOYMENTTYPE_FIELD_NUMBER = 22;
   private volatile java.lang.Object deploymentType_;
   /**
-   * <code>string deploymentType = 21;</code>
+   * <code>string deploymentType = 22;</code>
    * @return The deploymentType.
    */
   @java.lang.Override
@@ -1000,7 +1045,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string deploymentType = 21;</code>
+   * <code>string deploymentType = 22;</code>
    * @return The bytes for deploymentType.
    */
   @java.lang.Override
@@ -1018,10 +1063,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int ENVIRONMENTID_FIELD_NUMBER = 22;
+  public static final int ENVIRONMENTID_FIELD_NUMBER = 23;
   private volatile java.lang.Object environmentId_;
   /**
-   * <code>string environmentId = 22;</code>
+   * <code>string environmentId = 23;</code>
    * @return The environmentId.
    */
   @java.lang.Override
@@ -1038,7 +1083,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string environmentId = 22;</code>
+   * <code>string environmentId = 23;</code>
    * @return The bytes for environmentId.
    */
   @java.lang.Override
@@ -1056,10 +1101,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int ENVIRONMENTNAME_FIELD_NUMBER = 23;
+  public static final int ENVIRONMENTNAME_FIELD_NUMBER = 24;
   private volatile java.lang.Object environmentName_;
   /**
-   * <code>string environmentName = 23;</code>
+   * <code>string environmentName = 24;</code>
    * @return The environmentName.
    */
   @java.lang.Override
@@ -1076,7 +1121,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string environmentName = 23;</code>
+   * <code>string environmentName = 24;</code>
    * @return The bytes for environmentName.
    */
   @java.lang.Override
@@ -1094,10 +1139,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int BACKENDJWTCONFIGURATION_FIELD_NUMBER = 24;
+  public static final int BACKENDJWTCONFIGURATION_FIELD_NUMBER = 25;
   private org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration backendJWTConfiguration_;
   /**
-   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
    * @return Whether the backendJWTConfiguration field is set.
    */
   @java.lang.Override
@@ -1105,7 +1150,7 @@ private static final long serialVersionUID = 0L;
     return backendJWTConfiguration_ != null;
   }
   /**
-   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
    * @return The backendJWTConfiguration.
    */
   @java.lang.Override
@@ -1113,17 +1158,17 @@ private static final long serialVersionUID = 0L;
     return backendJWTConfiguration_ == null ? org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.getDefaultInstance() : backendJWTConfiguration_;
   }
   /**
-   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder getBackendJWTConfigurationOrBuilder() {
     return getBackendJWTConfiguration();
   }
 
-  public static final int CHOREOCOMPONENTINFO_FIELD_NUMBER = 25;
+  public static final int CHOREOCOMPONENTINFO_FIELD_NUMBER = 26;
   private org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo choreoComponentInfo_;
   /**
-   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
    * @return Whether the choreoComponentInfo field is set.
    */
   @java.lang.Override
@@ -1131,7 +1176,7 @@ private static final long serialVersionUID = 0L;
     return choreoComponentInfo_ != null;
   }
   /**
-   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
    * @return The choreoComponentInfo.
    */
   @java.lang.Override
@@ -1139,7 +1184,7 @@ private static final long serialVersionUID = 0L;
     return choreoComponentInfo_ == null ? org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.getDefaultInstance() : choreoComponentInfo_;
   }
   /**
-   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder getChoreoComponentInfoOrBuilder() {
@@ -1205,35 +1250,38 @@ private static final long serialVersionUID = 0L;
     if (!getAuthorizationHeaderBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 15, authorizationHeader_);
     }
+    if (!getApiKeyHeaderBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 16, apiKeyHeader_);
+    }
     if (disableSecurity_ != false) {
-      output.writeBool(16, disableSecurity_);
+      output.writeBool(17, disableSecurity_);
     }
     if (!getVhostBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 17, vhost_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 18, vhost_);
     }
     if (!getOrganizationIdBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 18, organizationId_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 19, organizationId_);
     }
     if (!getApiProviderBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 19, apiProvider_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 20, apiProvider_);
     }
     if (enableBackendJWT_ != false) {
-      output.writeBool(20, enableBackendJWT_);
+      output.writeBool(21, enableBackendJWT_);
     }
     if (!getDeploymentTypeBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 21, deploymentType_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 22, deploymentType_);
     }
     if (!getEnvironmentIdBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 22, environmentId_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 23, environmentId_);
     }
     if (!getEnvironmentNameBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 23, environmentName_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 24, environmentName_);
     }
     if (backendJWTConfiguration_ != null) {
-      output.writeMessage(24, getBackendJWTConfiguration());
+      output.writeMessage(25, getBackendJWTConfiguration());
     }
     if (choreoComponentInfo_ != null) {
-      output.writeMessage(25, getChoreoComponentInfo());
+      output.writeMessage(26, getChoreoComponentInfo());
     }
     unknownFields.writeTo(output);
   }
@@ -1295,39 +1343,42 @@ private static final long serialVersionUID = 0L;
     if (!getAuthorizationHeaderBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(15, authorizationHeader_);
     }
+    if (!getApiKeyHeaderBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(16, apiKeyHeader_);
+    }
     if (disableSecurity_ != false) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(16, disableSecurity_);
+        .computeBoolSize(17, disableSecurity_);
     }
     if (!getVhostBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(17, vhost_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, vhost_);
     }
     if (!getOrganizationIdBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, organizationId_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(19, organizationId_);
     }
     if (!getApiProviderBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(19, apiProvider_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(20, apiProvider_);
     }
     if (enableBackendJWT_ != false) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(20, enableBackendJWT_);
+        .computeBoolSize(21, enableBackendJWT_);
     }
     if (!getDeploymentTypeBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, deploymentType_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(22, deploymentType_);
     }
     if (!getEnvironmentIdBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(22, environmentId_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, environmentId_);
     }
     if (!getEnvironmentNameBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, environmentName_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(24, environmentName_);
     }
     if (backendJWTConfiguration_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(24, getBackendJWTConfiguration());
+        .computeMessageSize(25, getBackendJWTConfiguration());
     }
     if (choreoComponentInfo_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(25, getChoreoComponentInfo());
+        .computeMessageSize(26, getChoreoComponentInfo());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -1383,6 +1434,8 @@ private static final long serialVersionUID = 0L;
     }
     if (!getAuthorizationHeader()
         .equals(other.getAuthorizationHeader())) return false;
+    if (!getApiKeyHeader()
+        .equals(other.getApiKeyHeader())) return false;
     if (getDisableSecurity()
         != other.getDisableSecurity()) return false;
     if (!getVhost()
@@ -1462,6 +1515,8 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + AUTHORIZATIONHEADER_FIELD_NUMBER;
     hash = (53 * hash) + getAuthorizationHeader().hashCode();
+    hash = (37 * hash) + APIKEYHEADER_FIELD_NUMBER;
+    hash = (53 * hash) + getApiKeyHeader().hashCode();
     hash = (37 * hash) + DISABLESECURITY_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getDisableSecurity());
@@ -1682,6 +1737,8 @@ private static final long serialVersionUID = 0L;
       }
       authorizationHeader_ = "";
 
+      apiKeyHeader_ = "";
+
       disableSecurity_ = false;
 
       vhost_ = "";
@@ -1788,6 +1845,7 @@ private static final long serialVersionUID = 0L;
         result.endpointSecurity_ = endpointSecurityBuilder_.build();
       }
       result.authorizationHeader_ = authorizationHeader_;
+      result.apiKeyHeader_ = apiKeyHeader_;
       result.disableSecurity_ = disableSecurity_;
       result.vhost_ = vhost_;
       result.organizationId_ = organizationId_;
@@ -1975,6 +2033,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getAuthorizationHeader().isEmpty()) {
         authorizationHeader_ = other.authorizationHeader_;
+        onChanged();
+      }
+      if (!other.getApiKeyHeader().isEmpty()) {
+        apiKeyHeader_ = other.apiKeyHeader_;
         onChanged();
       }
       if (other.getDisableSecurity() != false) {
@@ -3804,9 +3866,85 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private java.lang.Object apiKeyHeader_ = "";
+    /**
+     * <code>string apiKeyHeader = 16;</code>
+     * @return The apiKeyHeader.
+     */
+    public java.lang.String getApiKeyHeader() {
+      java.lang.Object ref = apiKeyHeader_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        apiKeyHeader_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string apiKeyHeader = 16;</code>
+     * @return The bytes for apiKeyHeader.
+     */
+    public com.google.protobuf.ByteString
+        getApiKeyHeaderBytes() {
+      java.lang.Object ref = apiKeyHeader_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        apiKeyHeader_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string apiKeyHeader = 16;</code>
+     * @param value The apiKeyHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiKeyHeader(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      apiKeyHeader_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiKeyHeader = 16;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApiKeyHeader() {
+      
+      apiKeyHeader_ = getDefaultInstance().getApiKeyHeader();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiKeyHeader = 16;</code>
+     * @param value The bytes for apiKeyHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiKeyHeaderBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      apiKeyHeader_ = value;
+      onChanged();
+      return this;
+    }
+
     private boolean disableSecurity_ ;
     /**
-     * <code>bool disableSecurity = 16;</code>
+     * <code>bool disableSecurity = 17;</code>
      * @return The disableSecurity.
      */
     @java.lang.Override
@@ -3814,7 +3952,7 @@ private static final long serialVersionUID = 0L;
       return disableSecurity_;
     }
     /**
-     * <code>bool disableSecurity = 16;</code>
+     * <code>bool disableSecurity = 17;</code>
      * @param value The disableSecurity to set.
      * @return This builder for chaining.
      */
@@ -3825,7 +3963,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>bool disableSecurity = 16;</code>
+     * <code>bool disableSecurity = 17;</code>
      * @return This builder for chaining.
      */
     public Builder clearDisableSecurity() {
@@ -3837,7 +3975,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object vhost_ = "";
     /**
-     * <code>string vhost = 17;</code>
+     * <code>string vhost = 18;</code>
      * @return The vhost.
      */
     public java.lang.String getVhost() {
@@ -3853,7 +3991,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string vhost = 17;</code>
+     * <code>string vhost = 18;</code>
      * @return The bytes for vhost.
      */
     public com.google.protobuf.ByteString
@@ -3870,7 +4008,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string vhost = 17;</code>
+     * <code>string vhost = 18;</code>
      * @param value The vhost to set.
      * @return This builder for chaining.
      */
@@ -3885,7 +4023,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string vhost = 17;</code>
+     * <code>string vhost = 18;</code>
      * @return This builder for chaining.
      */
     public Builder clearVhost() {
@@ -3895,7 +4033,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string vhost = 17;</code>
+     * <code>string vhost = 18;</code>
      * @param value The bytes for vhost to set.
      * @return This builder for chaining.
      */
@@ -3913,7 +4051,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object organizationId_ = "";
     /**
-     * <code>string organizationId = 18;</code>
+     * <code>string organizationId = 19;</code>
      * @return The organizationId.
      */
     public java.lang.String getOrganizationId() {
@@ -3929,7 +4067,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string organizationId = 18;</code>
+     * <code>string organizationId = 19;</code>
      * @return The bytes for organizationId.
      */
     public com.google.protobuf.ByteString
@@ -3946,7 +4084,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string organizationId = 18;</code>
+     * <code>string organizationId = 19;</code>
      * @param value The organizationId to set.
      * @return This builder for chaining.
      */
@@ -3961,7 +4099,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string organizationId = 18;</code>
+     * <code>string organizationId = 19;</code>
      * @return This builder for chaining.
      */
     public Builder clearOrganizationId() {
@@ -3971,7 +4109,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string organizationId = 18;</code>
+     * <code>string organizationId = 19;</code>
      * @param value The bytes for organizationId to set.
      * @return This builder for chaining.
      */
@@ -3989,7 +4127,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object apiProvider_ = "";
     /**
-     * <code>string apiProvider = 19;</code>
+     * <code>string apiProvider = 20;</code>
      * @return The apiProvider.
      */
     public java.lang.String getApiProvider() {
@@ -4005,7 +4143,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string apiProvider = 19;</code>
+     * <code>string apiProvider = 20;</code>
      * @return The bytes for apiProvider.
      */
     public com.google.protobuf.ByteString
@@ -4022,7 +4160,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string apiProvider = 19;</code>
+     * <code>string apiProvider = 20;</code>
      * @param value The apiProvider to set.
      * @return This builder for chaining.
      */
@@ -4037,7 +4175,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string apiProvider = 19;</code>
+     * <code>string apiProvider = 20;</code>
      * @return This builder for chaining.
      */
     public Builder clearApiProvider() {
@@ -4047,7 +4185,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string apiProvider = 19;</code>
+     * <code>string apiProvider = 20;</code>
      * @param value The bytes for apiProvider to set.
      * @return This builder for chaining.
      */
@@ -4065,7 +4203,7 @@ private static final long serialVersionUID = 0L;
 
     private boolean enableBackendJWT_ ;
     /**
-     * <code>bool enableBackendJWT = 20;</code>
+     * <code>bool enableBackendJWT = 21;</code>
      * @return The enableBackendJWT.
      */
     @java.lang.Override
@@ -4073,7 +4211,7 @@ private static final long serialVersionUID = 0L;
       return enableBackendJWT_;
     }
     /**
-     * <code>bool enableBackendJWT = 20;</code>
+     * <code>bool enableBackendJWT = 21;</code>
      * @param value The enableBackendJWT to set.
      * @return This builder for chaining.
      */
@@ -4084,7 +4222,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>bool enableBackendJWT = 20;</code>
+     * <code>bool enableBackendJWT = 21;</code>
      * @return This builder for chaining.
      */
     public Builder clearEnableBackendJWT() {
@@ -4096,7 +4234,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object deploymentType_ = "";
     /**
-     * <code>string deploymentType = 21;</code>
+     * <code>string deploymentType = 22;</code>
      * @return The deploymentType.
      */
     public java.lang.String getDeploymentType() {
@@ -4112,7 +4250,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string deploymentType = 21;</code>
+     * <code>string deploymentType = 22;</code>
      * @return The bytes for deploymentType.
      */
     public com.google.protobuf.ByteString
@@ -4129,7 +4267,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string deploymentType = 21;</code>
+     * <code>string deploymentType = 22;</code>
      * @param value The deploymentType to set.
      * @return This builder for chaining.
      */
@@ -4144,7 +4282,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string deploymentType = 21;</code>
+     * <code>string deploymentType = 22;</code>
      * @return This builder for chaining.
      */
     public Builder clearDeploymentType() {
@@ -4154,7 +4292,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string deploymentType = 21;</code>
+     * <code>string deploymentType = 22;</code>
      * @param value The bytes for deploymentType to set.
      * @return This builder for chaining.
      */
@@ -4172,7 +4310,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object environmentId_ = "";
     /**
-     * <code>string environmentId = 22;</code>
+     * <code>string environmentId = 23;</code>
      * @return The environmentId.
      */
     public java.lang.String getEnvironmentId() {
@@ -4188,7 +4326,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string environmentId = 22;</code>
+     * <code>string environmentId = 23;</code>
      * @return The bytes for environmentId.
      */
     public com.google.protobuf.ByteString
@@ -4205,7 +4343,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string environmentId = 22;</code>
+     * <code>string environmentId = 23;</code>
      * @param value The environmentId to set.
      * @return This builder for chaining.
      */
@@ -4220,7 +4358,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string environmentId = 22;</code>
+     * <code>string environmentId = 23;</code>
      * @return This builder for chaining.
      */
     public Builder clearEnvironmentId() {
@@ -4230,7 +4368,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string environmentId = 22;</code>
+     * <code>string environmentId = 23;</code>
      * @param value The bytes for environmentId to set.
      * @return This builder for chaining.
      */
@@ -4248,7 +4386,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object environmentName_ = "";
     /**
-     * <code>string environmentName = 23;</code>
+     * <code>string environmentName = 24;</code>
      * @return The environmentName.
      */
     public java.lang.String getEnvironmentName() {
@@ -4264,7 +4402,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string environmentName = 23;</code>
+     * <code>string environmentName = 24;</code>
      * @return The bytes for environmentName.
      */
     public com.google.protobuf.ByteString
@@ -4281,7 +4419,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string environmentName = 23;</code>
+     * <code>string environmentName = 24;</code>
      * @param value The environmentName to set.
      * @return This builder for chaining.
      */
@@ -4296,7 +4434,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string environmentName = 23;</code>
+     * <code>string environmentName = 24;</code>
      * @return This builder for chaining.
      */
     public Builder clearEnvironmentName() {
@@ -4306,7 +4444,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string environmentName = 23;</code>
+     * <code>string environmentName = 24;</code>
      * @param value The bytes for environmentName to set.
      * @return This builder for chaining.
      */
@@ -4326,14 +4464,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration, org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder, org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder> backendJWTConfigurationBuilder_;
     /**
-     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
      * @return Whether the backendJWTConfiguration field is set.
      */
     public boolean hasBackendJWTConfiguration() {
       return backendJWTConfigurationBuilder_ != null || backendJWTConfiguration_ != null;
     }
     /**
-     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
      * @return The backendJWTConfiguration.
      */
     public org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration getBackendJWTConfiguration() {
@@ -4344,7 +4482,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
      */
     public Builder setBackendJWTConfiguration(org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration value) {
       if (backendJWTConfigurationBuilder_ == null) {
@@ -4360,7 +4498,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
      */
     public Builder setBackendJWTConfiguration(
         org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder builderForValue) {
@@ -4374,7 +4512,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
      */
     public Builder mergeBackendJWTConfiguration(org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration value) {
       if (backendJWTConfigurationBuilder_ == null) {
@@ -4392,7 +4530,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
      */
     public Builder clearBackendJWTConfiguration() {
       if (backendJWTConfigurationBuilder_ == null) {
@@ -4406,7 +4544,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
      */
     public org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder getBackendJWTConfigurationBuilder() {
       
@@ -4414,7 +4552,7 @@ private static final long serialVersionUID = 0L;
       return getBackendJWTConfigurationFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
      */
     public org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder getBackendJWTConfigurationOrBuilder() {
       if (backendJWTConfigurationBuilder_ != null) {
@@ -4425,7 +4563,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration, org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder, org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder> 
@@ -4445,14 +4583,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder> choreoComponentInfoBuilder_;
     /**
-     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
      * @return Whether the choreoComponentInfo field is set.
      */
     public boolean hasChoreoComponentInfo() {
       return choreoComponentInfoBuilder_ != null || choreoComponentInfo_ != null;
     }
     /**
-     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
      * @return The choreoComponentInfo.
      */
     public org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo getChoreoComponentInfo() {
@@ -4463,7 +4601,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
      */
     public Builder setChoreoComponentInfo(org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo value) {
       if (choreoComponentInfoBuilder_ == null) {
@@ -4479,7 +4617,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
      */
     public Builder setChoreoComponentInfo(
         org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder builderForValue) {
@@ -4493,7 +4631,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
      */
     public Builder mergeChoreoComponentInfo(org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo value) {
       if (choreoComponentInfoBuilder_ == null) {
@@ -4511,7 +4649,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
      */
     public Builder clearChoreoComponentInfo() {
       if (choreoComponentInfoBuilder_ == null) {
@@ -4525,7 +4663,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
      */
     public org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder getChoreoComponentInfoBuilder() {
       
@@ -4533,7 +4671,7 @@ private static final long serialVersionUID = 0L;
       return getChoreoComponentInfoFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
      */
     public org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder getChoreoComponentInfoOrBuilder() {
       if (choreoComponentInfoBuilder_ != null) {
@@ -4544,7 +4682,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder> 

@@ -335,6 +335,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
+		mgwSwagger.SetXWso2APIKeyHeader(apiYaml.APIKeyHeader)
 	}
 
 	if vHost == conf.Adapter.SandboxVhost {

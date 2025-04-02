@@ -153,8 +153,9 @@ public class WebSocketAPI implements API {
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
                 .apiSecurity(securityScopesMap).tier(api.getTier()).endpointSecurity(endpointSecurity)
-                .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).endpoints(endpoints).apiProvider(api.getApiProvider())
+                .authHeader(api.getAuthorizationHeader()).apiKeyHeader(api.getApiKeyHeader())
+                .disableSecurity(api.getDisableSecurity()).organizationId(api.getOrganizationId())
+                .endpoints(endpoints).apiProvider(api.getApiProvider())
                 .securitySchemeDefinitions(securitySchemeDefinitions).enableBackendJWT(api.getEnableBackendJWT())
                 .backendJWTConfiguration(backendJWTConfiguration).deploymentType(api.getDeploymentType())
                 .environmentId(api.getEnvironmentId()).environmentName(api.getEnvironmentName()).build();
