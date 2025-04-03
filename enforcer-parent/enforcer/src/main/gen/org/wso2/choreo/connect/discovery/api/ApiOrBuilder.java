@@ -233,128 +233,128 @@ public interface ApiOrBuilder extends
       getAuthorizationHeaderBytes();
 
   /**
-   * <code>string apiKeyHeader = 16;</code>
-   * @return The apiKeyHeader.
-   */
-  java.lang.String getApiKeyHeader();
-  /**
-   * <code>string apiKeyHeader = 16;</code>
-   * @return The bytes for apiKeyHeader.
-   */
-  com.google.protobuf.ByteString
-      getApiKeyHeaderBytes();
-
-  /**
-   * <code>bool disableSecurity = 17;</code>
+   * <code>bool disableSecurity = 16;</code>
    * @return The disableSecurity.
    */
   boolean getDisableSecurity();
 
   /**
-   * <code>string vhost = 18;</code>
+   * <code>string vhost = 17;</code>
    * @return The vhost.
    */
   java.lang.String getVhost();
   /**
-   * <code>string vhost = 18;</code>
+   * <code>string vhost = 17;</code>
    * @return The bytes for vhost.
    */
   com.google.protobuf.ByteString
       getVhostBytes();
 
   /**
-   * <code>string organizationId = 19;</code>
+   * <code>string organizationId = 18;</code>
    * @return The organizationId.
    */
   java.lang.String getOrganizationId();
   /**
-   * <code>string organizationId = 19;</code>
+   * <code>string organizationId = 18;</code>
    * @return The bytes for organizationId.
    */
   com.google.protobuf.ByteString
       getOrganizationIdBytes();
 
   /**
-   * <code>string apiProvider = 20;</code>
+   * <code>string apiProvider = 19;</code>
    * @return The apiProvider.
    */
   java.lang.String getApiProvider();
   /**
-   * <code>string apiProvider = 20;</code>
+   * <code>string apiProvider = 19;</code>
    * @return The bytes for apiProvider.
    */
   com.google.protobuf.ByteString
       getApiProviderBytes();
 
   /**
-   * <code>bool enableBackendJWT = 21;</code>
+   * <code>bool enableBackendJWT = 20;</code>
    * @return The enableBackendJWT.
    */
   boolean getEnableBackendJWT();
 
   /**
-   * <code>string deploymentType = 22;</code>
+   * <code>string deploymentType = 21;</code>
    * @return The deploymentType.
    */
   java.lang.String getDeploymentType();
   /**
-   * <code>string deploymentType = 22;</code>
+   * <code>string deploymentType = 21;</code>
    * @return The bytes for deploymentType.
    */
   com.google.protobuf.ByteString
       getDeploymentTypeBytes();
 
   /**
-   * <code>string environmentId = 23;</code>
+   * <code>string environmentId = 22;</code>
    * @return The environmentId.
    */
   java.lang.String getEnvironmentId();
   /**
-   * <code>string environmentId = 23;</code>
+   * <code>string environmentId = 22;</code>
    * @return The bytes for environmentId.
    */
   com.google.protobuf.ByteString
       getEnvironmentIdBytes();
 
   /**
-   * <code>string environmentName = 24;</code>
+   * <code>string environmentName = 23;</code>
    * @return The environmentName.
    */
   java.lang.String getEnvironmentName();
   /**
-   * <code>string environmentName = 24;</code>
+   * <code>string environmentName = 23;</code>
    * @return The bytes for environmentName.
    */
   com.google.protobuf.ByteString
       getEnvironmentNameBytes();
 
   /**
-   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
    * @return Whether the backendJWTConfiguration field is set.
    */
   boolean hasBackendJWTConfiguration();
   /**
-   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
    * @return The backendJWTConfiguration.
    */
   org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration getBackendJWTConfiguration();
   /**
-   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 25;</code>
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
    */
   org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder getBackendJWTConfigurationOrBuilder();
 
   /**
-   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
    * @return Whether the choreoComponentInfo field is set.
    */
   boolean hasChoreoComponentInfo();
   /**
-   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
    * @return The choreoComponentInfo.
    */
   org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo getChoreoComponentInfo();
   /**
-   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 26;</code>
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
    */
   org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder getChoreoComponentInfoOrBuilder();
+
+  /**
+   * <code>string apiKeyHeader = 26;</code>
+   * @return The apiKeyHeader.
+   */
+  java.lang.String getApiKeyHeader();
+  /**
+   * <code>string apiKeyHeader = 26;</code>
+   * @return The bytes for apiKeyHeader.
+   */
+  com.google.protobuf.ByteString
+      getApiKeyHeaderBytes();
 }

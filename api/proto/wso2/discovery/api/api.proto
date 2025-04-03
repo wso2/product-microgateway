@@ -49,15 +49,15 @@ message Api {
 	repeated SecurityList security = 13;
 	EndpointSecurity endpointSecurity = 14;
 	string authorizationHeader = 15;
-	string apiKeyHeader = 16;
-	bool disableSecurity = 17;
-	string vhost = 18;
-	string organizationId = 19;
-	string apiProvider = 20;
-	bool enableBackendJWT = 21;
-	string deploymentType = 22;
-	string environmentId = 23;
-	string environmentName = 24;
-	BackendJWTConfiguration backendJWTConfiguration = 25;
-	ChoreoComponentInfo choreoComponentInfo = 26;
+	bool disableSecurity = 16;
+	string vhost = 17;
+	string organizationId = 18;
+	string apiProvider = 19;
+	bool enableBackendJWT = 20;
+	string deploymentType = 21;
+	string environmentId = 22;
+	string environmentName = 23;
+	BackendJWTConfiguration backendJWTConfiguration = 24;
+	ChoreoComponentInfo choreoComponentInfo = 25;
+	string apiKeyHeader = 26;
 }
