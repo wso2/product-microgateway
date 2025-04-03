@@ -30,16 +30,16 @@ import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * API Key authenticator.
@@ -97,13 +97,15 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
     private List<String> getAPIKeyInternalHeaders(RequestContext requestContext) {
         APIConfig apiConfig = requestContext.getMatchedAPI();
         String configuredApiKeyHeader = apiConfig.getApiKeyHeader();
-        List<String> apiKeyInternalHeaders
-                = ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeaders();
+        List<String> apiKeyInternalHeaders = new ArrayList<>();
         if (StringUtils.isNotEmpty(configuredApiKeyHeader)) {
-            return Stream.concat(apiKeyInternalHeaders.stream(), Stream.of(configuredApiKeyHeader))
-                    .distinct()
-                    .collect(Collectors.toList());
+            apiKeyInternalHeaders.add(configuredApiKeyHeader);
+        } else {
+            apiKeyInternalHeaders.add(Constants.DEFAULT_API_KEY_HEADER);
         }
+        apiKeyInternalHeaders.addAll(
+                ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeaders()
+        );
         return apiKeyInternalHeaders;
     }
 
