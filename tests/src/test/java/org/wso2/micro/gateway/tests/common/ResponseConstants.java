@@ -71,9 +71,10 @@ public class ResponseConstants {
             + ":content-type:Host:Pragma::/petstore/v1/user?test=value1&test2=value2:POST:1.1:"
             + "{test2=value2, test=value1}:value1:<test><msg>hello</msg></test>";
     public static final String VALIDATION_RESPONSE = "{\"fault\":{\"code\":400, \"message\":\"Bad Request\", " +
-            "\"description\":\"#: required key [name] not found, #: required key [photoUrls] not found, \"}}";
+            "\"description\":\"Object has missing required properties ([\\\"name\\\",\\\"photoUrls\\\"])\"}}";
     public static final String  INVALID_RESPONSE = "{\"fault\":{\"code\":500, \"message\":\"Bad Response\", " +
-            "\"description\":\"#/status: hello is not a valid enum value, \"}}";
+            "\"description\":\"[Path '\\/status'] Instance value (\\\"hello\\\") not found in enum " +
+            "(possible values: [\\\"available\\\",\\\"pending\\\",\\\"sold\\\"])\"}}";
 
     public static final String INTERCEPT_JSON_RESPONSE = "\"{\"city\":\"chicago\",\"name\":\"jon doe\",\"age\":\"22\"}\"";
     public static final String ERROR_RESPONSE = "error:true";
