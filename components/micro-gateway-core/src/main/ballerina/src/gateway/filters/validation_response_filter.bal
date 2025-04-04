@@ -57,7 +57,7 @@ function doValidationFilterResponse(@tainted http:Response response, http:Filter
 
     //todo: Accept only the content types which are mentioned in the openAPI definition
     //If the content-type is not application/json, validation fiter is not applied.
-    if (!stringutils:equalsIgnoreCase(response.getContentType(), APPLICATION_JSON)) {
+    if (!stringutils:contains(response.getContentType().toLowerAscii(), APPLICATION_JSON)) {
         printDebug(KEY_VALIDATION_FILTER, "Validation Filter is not applied as the response content type is : " + 
             response.getContentType());
         return true;
@@ -70,7 +70,15 @@ function doValidationFilterResponse(@tainted http:Response response, http:Filter
         resPayload = payload.toJsonString();
     }
     string servName = filterContext.getServiceName();
-    var valResult = responseValidate(reqestPath, requestMethod, responseCode, resPayload, servName);
+    //getting the headers of the response
+    string[] headerNames = response.getHeaderNames();
+    map<string> headers = {};
+    foreach var header in headerNames {
+        string headerValue = response.getHeader(<@untained> header);
+        headers[header] = headerValue;
+    }
+
+    var valResult = responseValidate(reqestPath, requestMethod, responseCode, resPayload, headers, servName);
     if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
         return true;
     } else {

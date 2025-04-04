@@ -16,497 +16,222 @@
 
 package org.wso2.micro.gateway.core.validation;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.google.common.collect.Lists;
-import com.jayway.jsonpath.JsonPath;
-import org.apache.commons.lang3.StringUtils;
+import com.atlassian.oai.validator.OpenApiInteractionValidator;
+import com.atlassian.oai.validator.model.Headers;
+import com.atlassian.oai.validator.report.LevelResolver;
+import com.atlassian.oai.validator.report.ValidationReport;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.Multimap;
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.ballerinalang.jvm.values.ArrayValue;
+import org.ballerinalang.jvm.values.MapValue;
 import org.wso2.micro.gateway.core.Constants;
 import org.wso2.micro.gateway.core.utils.CommonUtils;
 
-import java.io.IOException;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import javax.validation.constraints.NotNull;
 
 /**
  * This class is for validating request/response payload against schema.
  */
 public class Validate {
+    public static final String REG_TIME_MODULE = "register.timeModule";
     private static final Logger logger = LogManager.getLogger(Validate.class);
-    private static JsonNode rootNode;
-    private static String swaggerObject;
 
     /**
-     * Validate request message.
+     * Method to validate request message
      *
      * @param requestPath API request resource path
      * @param reqMethod   API request method
      * @param payload     Request payload
+     * @param headers     Transport headers
+     * @param queryParams Query parameters
      * @return Status of the validation
      */
-    public static String validateRequest(String requestPath, String reqMethod, String payload, String serviceName)
-            throws IOException {
+    public static String validateRequest(String requestPath, String reqMethod, String payload,
+                                         MapValue<String, String> headers, MapValue<String, ArrayValue> queryParams,
+                                         String serviceName) {
         String swagger = CommonUtils.getOpenAPIMap().get(serviceName);
-        if ("get".equals(reqMethod) || "GET".equals(reqMethod)) {
-            return Constants.VALIDATED_STATUS;
+        OpenAPIParser parser = new OpenAPIParser();
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        parseOptions.setResolveCombinators(false);
+        OpenAPI openAPI = parser.readContents(swagger, null, parseOptions).getOpenAPI();
+        convertHeadersToLowercase(openAPI);
+        boolean timeModuleRegisterEnabled = Boolean.parseBoolean(System.getProperty(REG_TIME_MODULE, "false"));
+        if (timeModuleRegisterEnabled) {
+            Json.mapper().registerModule(new JavaTimeModule());
         }
-        String schema = extractSchemaFromRequest(requestPath, reqMethod, swagger);
-        if (schema != null && !Constants.EMPTY_ARRAY.equals(schema)) {
-            return validateContent(payload, schema);
-        } else  {
-            return Constants.VALIDATED_STATUS;
-        }
-    }
-
-    /***
-     * Validate response message.
-     * @param resourcePath request resource path
-     * @param reqMethod request method
-     * @param responseCode response message code
-     * @param response response payload
-     * @return Status of the validation result
-     */
-    public static String validateResponse(String resourcePath, String reqMethod, String responseCode, String response,
-                                          String serviceName) {
-        String swagger = CommonUtils.getOpenAPIMap().get(serviceName);
-        String responseSchema = extractResponse(resourcePath, reqMethod, responseCode, swagger);
-        if (responseSchema != null && !Constants.EMPTY_ARRAY.equals(responseSchema)) {
-            return validateContent(response, responseSchema);
-        } else {
-            return Constants.VALIDATED_STATUS;
-        }
-    }
-
-
-
-    private static String extractSchemaFromRequest(String resourcePath, String requestMethod, String swagger)
-            throws IOException {
-        String schema;
-        ObjectMapper objectMapper = new ObjectMapper();
-        rootNode = objectMapper.readTree(swagger.getBytes());
-        swaggerObject = swagger;
-        String value = JsonPath.read(swagger, Constants.JSON_PATH +
-                Constants.OPEN_API).toString();
-        if (value != null && !value.equals(Constants.EMPTY_ARRAY)) {
-            //refer schema
-            StringBuilder jsonPath = new StringBuilder();
-            jsonPath.append(Constants.PATHS)
-                    .append(resourcePath).append(Constants.JSONPATH_SEPARATE)
-                    .append(requestMethod.toLowerCase())
-                    .append(Constants.BODY_CONTENT);
-            schema = JsonPath.read(swagger, jsonPath.toString()).toString();
-            if (schema == null || Constants.EMPTY_ARRAY.equals(schema)) {
-                // refer request bodies
-                StringBuilder requestBodyPath = new StringBuilder();
-                requestBodyPath.append(Constants.PATHS).append(resourcePath).
-                        append(Constants.JSONPATH_SEPARATE).
-                        append(requestMethod.toLowerCase()).append(Constants.REQUEST_BODY);
-                schema = JsonPath.read(swagger, requestBodyPath.toString()).toString();
-            }
-        } else {
-            StringBuilder schemaPath = new StringBuilder();
-            schemaPath.append(Constants.PATHS).append(resourcePath).
-                    append(Constants.JSONPATH_SEPARATE)
-                    .append(requestMethod.toLowerCase()).append(Constants.PARAM_SCHEMA);
-            schema = JsonPath.read(swagger, schemaPath.toString()).toString();
-        }
-        return extractReference(schema);
-    }
-
-    /**
-     * Extract the reference.
-     *
-     * @param schemaNode Schema node to be extracted
-     * @return extracted schema
-     */
-    private static String extractReference(String schemaNode) {
-        String schemaContent = null;
-        String[] val = schemaNode.split("" + Constants.HASH);
-        if (val.length ==  1) {
-            JSONArray jsonArray = new JSONArray(val[0]);
-            return jsonArray.getJSONObject(0).toString();
-        }
-        String path = val[1].replaceAll("\"|}|]|\\\\", "");
-        String searchLastIndex = null;
-        if (StringUtils.isNotEmpty(path)) {
-            int index = path.lastIndexOf(Constants.FORWARD_SLASH);
-            searchLastIndex = path.substring(index + 1);
-        }
-
-        String nodeVal = path.replaceAll("" + Constants.FORWARD_SLASH, ".");
-        String name = null;
-        Object object = JsonPath.read(swaggerObject, Constants.JSON_PATH + nodeVal);
-        String value;
-        ObjectMapper mapper = new ObjectMapper();
-
-        JsonNode jsonSchema = mapper.convertValue(object, JsonNode.class);
-        if (jsonSchema.get(0) != null) {
-            value = jsonSchema.get(0).toString();
-        } else {
-            value = jsonSchema.toString();
-        }
-        if (value.contains(Constants.SCHEMA_REFERENCE) &&
-                !nodeVal.contains(Constants.DEFINITIONS)) {
-            if (nodeVal.contains(Constants.REQUESTBODIES)) {
-                StringBuilder extractRefPath = new StringBuilder();
-                extractRefPath.append(Constants.JSON_PATH).append(Constants.REQUESTBODY_SCHEMA).
-                        append(searchLastIndex).append(Constants.JSON_SCHEMA);
-                String res = JsonPath.read(swaggerObject, extractRefPath.toString()).toString();
-                if (res.contains(Constants.ITEMS)) {
-                    StringBuilder requestSchemaPath = new StringBuilder();
-                    requestSchemaPath.append(Constants.JSON_PATH).
-                            append(Constants.REQUESTBODY_SCHEMA).append(
-                            searchLastIndex).append(Constants.JSON_SCHEMA).
-                            append(Constants.JSONPATH_SEPARATE).append(Constants.ITEMS).
-                            append(Constants.JSONPATH_SEPARATE).append(Constants.SCHEMA_REFERENCE);
-                    name = JsonPath.read(swaggerObject, requestSchemaPath.toString()).toString();
-                    extractReference(name);
-                } else {
-                    StringBuilder jsonSchemaRef = new StringBuilder();
-                    jsonSchemaRef.append(Constants.JSON_PATH).append(
-                            Constants.REQUESTBODY_SCHEMA).append(searchLastIndex).append(
-                            Constants.CONTENT).append(Constants.JSON_CONTENT);
-                    name = JsonPath.read(swaggerObject, jsonSchemaRef.toString()).toString();
-                    if (name.contains(Constants.COMPONENT_SCHEMA)) {
-                        Object componentSchema = JsonPath.read(swaggerObject,
-                                Constants.JSONPATH_SCHEMAS + searchLastIndex);
-                        mapper = new ObjectMapper();
-                        JsonNode jsonNode = mapper.convertValue(componentSchema, JsonNode.class);
-                        generateSchema(jsonNode);
-                        if (jsonNode.get(0) != null) {
-                            name = jsonNode.get(0).toString();
-                        } else {
-                            name = jsonNode.toString();
-                        }
-                        schemaContent = name;
-                    } else {
-                        extractReference(name);
-                    }
+        if (openAPI != null) {
+            OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
+            Multimap<String, String> headersMap = SchemaValidationUtils.convertToMultimap(headers);
+            Map<String, Collection<String>> queryParamsMap = SchemaValidationUtils
+                    .convertMapofArrayValuesToMap(queryParams);
+            OpenAPIRequest request = new OpenAPIRequest(requestPath, reqMethod, payload, headersMap, queryParamsMap,
+                    swagger);
+            ValidationReport validationReport = validator.validateRequest(request);
+            if (validationReport.hasErrors()) {
+                StringBuilder finalMessage = new StringBuilder();
+                for (ValidationReport.Message message : validationReport.getMessages()) {
+                    finalMessage.append(getErrorMessage(message)).append(", ");
                 }
-            } else if (nodeVal.contains(Constants.SCHEMA)) {
-                Object componentSchema = JsonPath.read(swaggerObject,
-                        Constants.JSONPATH_SCHEMAS + searchLastIndex);
-                mapper = new ObjectMapper();
-                JsonNode jsonNode = mapper.convertValue(componentSchema, JsonNode.class);
-                generateSchema(jsonNode);
-                if (jsonNode.get(0) != null) {
-                    name = jsonNode.get(0).toString();
-                } else {
-                    name = jsonNode.toString();
+                // Remove the last comma and space, if present
+                if (finalMessage.length() > 0) {
+                    finalMessage.setLength(finalMessage.length() - 2);
                 }
-                schemaContent = name;
-            }
-        } else if (nodeVal.contains(Constants.DEFINITIONS)) {
-            StringBuilder requestSchemaPath = new StringBuilder();
-            requestSchemaPath.append(Constants.JSON_PATH).
-                    append(Constants.DEFINITIONS).append(Constants.JSONPATH_SEPARATE
-            ).append(searchLastIndex);
-            Object nameObj = JsonPath.read(swaggerObject, requestSchemaPath.toString());
-            mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.convertValue(nameObj, JsonNode.class);
-            generateSchema(jsonNode);
-            if (jsonNode.get(0) != null) {
-                name = jsonNode.get(0).toString();
-            } else {
-                name = jsonNode.toString();
-            }
-            schemaContent = name;
-        } else {
-            schemaContent = value;
-            return schemaContent;
-        }
-        return schemaContent;
-    }
-
-    /**
-     * Replace $ref references with relevant schemas and recreate the swagger definition.
-     *
-     * @param parent Swagger definition parent Node
-     */
-    private static void generateSchema(JsonNode parent) {
-        JsonNode schemaProperty;
-        Iterator<Map.Entry<String, JsonNode>> schemaNode;
-        if (parent.get(0) != null) {
-            schemaNode = parent.get(0).fields();
-        } else {
-            schemaNode = parent.fields();
-        }
-        while (schemaNode.hasNext()) {
-            Map.Entry<String, JsonNode> entry = schemaNode.next();
-            if (entry.getValue().has(Constants.SCHEMA_REFERENCE)) {
-                JsonNode refNode = entry.getValue();
-                Iterator<Map.Entry<String, JsonNode>> refItems = refNode.fields();
-                while (refItems.hasNext()) {
-                    Map.Entry<String, JsonNode> entryRef = refItems.next();
-                    if (entryRef.getKey().equals(Constants.SCHEMA_REFERENCE)) {
-                        JsonNode schemaObject = extractSchemaObject(entryRef.getValue());
-                        if (schemaObject != null) {
-                            entry.setValue(schemaObject);
-                        }
-                    }
-                }
-            }
-            schemaProperty = entry.getValue();
-            if (JsonNodeType.OBJECT == schemaProperty.getNodeType()) {
-                generateSchema(schemaProperty);
-            }
-            if (JsonNodeType.ARRAY == schemaProperty.getNodeType()) {
-                generateArraySchemas(entry);
-            }
-        }
-    }
-
-    /**
-     * Extract the schema Object.
-     *
-     * @param refNode JSON node to be extracted
-     * @return Extracted schema
-     */
-    private static JsonNode extractSchemaObject(JsonNode refNode) {
-        String[] val = refNode.toString().split("" + Constants.HASH);
-        String path = val[1].replace("\\{^\"|\"}", Constants.EMPTY).replace
-                ("\"", Constants.EMPTY).replace("}", Constants.EMPTY)
-                .replaceAll(Constants.BACKWARD_SLASH, Constants.EMPTY);
-        return rootNode.at(path);
-    }
-
-    /**
-     * Replace $ref array elements.
-     *
-     * @param entry Array reference to be replaced from actual value.
-     */
-    private static void generateArraySchemas(Map.Entry<String, JsonNode> entry) {
-        JsonNode entryRef;
-        JsonNode ref;
-        JsonNode schemaProperty;
-        if (entry.getValue() != null) {
-            schemaProperty = entry.getValue();
-            if (schemaProperty == null) {
-                return;
-            }
-            Iterator<JsonNode> arrayElements = schemaProperty.elements();
-            List<JsonNode> nodeList = Lists.newArrayList(arrayElements);
-            for (int i = 0; i < nodeList.size(); i++) {
-                entryRef = nodeList.get(i);
-                if (entryRef.has(Constants.SCHEMA_REFERENCE)) {
-                    ref = extractSchemaObject(entryRef);
-                    nodeList.remove(i);
-                    nodeList.add(ref);
-                }
-            }
-            ObjectMapper mapper = new ObjectMapper();
-            ArrayNode array = mapper.valueToTree(nodeList);
-            entry.setValue(array);
-        }
-    }
-
-    /**
-     * Validate the Request/response content.
-     *
-     * @param payload      Request/response payload
-     * @param schemaString Schema which uses to validate request/response messages
-     * @return Returns "validated" or everit error logs
-     */
-    private static String validateContent(String payload, String schemaString) {
-
-        StringBuilder finalMessage = new StringBuilder();
-        List<String> errorMessages;
-        JSONObject jsonSchema = new JSONObject(schemaString);
-        JSONObject payloadObject = null;
-
-        //if payload is not a valid json string
-        try {
-            payloadObject = new JSONObject(payload);
-        } catch (JSONException e) {
-            try {
-                new JSONArray(payload);
-                logger.warn("Request/Response validation is not applied for JSON Arrays. payload : " + payload);
-                return Constants.VALIDATED_STATUS;
-            } catch (JSONException e1) {
-                finalMessage.append("Provided payload is not a valid json. " + e.getMessage());
                 return finalMessage.toString();
             }
         }
+        return Constants.VALIDATED_STATUS;
+    }
 
-        Schema schema = SchemaLoader.load(jsonSchema);
-        if (schema == null) {
-            return null;
+    /**
+     * Method to validate response message
+     *
+     * @param resourcePath  Request resource path
+     * @param reqMethod     Request method
+     * @param responseCode  Response code
+     * @param responseBody  Response payload
+     * @param headers       Transport headers
+     * @param serviceName   Service name
+     * @return Status of the validation result
+     */
+    public static String validateResponse(String resourcePath, String reqMethod, String responseCode,
+                                          String responseBody, MapValue<String, String> headers, String serviceName) {
+        String swagger = CommonUtils.getOpenAPIMap().get(serviceName);
+        OpenAPIParser parser = new OpenAPIParser();
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        parseOptions.setResolveCombinators(false);
+        OpenAPI openAPI = parser.readContents(swagger, null, parseOptions).getOpenAPI();
+        convertHeadersToLowercase(openAPI);
+        boolean timeModuleRegisterEnabled = Boolean.parseBoolean(System.getProperty(REG_TIME_MODULE, "false"));
+        if (timeModuleRegisterEnabled) {
+            Json.mapper().registerModule(new JavaTimeModule());
         }
-        try {
-            schema.validate(payloadObject);
-            return Constants.VALIDATED_STATUS;
-        } catch (ValidationException e) {
-            errorMessages = e.getAllMessages();
-            for (String message : errorMessages) {
-                finalMessage.append(message).append(", ");
+        if (openAPI != null) {
+            OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
+            Multimap<String, String> headersMap = SchemaValidationUtils.convertToMultimap(headers);
+            OpenAPIResponse response = new OpenAPIResponse(resourcePath, reqMethod, responseCode, responseBody,
+                    headersMap);
+            ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
+                    response);
+            if (validationReport.hasErrors()) {
+                StringBuilder finalMessage = new StringBuilder();
+                for (ValidationReport.Message message : validationReport.getMessages()) {
+                    finalMessage.append(getErrorMessage(message)).append(", ");
+                }
+                // Remove the last comma and space, if present
+                if (finalMessage.length() > 0) {
+                    finalMessage.setLength(finalMessage.length() - 2);
+                }
+                return finalMessage.toString();
             }
-            return finalMessage.toString();
+        }
+        return Constants.VALIDATED_STATUS;
+    }
+
+    /**
+     * Method to generate OpenApiInteractionValidator when the openAPI is provided.
+     *
+     * @param openAPI openAPI
+     * @return OpenApiInteractionValidator object for the provided swagger.
+     */
+    private static OpenApiInteractionValidator getOpenAPIValidator(OpenAPI openAPI) {
+        return OpenApiInteractionValidator
+                .createFor(openAPI)
+                .withLevelResolver(
+                        LevelResolver.create()
+                                .withLevel("validation.schema.required", ValidationReport.Level.INFO)
+                                .withLevel("validation.response.body.missing", ValidationReport.Level.INFO)
+                                .withLevel("validation.schema.additionalProperties", ValidationReport.Level.IGNORE)
+                                .build())
+                .build();
+    }
+
+    /**
+     * Method to iterate through openAPI paths and convert header parameter names to lowercase for each operation
+     *
+     * @param openAPI openAPI object
+     */
+    private static void convertHeadersToLowercase(OpenAPI openAPI) {
+        // Iterate each path
+        for (Map.Entry<String, PathItem> entry : openAPI.getPaths().entrySet()) {
+            // Iterate each operation
+            PathItem pathItem = entry.getValue();
+            if (pathItem != null) {
+                List<Operation> operations = pathItem.readOperations();
+                for (Operation operation : operations) {
+                    if (operation.getParameters() != null) {
+                        operation.setParameters(getLowercaseHeaderParameters(operation.getParameters()));
+                    }
+                }
+            }
         }
     }
 
     /**
-     * Extract the response schema from swagger according to the response code.
+     * Method to read the parameter list and convert header parameter's name to lowercase
      *
-     * @return response schema
+     * @param parameters list of params
+     * @return list of params with lower case header names
      */
-    private static String extractResponse(String reqPath, String reqMethod, String responseCode, String swagger) {
-        Object resourceSchema;
-        Object resource;
-        Object content = null;
-        Object schemaCon = null;
-        ObjectMapper mapper = new ObjectMapper();
-        String name;
-        Object schema;
-        String value;
-
-        StringBuilder responseSchemaPath = new StringBuilder();
-        responseSchemaPath.append(Constants.PATHS).append(reqPath).
-                append(Constants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
-                append(Constants.JSON_RESPONSES).append(responseCode);
-        resource = JsonPath.read(swagger, responseSchemaPath.toString());
-        swaggerObject = swagger;
-        try {
-            rootNode = mapper.readTree(swagger.getBytes());
-        } catch (IOException e) {
-            logger.error("Error occurred while reading the swagger.", e);
-        }
-        if (resource != null) {
-            responseSchemaPath.append(Constants.CONTENT);
-            content = JsonPath.read(swagger, responseSchemaPath.toString());
-        }
-        if (content != null) {
-            responseSchemaPath.append(Constants.JSON_CONTENT);
-            schemaCon = JsonPath.read(swagger, responseSchemaPath.toString());
-        }
-        if (schemaCon != null) {
-            if (!schemaCon.toString().equals(Constants.EMPTY_ARRAY)) {
-                return extractReference(schemaCon.toString());
-            } else {
-                StringBuilder pathBuilder = new StringBuilder();
-                pathBuilder.append(Constants.PATHS).append(reqPath).
-                        append(Constants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
-                        append(Constants.JSON_RESPONSES).
-                        append(responseCode).append(Constants.JSON_SCHEMA);
-
-                schema = JsonPath.read(swagger, pathBuilder.toString()).toString();
-                JsonNode jsonNode = mapper.convertValue(schema, JsonNode.class);
-                if (jsonNode.get(0) != null) {
-                    value = jsonNode.get(0).toString();
-                } else {
-                    value = jsonNode.toString();
-                }
-                if (value.contains(Constants.ITEMS)) {
-                    StringBuilder requestSchemaPath = new StringBuilder();
-                    requestSchemaPath.append(Constants.PATHS).append(reqPath).
-                            append(Constants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
-                            append(Constants.JSON_RESPONSES).append(responseCode).
-                            append(Constants.JSON_SCHEMA).append(
-                            Constants.JSONPATH_SEPARATE).append(Constants.ITEMS);
-                    name = JsonPath.read(swagger, requestSchemaPath.toString()).toString();
-                    if (name.contains(Constants.SCHEMA_REFERENCE)) {
-                        requestSchemaPath.append(Constants.JSONPATH_SEPARATE).
-                                append(Constants.SCHEMA_REFERENCE);
-                        return extractReference(name);
-                    }
-                    return value;
-                }
-            }
-        }
-        StringBuilder resPath = new StringBuilder();
-        resPath.append(Constants.PATHS).append(reqPath).append(
-                Constants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
-                append(Constants.JSON_RESPONSES).append(responseCode).append
-                (Constants.SCHEMA);
-        resource = JsonPath.read(swagger, resPath.toString());
-        JsonNode json = mapper.convertValue(resource, JsonNode.class);
-        if (json.get(0) != null && !Constants.EMPTY_ARRAY.equals(json.get(0))) {
-            value = json.get(0).toString();
-        } else {
-            value = json.toString();
-        }
-        if (value != null && !Constants.EMPTY_ARRAY.equals(value)) {
-            if (value.contains(Constants.SCHEMA_REFERENCE)) {
-                byte[] bytes = value.getBytes();
-                try {
-                    JsonNode node = mapper.readTree(bytes);
-                    Iterator<JsonNode> schemaNode = node.findParent(
-                            Constants.SCHEMA_REFERENCE).elements();
-                    JsonNode nodeNext = schemaNode.next();
-                    if (nodeNext != null) {
-                        return extractReference(nodeNext.toString());
-                    }
-                } catch (IOException e) {
-                    logger.error("Error occurred while converting bytes from json node");
-                }
-            } else {
-                return value;
-            }
-        } else {
-            StringBuilder responseDefaultPath = new StringBuilder();
-            responseDefaultPath.append(Constants.PATHS).append(reqPath).
-                    append(Constants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
-                    append(Constants.JSON_RESPONSES).append(Constants.DEFAULT);
-            resourceSchema = JsonPath.read(swagger, responseDefaultPath.toString());
-            JsonNode jnode = mapper.convertValue(resourceSchema, JsonNode.class);
-            if (jnode.get(0) != null && !Constants.EMPTY_ARRAY.equals(jnode)) {
-                value = jnode.get(0).toString();
-            } else {
-                value = jnode.toString();
-            }
-            if (resourceSchema != null) {
-                if (value.contains(Constants.SCHEMA_REFERENCE)) {
-                    byte[] bytes = value.getBytes();
-                    try {
-                        JsonNode node = mapper.readTree(bytes);
-                        if (node != null) {
-                            Iterator<JsonNode> schemaNode = node.findParent(
-                                    Constants.SCHEMA_REFERENCE).elements();
-                            return extractRef(schemaNode);
-                        }
-                    } catch (IOException e) {
-                        logger.error("Error occurred while reading the schema.", e);
-                    }
-                } else {
-                    return value;
-                }
-            } else {
-                return value;
-            }
-        }
-        return value;
+    @NotNull
+    private static List<Parameter> getLowercaseHeaderParameters(List<Parameter> parameters) {
+        List<Parameter> headerParameters = parameters.stream()
+                .filter(param -> param.getIn().equalsIgnoreCase("header"))
+                .filter(param -> !param.getName().equalsIgnoreCase(Headers.CONTENT_TYPE))
+                .collect(Collectors.toList());
+        List<Parameter> modifiedHeaderParameters = headerParameters.stream()
+                .map(Validate::replaceLowerCaseHeaderName).collect(Collectors.toList());
+        List<Parameter> nonHeaderParameters = parameters.stream()
+                .filter(param -> !(param instanceof HeaderParameter)).collect(Collectors.toList());
+        nonHeaderParameters.addAll(modifiedHeaderParameters);
+        return nonHeaderParameters;
     }
 
     /**
-     * Get Schema path from $ref.
+     * This method convert parameter name to lowercase.
      *
-     * @param schemaNode Swagger schema content
-     * @return $ref path
+     * @param parameter param
+     * @return parameter with lower case name
      */
-    private static String extractRef(Iterator<JsonNode> schemaNode) {
-        while (schemaNode.hasNext()) {
-            String nodeVal = schemaNode.next().toString();
-            String[] val = nodeVal.split("" + Constants.HASH);
-            if (val.length > 0) {
-                String path = val[1].replaceAll("^\"|\"$", Constants.EMPTY);
-                if (StringUtils.isNotEmpty(path)) {
-                    int c = path.lastIndexOf(Constants.FORWARD_SLASH);
-                    return path.substring(c + 1);
-                }
-            }
-            return null;
+    private static Parameter replaceLowerCaseHeaderName(Parameter parameter) {
+        parameter.setName(parameter.getName().toLowerCase(Locale.ROOT));
+        return parameter;
+    }
+
+    /**
+     * Method to retrieve nested error messages from the validation report error messages
+     *
+     * @param message message of validation error report
+     * @return error message with nested messages
+     */
+    private static String getErrorMessage(ValidationReport.Message message) {
+        if (message.getNestedMessages().isEmpty()) {
+            return message.getMessage();
         }
-        return null;
+        StringBuilder combinedMessages = new StringBuilder();
+        combinedMessages.append(message.getMessage());
+        for (ValidationReport.Message nestedMessage : message.getNestedMessages()) {
+            combinedMessages.append(", ").append(getErrorMessage(nestedMessage));
+        }
+        return combinedMessages.toString().trim();
     }
 }

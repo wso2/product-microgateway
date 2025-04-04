@@ -99,9 +99,9 @@
             <version>${com.google.guava.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>${com.jayway.jsonpath.version}</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>failureaccess</artifactId>
+            <version>${guava.failureaccess.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.everit.json</groupId>
@@ -227,6 +227,50 @@
             <groupId>net.minidev</groupId>
             <artifactId>asm</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger.v3</groupId>
+            <artifactId>swagger-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.atlassian.oai</groupId>
+            <artifactId>swagger-request-validator-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.github.java-json-tools</groupId>
+            <artifactId>json-schema-validator-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>rhino.wso2</groupId>
+            <artifactId>js</artifactId>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -329,18 +373,21 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds,
-                                net.minidev, org.apache.logging.log4j, com.fasterxml.jackson.core,
-                                org.wso2.carbon.apimgt, org.wso2.am.analytics.publisher, ua.parser.wso2,
-                                org.wso2.orbit.com.azure, org.reactivestreams, io.github.openfeign,
-                                org.wso2.orbit.io.projectreactor, org.apache.qpid
+                            <includeGroupIds>
+                                org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds, net.minidev,
+                                org.apache.logging.log4j, com.fasterxml.jackson.core, org.wso2.carbon.apimgt,
+                                org.wso2.am.analytics.publisher, ua.parser.wso2, org.wso2.orbit.com.azure,
+                                org.reactivestreams, io.github.openfeign, org.wso2.orbit.io.projectreactor,
+                                org.apache.qpid, org.wso2.orbit.com.atlassian.oai, com.fasterxml.jackson.datatype,
+                                com.google.guava
                             </includeGroupIds>
-                            <includeArtifactIds>org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm,
-                                log4j-api, log4j-core, jackson-databind, jackson-core,
-                                jackson-annotations, org.wso2.carbon.apimgt.common.analytics,
-                                org.wso2.am.analytics.publisher.client, ua-parser, azure-core, azure-core-amqp,
-                                azure-messaging-eventhubs, reactive-streams, feign-core, feign-slf4j, feign-gson,
-                                reactor-core, proton-j
+                            <includeArtifactIds>
+                                org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm, log4j-api, log4j-core,
+                                jackson-databind, jackson-core, jackson-annotations,
+                                org.wso2.carbon.apimgt.common.analytics, org.wso2.am.analytics.publisher.client,
+                                ua-parser, azure-core, azure-core-amqp, azure-messaging-eventhubs, reactive-streams,
+                                feign-core, feign-slf4j, feign-gson, reactor-core, proton-j,
+                                swagger-request-validator-core, jackson-datatype-jsr310, guava
                             </includeArtifactIds>
                         </configuration>
                     </execution>

@@ -28,28 +28,84 @@ target = "java8"
         path = "{{toolkitHome}}/lib/dependencies/mgw-jwt-transformer-{{mgwVersion}}.jar"
 
     [[platform.libraries]]
-            module = "jwtGenerator"
-            path = "{{toolkitHome}}/lib/dependencies/mgw-jwt-generator-{{mgwVersion}}.jar"
+        module = "jwtGenerator"
+        path = "{{toolkitHome}}/lib/dependencies/mgw-jwt-generator-{{mgwVersion}}.jar"
 
-     [[platform.libraries]]
+    [[platform.libraries]]
         module = "gateway"
         path = "{{toolkitHome}}/lib/dependencies/org.wso2.carbon.databridge.commons-6.1.45.jar"
 
-     [[platform.libraries]]
+    [[platform.libraries]]
         module = "gateway"
         path = "{{toolkitHome}}/lib/dependencies/org.wso2.carbon.databridge.commons.binary-6.1.45.jar"
 
-     [[platform.libraries]]
+    [[platform.libraries]]
         module = "gateway"
         path = "{{toolkitHome}}/lib/dependencies/disruptor-3.4.2.wso2v1.jar"
 
-     [[platform.libraries]]
+    [[platform.libraries]]
         module = "callhome"
         path = "{{toolkitHome}}/lib/gateway/platform/core-1.0.16.jar"
 
-     [[platform.libraries]]
+    [[platform.libraries]]
         module = "bind-api"
         path = "{{toolkitHome}}/lib/gateway/platform/jaxb-api-2.3.1.jar"
+
+    [[platform.libraries]]
+        module = "bind-api"
+        path = "{{toolkitHome}}/lib/gateway/platform/jaxb-api-2.3.1.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/swagger-parser-2.1.22.wso2v2.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/swagger-request-validator-core-2.12.1.wso2v2.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/jackson-datatype-jsr310-2.16.2.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/jackson-dataformat-yaml-2.16.2.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/swagger-core-1.5.8.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/swagger-models-1.5.16.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/json-schema-validator-all-2.2.7.wso2v2.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/joda-time-2.13.1.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/javax.mail-api-1.6.2.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/libphonenumber-7.4.5.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/guava-32.1.1-jre.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/failureaccess-1.0.1.jar"
+
+    [[platform.libraries]]
+        module = "gateway"
+        path = "{{toolkitHome}}/lib/dependencies/validation/js-1.7.0.R4.wso2v1.jar"
 
 {{#each libs}}
     [[platform.libraries]]

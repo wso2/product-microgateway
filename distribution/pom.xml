@@ -66,11 +66,6 @@
             <version>${org.wso2.securevault.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>${com.jayway.jsonpath.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${com.google.guava.version}</version>
@@ -227,8 +222,19 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/validation</outputDirectory>
-                            <includeGroupIds>com.fasterxml.jackson.core,net.minidev,org.wso2.orbit.com.jayway.jsonpath,com.google.guava</includeGroupIds>
-                            <includeArtifactIds>jackson-databind,jackson-core,jackson-annotations,json-smart,json-path,asm,guava</includeArtifactIds>
+                            <includeGroupIds>
+                                com.fasterxml.jackson.core,org.wso2.orbit.io.swagger.v3,
+                                org.wso2.orbit.com.atlassian.oai,com.fasterxml.jackson.datatype,
+                                com.fasterxml.jackson.dataformat,io.swagger,org.wso2.orbit.com.github.java-json-tools,
+                                joda-time,javax.mail,com.googlecode.libphonenumber,com.google.guava,rhino.wso2
+                            </includeGroupIds>
+                            <includeArtifactIds>
+                                jackson-databind,jackson-core,jackson-annotations,swagger-parser,
+                                swagger-request-validator-core,jackson-datatype-jsr310,jackson-dataformat-yaml,
+                                json-schema-core,swagger-core,swagger-models,btf,jackson-coreutils,
+                                json-schema-validator-all,joda-time,javax.mail-api,libphonenumber,guava,
+                                failureaccess,js
+                            </includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
