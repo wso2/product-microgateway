@@ -77,7 +77,19 @@ function doValidationFilterRequest(http:Caller caller, http:Request request, htt
     if (reqPayload is json) {
         payloadVal = reqPayload.toJsonString();
     }
-    var valResult = requestValidate(requestPath, requestMethod, payloadVal, serviceName);
+
+    //getting the headers of the request
+    string[] headerNames = request.getHeaderNames();
+    map<string> headers = {};
+    foreach var header in headerNames {
+        string headerValue = request.getHeader(<@untained> header);
+        headers[header] = headerValue;
+    }
+
+    //getting the query params of the request
+    map<string[]> queryParams = request.getQueryParams();
+
+    var valResult = requestValidate(requestPath, requestMethod, payloadVal, headers, queryParams, serviceName);
     if (valResult is handle && stringutils:equalsIgnoreCase(valResult.toString(), VALIDATION_STATUS)) {
         return true;
     } else {

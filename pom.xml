@@ -291,7 +291,7 @@
             <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-models</artifactId>
-                <version>${swagger.models.version}</version>
+                <version>${io.swagger.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
@@ -450,6 +450,46 @@
                 <artifactId>asm</artifactId>
                 <version>${net.minidev.asm.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.swagger.v3</groupId>
+                <artifactId>swagger-parser</artifactId>
+                <version>${swagger.parser.v3.orbit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.atlassian.oai</groupId>
+                <artifactId>swagger-request-validator-core</artifactId>
+                <version>${org.wso2.orbit.atlassian.oai.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-core</artifactId>
+                <version>${io.swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.github.java-json-tools</groupId>
+                <artifactId>json-schema-validator-all</artifactId>
+                <version>${json.schema.validator.all.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda.time.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>javax.mail</artifactId>
+                <version>${javax.mail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.googlecode.libphonenumber</groupId>
+                <artifactId>libphonenumber</artifactId>
+                <version>${libphonenumber.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>rhino.wso2</groupId>
+                <artifactId>js</artifactId>
+                <version>${rhino.js.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -574,7 +614,7 @@
     </build>
 
     <properties>
-        <ballerina.platform.version>1.2.56</ballerina.platform.version>
+        <ballerina.platform.version>1.2.57</ballerina.platform.version>
         <broker.version>0.970.5</broker.version>
         <assembly.plugin.version>3.1.1</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
@@ -586,9 +626,8 @@
         <airline.version>0.7</airline.version>
         <guice.version>4.1.0</guice.version>
         <commons-cli.version>1.3.1</commons-cli.version>
-        <io.swagger.version>1.5.8</io.swagger.version>
+        <io.swagger.version>1.6.11</io.swagger.version>
         <swagger.parser.version>1.0.34</swagger.parser.version>
-        <swagger.models.version>1.5.16</swagger.models.version>
         <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
         <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
         <swagger.parser.v2.converter.version>2.0.8</swagger.parser.v2.converter.version>
@@ -623,8 +662,8 @@
         <com.google.protobuf.version>3.11.3</com.google.protobuf.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jackson.version>2.15.2</jackson.version>
-        <jackson.databind.version>2.15.2</jackson.databind.version>
+        <jackson.version>2.16.2</jackson.version>
+        <jackson.databind.version>2.16.2</jackson.databind.version>
         <kraal.version>0.0.16</kraal.version>
         <kotlin.stdlib.version>1.3.31</kotlin.stdlib.version>
         <prometheus.jmx.agent.version>0.18.0</prometheus.jmx.agent.version>
@@ -634,13 +673,11 @@
         <org.wso2.securevault.version>1.1.1</org.wso2.securevault.version>
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <everit.version>1.5.0.wso2.v1</everit.version>
-        <jayway.jsonpath.version>2.4.0</jayway.jsonpath.version>
         <com.google.guava.version>32.1.1-jre</com.google.guava.version>
         <commons-logging.version>1.1.1</commons-logging.version>
-        <org.apache.logging.log4j.version>2.17.0</org.apache.logging.log4j.version>
+        <org.apache.logging.log4j.version>2.17.2</org.apache.logging.log4j.version>
         <commons-io.version>2.14.0</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
-        <com.jayway.jsonpath.version>2.6.0.wso2v2</com.jayway.jsonpath.version>
         <everit.version>1.5.0.wso2.v1</everit.version>
         <org.wso2.json.version>3.0.0.wso2v4</org.wso2.json.version>
         <carbon.callhome.version>1.0.16</carbon.callhome.version>
@@ -659,6 +696,14 @@
         <io.github.openfeign.version>13.2.1</io.github.openfeign.version>
         <io.projectreactor.reactor-core.version>3.4.31.wso2v1</io.projectreactor.reactor-core.version>
         <org.apache.qpid.proton-j.version>0.33.4</org.apache.qpid.proton-j.version>
+        <swagger.parser.v3.orbit.version>2.1.22.wso2v2</swagger.parser.v3.orbit.version>
+        <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
+        <json.schema.validator.all.version>2.2.7.wso2v2</json.schema.validator.all.version>
+        <joda.time.version>2.13.1</joda.time.version>
+        <javax.mail.version>1.6.2</javax.mail.version>
+        <libphonenumber.version>7.4.5</libphonenumber.version>
+        <guava.failureaccess.version>1.0.1</guava.failureaccess.version>
+        <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
     </properties>
 
 </project>
