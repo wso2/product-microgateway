@@ -291,7 +291,7 @@
             <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-models</artifactId>
-                <version>${swagger.models.version}</version>
+                <version>${io.swagger.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
@@ -476,9 +476,9 @@
                 <version>${joda.time.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.mail</groupId>
-                <artifactId>javax.mail-api</artifactId>
-                <version>${javax.mail-api.version}</version>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>javax.mail</artifactId>
+                <version>${javax.mail.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.googlecode.libphonenumber</groupId>
@@ -626,9 +626,8 @@
         <airline.version>0.7</airline.version>
         <guice.version>4.1.0</guice.version>
         <commons-cli.version>1.3.1</commons-cli.version>
-        <io.swagger.version>1.5.8</io.swagger.version>
+        <io.swagger.version>1.6.11</io.swagger.version>
         <swagger.parser.version>1.0.34</swagger.parser.version>
-        <swagger.models.version>1.5.16</swagger.models.version>
         <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
         <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
         <swagger.parser.v2.converter.version>2.0.8</swagger.parser.v2.converter.version>
@@ -701,7 +700,7 @@
         <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
         <json.schema.validator.all.version>2.2.7.wso2v2</json.schema.validator.all.version>
         <joda.time.version>2.13.1</joda.time.version>
-        <javax.mail-api.version>1.6.2</javax.mail-api.version>
+        <javax.mail.version>1.6.2</javax.mail.version>
         <libphonenumber.version>7.4.5</libphonenumber.version>
         <guava.failureaccess.version>1.0.1</guava.failureaccess.version>
         <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>

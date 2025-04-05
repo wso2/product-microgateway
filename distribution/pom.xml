@@ -226,13 +226,13 @@
                                 com.fasterxml.jackson.core,org.wso2.orbit.io.swagger.v3,
                                 org.wso2.orbit.com.atlassian.oai,com.fasterxml.jackson.datatype,
                                 com.fasterxml.jackson.dataformat,io.swagger,org.wso2.orbit.com.github.java-json-tools,
-                                joda-time,javax.mail,com.googlecode.libphonenumber,com.google.guava,rhino.wso2
+                                joda-time,com.sun.mail,com.googlecode.libphonenumber,com.google.guava,rhino.wso2
                             </includeGroupIds>
                             <includeArtifactIds>
                                 jackson-databind,jackson-core,jackson-annotations,swagger-parser,
                                 swagger-request-validator-core,jackson-datatype-jsr310,jackson-dataformat-yaml,
                                 json-schema-core,swagger-core,swagger-models,btf,jackson-coreutils,
-                                json-schema-validator-all,joda-time,javax.mail-api,libphonenumber,guava,
+                                json-schema-validator-all,joda-time,javax.mail,libphonenumber,guava,
                                 failureaccess,js
                             </includeArtifactIds>
                         </configuration>
