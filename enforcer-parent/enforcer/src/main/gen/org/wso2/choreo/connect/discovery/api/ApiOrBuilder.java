@@ -345,4 +345,16 @@ public interface ApiOrBuilder extends
    * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
    */
   org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder getChoreoComponentInfoOrBuilder();
+
+  /**
+   * <code>string apiKeyHeader = 26;</code>
+   * @return The apiKeyHeader.
+   */
+  java.lang.String getApiKeyHeader();
+  /**
+   * <code>string apiKeyHeader = 26;</code>
+   * @return The bytes for apiKeyHeader.
+   */
+  com.google.protobuf.ByteString
+      getApiKeyHeaderBytes();
 }

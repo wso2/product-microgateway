@@ -1,36 +1,25 @@
-### Purpose
-<!-- Short description of the feature you are going to add with this PR. -->
+## Purpose
+> Describe the problems, issues, or needs driving this feature/fix and include links to related issues in the following format: Resolves issue1, issue2, etc.
 
-### Issues
-<!-- Link github issues that are going to be solved with this PR. Format should be: Fixes #123 -->
-Fixes #
+## Approach
+> Describe the DX flow
+> Describe important design decisions and compromises
+> Rationale: for reviewer to understand how the problem is solved
 
-### Release note
-<!-- Brief description of the new feature or bug fix as it will appear in the release notes -->
+## Documentation
+> Link(s) to product documentation that addresses the changes of this PR. If no doc impact, enter “N/A” plus brief explanation of why there’s no doc impact
 
-### Documentation
-<!-- Link(s) to product documentation that addresses the changes of this PR. If no doc impact, enter “N/A” plus brief explanation of why there’s no doc impact -->
-No documentation impact. Current documentation covers the changes.
+## Automation tests
+ - Unit tests (Mandatory)
+   > Code coverage information(before, after)
+ - Integration tests
+   > Details about the test cases and coverage. New improvements and features are supposed to have associated integration tests.
 
-### Security checks
- - Followed [secure coding standards](http://wso2.com/technical-reports/wso2-secure-engineering-guidelines)? Yes/No
- - Verified `FindSecurityBugs` report? Yes/No
- - Confirmed that this PR doesn't commit any keys, passwords, tokens, usernames, or other secrets? Yes/No
+## Security checks
+ - Followed secure coding standards in https://security.docs.wso2.com/en/latest/security-guidelines/secure-engineering-guidelines/? yes/no 
+ - Ran golangci-lint plugin and verified report? yes/no 
+ - Ran maven-checkstyle-plugin and verified report? yes/no 
+ - Confirmed that this PR doesn't commit any keys, passwords, tokens, usernames, or other secrets? yes/no
 
-### Samples
-<!-- Provide a sample or a link(s) with guide to test this feature. -->
-
-### Migrations (if applicable)
-<!-- Describe migration steps and platforms on which migration has been tested -->
-No migration required
-
-### Tested environments
-<!-- Specify the environments you used to test this PR. OS, DB, JDK version, etc... -->
-Not Tested
-
----
-#### Maintainers: Check before merge
-- [ ] Assigned 'Type' label
-- [ ] Assigned the project
-- [ ] Validated respective github issues
-- [ ] Assigned milestone to the github issue(s)
+## Related PRs
+> List any other related PRs

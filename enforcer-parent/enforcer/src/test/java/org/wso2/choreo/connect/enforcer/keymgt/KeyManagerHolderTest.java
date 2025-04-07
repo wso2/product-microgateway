@@ -136,6 +136,8 @@ public class KeyManagerHolderTest {
         Assert.assertTrue(residentKeyManager.isValidateSubscriptions());
         Assert.assertFalse(residentKeyManager.getJwksConfigurationDTO().isEnabled());
 
+        Assert.assertNull(KeyManagerHolder.getInstance().getTokenIssuerDTO("carbon.super",
+                null));
         Assert.assertEquals(residentKeyManager, KeyManagerHolder.getInstance().getTokenIssuerDTO("carbon.super",
                 "https://localhost:9443/oauth2/token"));
         Assert.assertEquals(publisherIssuer, KeyManagerHolder.getInstance().getTokenIssuerDTO("carbon.super",

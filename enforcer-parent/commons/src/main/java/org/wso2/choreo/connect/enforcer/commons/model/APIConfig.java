@@ -37,6 +37,7 @@ public class APIConfig {
     private Map<String, SecuritySchemaConfig> securitySchemeDefinitions; // security scheme def name -> scheme def
     private String apiLifeCycleState;
     private String authorizationHeader;
+    private String apiKeyHeader;
     private EndpointSecurity endpointSecurity;
     private String organizationId;
     private String uuid;
@@ -156,6 +157,15 @@ public class APIConfig {
     }
 
     /**
+     * If the API Key Header for the API is modified using x-wso2-api-key-header extension,
+     * this would return the changed value. If it remains unchanged, it returns null.
+     * @return API Key header for the API if changed.
+     */
+    public String getApiKeyHeader() {
+        return apiKeyHeader;
+    }
+
+    /**
      * Current API Lifecycle state is returned.
      * @return lifecycle state
      */
@@ -246,6 +256,7 @@ public class APIConfig {
         private Map<String, EndpointCluster> endpoints;
         private String apiLifeCycleState;
         private String authorizationHeader;
+        private String apiKeyHeader;
         private EndpointSecurity endpointSecurity;
         private String organizationId;
         private String uuid;
@@ -326,6 +337,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder apiKeyHeader(String apiKeyHeader) {
+            this.apiKeyHeader = apiKeyHeader;
+            return this;
+        }
+
         public Builder organizationId(String organizationId) {
             this.organizationId = organizationId;
             return this;
@@ -396,6 +412,7 @@ public class APIConfig {
             apiConfig.tier = this.tier;
             apiConfig.endpointSecurity = this.endpointSecurity;
             apiConfig.authorizationHeader = this.authorizationHeader;
+            apiConfig.apiKeyHeader = this.apiKeyHeader;
             apiConfig.disableSecurity = this.disableSecurity;
             apiConfig.organizationId = this.organizationId;
             apiConfig.uuid = this.uuid;

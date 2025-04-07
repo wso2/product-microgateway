@@ -73,6 +73,7 @@ type MgwSwagger struct {
 	security                []map[string][]string
 	xWso2ThrottlingTier     string
 	xWso2AuthHeader         string
+	xWso2APIKeyHeader       string
 	disableSecurity         bool
 	OrganizationID          string
 	VHost                   string
@@ -319,6 +320,18 @@ func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
 	return swagger.xWso2AuthHeader
 }
 
+// SetXWso2APIKeyHeader sets the apiKeyHeader of the API
+func (swagger *MgwSwagger) SetXWso2APIKeyHeader(apiKeyHeader string) {
+	if swagger.xWso2APIKeyHeader == "" {
+		swagger.xWso2APIKeyHeader = apiKeyHeader
+	}
+}
+
+// GetXWSO2APIKeyHeader returns the api key header set via the vendor extension.
+func (swagger *MgwSwagger) GetXWSO2APIKeyHeader() string {
+	return swagger.xWso2APIKeyHeader
+}
+
 // GetSecurityScheme returns the securitySchemes of the API
 func (swagger *MgwSwagger) GetSecurityScheme() []SecurityScheme {
 	return swagger.securityScheme
@@ -454,6 +467,7 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	swagger.setXWso2ThrottlingTier()
 	swagger.setDisableSecurity()
 	swagger.setXWso2AuthHeader()
+	swagger.setXWso2APIKeyHeader()
 
 	// Error nil for successful execution
 	return nil
@@ -794,6 +808,23 @@ func (swagger *MgwSwagger) setXWso2AuthHeader() {
 	if authorizationHeader != "" {
 		swagger.xWso2AuthHeader = authorizationHeader
 	}
+}
+
+func (swagger *MgwSwagger) setXWso2APIKeyHeader() {
+	xWso2APIKeyHeader := getXWso2APIKeyHeader(swagger.vendorExtensions)
+	if xWso2APIKeyHeader != "" {
+		swagger.xWso2APIKeyHeader = xWso2APIKeyHeader
+	}
+}
+
+func getXWso2APIKeyHeader(vendorExtensions map[string]interface{}) string {
+	xWso2APIKeyHeader := ""
+	if y, found := vendorExtensions[xAPIKeyHeader]; found {
+		if val, ok := y.(string); ok {
+			xWso2APIKeyHeader = val
+		}
+	}
+	return xWso2APIKeyHeader
 }
 
 func (swagger *MgwSwagger) setDisableSecurity() {

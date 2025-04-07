@@ -38,6 +38,7 @@ const (
 	xThrottlingTier      string = "x-throttling-tier"
 	xWso2ThrottlingTier  string = "x-wso2-throttling-tier"
 	xAuthHeader          string = "x-wso2-auth-header"
+	xAPIKeyHeader        string = "x-wso2-api-key-header"
 	xAuthType            string = "x-auth-type"
 	xWso2DisableSecurity string = "x-wso2-disable-security"
 	None                 string = "None"
