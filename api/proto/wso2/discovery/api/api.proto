@@ -59,4 +59,5 @@ message Api {
 	string environmentName = 23;
 	BackendJWTConfiguration backendJWTConfiguration = 24;
 	ChoreoComponentInfo choreoComponentInfo = 25;
+	string apiKeyHeader = 26;
 }

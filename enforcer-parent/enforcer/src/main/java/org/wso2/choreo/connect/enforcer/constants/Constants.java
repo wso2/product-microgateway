@@ -80,4 +80,6 @@ public class Constants {
     // Modes for the temporary console test headers.
     public static final String TEMP_CONSOLE_TEST_HEADERS_MONITOR_MODE = "monitor";
     public static final String TEMP_CONSOLE_TEST_HEADERS_ACTIVE_MODE = "active";
+
+    public static final String DEFAULT_API_KEY_HEADER = "api-key";
 }

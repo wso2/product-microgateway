@@ -155,7 +155,7 @@ public class RestAPI implements API {
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState).tier(api.getTier())
                 .apiSecurity(securityScopesMap).securitySchemeDefinitions(securitySchemeDefinitions)
                 .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
-                .endpoints(endpoints).endpointSecurity(endpointSecurity)
+                .apiKeyHeader(api.getApiKeyHeader()).endpoints(endpoints).endpointSecurity(endpointSecurity)
                 .organizationId(api.getOrganizationId()).apiProvider(api.getApiProvider())
                 .enableBackendJWT(api.getEnableBackendJWT()).backendJWTConfiguration(backendJWTConfiguration)
                 .deploymentType(api.getDeploymentType())

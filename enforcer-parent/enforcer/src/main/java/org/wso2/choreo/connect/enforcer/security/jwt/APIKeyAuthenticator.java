@@ -20,18 +20,23 @@ package org.wso2.choreo.connect.enforcer.security.jwt;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -82,12 +87,28 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
 
     private String getAPIKeyFromRequest(RequestContext requestContext) {
         Map<String, String> headers = requestContext.getHeaders();
-        return ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeaders().stream()
+        return getAPIKeyInternalHeaders(requestContext).stream()
                 .map(headers::get)
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
     }
+
+    private List<String> getAPIKeyInternalHeaders(RequestContext requestContext) {
+        APIConfig apiConfig = requestContext.getMatchedAPI();
+        String configuredApiKeyHeader = apiConfig.getApiKeyHeader();
+        List<String> apiKeyInternalHeaders = new ArrayList<>();
+        if (StringUtils.isNotEmpty(configuredApiKeyHeader)) {
+            apiKeyInternalHeaders.add(configuredApiKeyHeader);
+        } else {
+            apiKeyInternalHeaders.add(Constants.DEFAULT_API_KEY_HEADER);
+        }
+        apiKeyInternalHeaders.addAll(
+                ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeaders()
+        );
+        return apiKeyInternalHeaders;
+    }
+
 
     private JSONObject getDecodedAPIKeyData(String apiKeyHeaderValue) throws APISecurityException {
         try {

@@ -220,6 +220,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		Security:                securityList,
 		EndpointSecurity:        endpointSecurityDetails,
 		AuthorizationHeader:     mgwSwagger.GetXWSO2AuthHeader(),
+		ApiKeyHeader:            mgwSwagger.GetXWSO2APIKeyHeader(),
 		DisableSecurity:         mgwSwagger.GetDisableSecurity(),
 		OrganizationId:          mgwSwagger.OrganizationID,
 		ApiProvider:             mgwSwagger.APIProvider,

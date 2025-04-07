@@ -158,4 +158,100 @@ public class APIKeyAuthenticatorTest {
         String token = apiKeyAuthenticator.retrieveTokenFromRequestCtx(requestContext);
         Assert.assertEquals(mockJWT, token);
     }
+
+    @Test
+    public void retrieveTokenFromCustomHeaderRequestCtxTest_invalidKey() {
+
+        RequestContext.Builder requestContextBuilder = new RequestContext.Builder("/api-key");
+        ChoreoComponentInfo choreoComponentInfo = new ChoreoComponentInfo();
+        choreoComponentInfo.setComponentID("component_id");
+        requestContextBuilder.matchedAPI(new APIConfig.Builder("Petstore")
+                .basePath("/test")
+                .uuid("6003a3b7-af0f-4fb3-853e-a6562b2345f2")
+                .apiType("REST")
+                .apiKeyHeader("custom-header")
+                .choreoComponentInfo(choreoComponentInfo)
+                .build());
+        Map<String, String> headersMap = new HashMap<>();
+        headersMap.put("custom-header",
+                "chk_eyJrZXkiOiJieTlpYXQ5d3MycDY0dWF6anFkbzQ4cnAyYnY3aWoxdWRuYmRzNzN6ZWx5OWNoZHJ2YiJ97JYpag");
+        requestContextBuilder.headers(headersMap);
+        RequestContext requestContext = requestContextBuilder.build();
+
+        APIKeyAuthenticator apiKeyAuthenticator = new APIKeyAuthenticator();
+        Assert.assertThrows(APISecurityException.class, () ->
+                apiKeyAuthenticator.retrieveTokenFromRequestCtx(requestContext));
+    }
+
+    @Test
+    public void retrieveTokenFromCustomHeaderRequestCtxTest_cached_validKey() throws APISecurityException {
+
+        String mockJWT = "eyJrZXkiOiJieTlpYXQ5d3MycDY0dWF6anFkbzQ4cnAyYnY3aWoxdWRuYmRzNzN6ZWx5OWNoZHJ2YiJ97JYPAg";
+        PowerMockito.mockStatic(APIKeyUtils.class);
+        PowerMockito.when(APIKeyUtils.isValidAPIKey(Mockito.anyString())).thenReturn(true);
+        PowerMockito.when(APIKeyUtils.generateAPIKeyHash(Mockito.anyString())).thenReturn("key_hash");
+        PowerMockito.when(APIKeyUtils.isJWTExpired(Mockito.anyString())).thenReturn(false);
+
+        PowerMockito.mockStatic(CacheProvider.class);
+        LoadingCache gatewayAPIKeyJWTCache = PowerMockito.mock(LoadingCache.class);
+        PowerMockito.when(CacheProvider.getGatewayAPIKeyJWTCache()).thenReturn(gatewayAPIKeyJWTCache);
+        PowerMockito.when(gatewayAPIKeyJWTCache.getIfPresent(Mockito.anyString())).thenReturn(mockJWT);
+
+        ChoreoComponentInfo choreoComponentInfo = new ChoreoComponentInfo();
+        choreoComponentInfo.setComponentID("component_id");
+        RequestContext.Builder requestContextBuilder = new RequestContext.Builder("/api-key");
+        requestContextBuilder.matchedAPI(new APIConfig.Builder("Petstore")
+                .basePath("/test")
+                .uuid("6003a3b7-af0f-4fb3-853e-a6562b2345f2")
+                .apiKeyHeader("custom-header")
+                .choreoComponentInfo(choreoComponentInfo)
+                .apiType("REST")
+                .build());
+        Map<String, String> headersMap = new HashMap<>();
+        headersMap.put("custom-header",
+                "chk_eyJhdHRyMSI6InYxIiwiY29ubmVjdGlvbklkIjoiNjAwM2EzYjctYWYwZi00ZmIzLTg1M2UtYTY1NjJiMjM0N" +
+                        "WYyIiwia2V5IjoieG5lcGVxZmZ4eWx2Y2Q4a3FnNHprZDFpMHoxMnA2dTBqcW50aDUyM3JlN292a2pudncifQBdZRRQ");
+        requestContextBuilder.headers(headersMap);
+        RequestContext requestContext = requestContextBuilder.build();
+
+        APIKeyAuthenticator apiKeyAuthenticator = new APIKeyAuthenticator();
+        String token = apiKeyAuthenticator.retrieveTokenFromRequestCtx(requestContext);
+        Assert.assertEquals(mockJWT, token);
+    }
+
+    @Test
+    public void retrieveTokenFromCustomHeaderRequestCtxTest_validKey() throws APISecurityException {
+
+        PowerMockito.mockStatic(APIKeyUtils.class);
+        String mockJWT = "eyJrZXkiOiJieTlpYXQ5d3MycDY0dWF6anFkbzQ4cnAyYnY3aWoxdWRuYmRzNzN6ZWx5OWNoZHJ2YiJ97JYPAg";
+        PowerMockito.when(APIKeyUtils.exchangeAPIKeyToJWT(Mockito.anyString())).thenReturn(Optional.of(mockJWT));
+        PowerMockito.when(APIKeyUtils.isValidAPIKey(Mockito.anyString())).thenReturn(true);
+        PowerMockito.when(APIKeyUtils.generateAPIKeyHash(Mockito.anyString())).thenReturn("key_hash");
+
+        PowerMockito.mockStatic(CacheProvider.class);
+        LoadingCache gatewayAPIKeyJWTCache = PowerMockito.mock(LoadingCache.class);
+        PowerMockito.when(CacheProvider.getGatewayAPIKeyJWTCache()).thenReturn(gatewayAPIKeyJWTCache);
+        PowerMockito.when(gatewayAPIKeyJWTCache.getIfPresent(Mockito.anyString())).thenReturn(null);
+
+        ChoreoComponentInfo choreoComponentInfo = new ChoreoComponentInfo();
+        choreoComponentInfo.setComponentID("component_id");
+        RequestContext.Builder requestContextBuilder = new RequestContext.Builder("/api-key");
+        requestContextBuilder.matchedAPI(new APIConfig.Builder("Petstore")
+                .basePath("/test")
+                .uuid("6003a3b7-af0f-4fb3-853e-a6562b2345f2")
+                .apiType("REST")
+                .apiKeyHeader("custom-header")
+                .choreoComponentInfo(choreoComponentInfo)
+                .build());
+        Map<String, String> headersMap = new HashMap<>();
+        headersMap.put("custom-header",
+                "chk_eyJhdHRyMSI6InYxIiwiY29ubmVjdGlvbklkIjoiNjAwM2EzYjctYWYwZi00ZmIzLTg1M2UtYTY1NjJiMjM0N" +
+                        "WYyIiwia2V5IjoieG5lcGVxZmZ4eWx2Y2Q4a3FnNHprZDFpMHoxMnA2dTBqcW50aDUyM3JlN292a2pudncifQBdZRRQ");
+        requestContextBuilder.headers(headersMap);
+        RequestContext requestContext = requestContextBuilder.build();
+
+        APIKeyAuthenticator apiKeyAuthenticator = new APIKeyAuthenticator();
+        String token = apiKeyAuthenticator.retrieveTokenFromRequestCtx(requestContext);
+        Assert.assertEquals(mockJWT, token);
+    }
 }
