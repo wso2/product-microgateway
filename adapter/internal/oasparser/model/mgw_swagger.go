@@ -30,6 +30,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
 	parser "github.com/mitchellh/mapstructure"
+	"github.com/pb33f/libopenapi"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -41,14 +42,14 @@ import (
 var paidOrgsFromSubscriptionServiceEnabled bool
 
 func init() {
-    envIsPaidOrgsFromSubscriptionServiceEnabled := os.Getenv("ENABLE_PAID_ORGS_FROM_SUBSCRIPTION_SERVICE")
+	envIsPaidOrgsFromSubscriptionServiceEnabled := os.Getenv("ENABLE_PAID_ORGS_FROM_SUBSCRIPTION_SERVICE")
 
-    // Parse the environment variable to a boolean, defaulting to false if not set or if parsing fails
-    var err error
-    paidOrgsFromSubscriptionServiceEnabled, err = strconv.ParseBool(envIsPaidOrgsFromSubscriptionServiceEnabled)
-    if err != nil || envIsPaidOrgsFromSubscriptionServiceEnabled == "" {
-        paidOrgsFromSubscriptionServiceEnabled = false
-    }
+	// Parse the environment variable to a boolean, defaulting to false if not set or if parsing fails
+	var err error
+	paidOrgsFromSubscriptionServiceEnabled, err = strconv.ParseBool(envIsPaidOrgsFromSubscriptionServiceEnabled)
+	if err != nil || envIsPaidOrgsFromSubscriptionServiceEnabled == "" {
+		paidOrgsFromSubscriptionServiceEnabled = false
+	}
 }
 
 // MgwSwagger represents the object structure holding the information related to the
@@ -1320,6 +1321,21 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 				return infoOpenAPIErr
 			}
 		}
+
+	} else if definitionVersion == "3.1" {
+		// Implementation for OpenAPI 3.1
+		// Refer above case for Implementation
+		document, err:= libopenapi.NewDocument(apiJsn)
+		if err != nil {
+			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
+		} else{
+			v31Model, _:= document.BuildV3Model()
+			infoOpenAPIErr := swagger.SetInfoOpenAPI31(v31Model.Model)
+			if infoOpenAPIErr != nil {
+				return infoOpenAPIErr
+			}
+		}
+		
 
 	} else if definitionVersion == "asyncapi_2" {
 		var asyncAPISpec AsyncAPI

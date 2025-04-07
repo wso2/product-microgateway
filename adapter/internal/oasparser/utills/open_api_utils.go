@@ -66,7 +66,15 @@ func FindAPIDefinitionVersion(jsn []byte) string {
 	if _, ok := result["swagger"]; ok {
 		return "2"
 	} else if _, ok := result["openapi"]; ok {
-		return "3"
+		if threeVersion, ok := result["openapi"].(string); ok {
+			if strings.HasPrefix(threeVersion, "3.0") {
+				return "3"
+			} else if strings.HasPrefix(threeVersion, "3.1") {
+				return "3.1"
+			}
+			logger.LoggerOasparser.Errorf("OpenAPI version %v is not supported.", threeVersion)
+			return "not_supported_openapi_version" + threeVersion
+		}
 	} else if versionNumber, ok := result["asyncapi"]; ok {
 		if strings.HasPrefix(versionNumber.(string), "2") {
 			return "asyncapi_2"
