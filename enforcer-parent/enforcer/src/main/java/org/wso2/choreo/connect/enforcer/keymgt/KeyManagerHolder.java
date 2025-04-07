@@ -218,6 +218,10 @@ public class KeyManagerHolder {
     }
 
     public ExtendedTokenIssuerDto getTokenIssuerDTO(String organizationUUID, String issuer) {
+        // If the iss claim is not available, this could happen.
+        if (StringUtils.isEmpty(issuer)) {
+            return null;
+        }
         Map<String, Map<String, ExtendedTokenIssuerDto>> tokenIssuerMap = getTokenIssuerMap();
         if (tokenIssuerMap.containsKey(organizationUUID)) {
             Map<String, ExtendedTokenIssuerDto> orgSpecificKMIssuerMap = tokenIssuerMap.get(organizationUUID);
