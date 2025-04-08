@@ -24,7 +24,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pb33f/libopenapi/datamodel/high/base"
-	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
+	"github.com/pb33f/libopenapi/datamodel/high/v3"
 	"github.com/pb33f/libopenapi/orderedmap"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
