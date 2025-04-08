@@ -1354,13 +1354,11 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 		}
 
 	} else if definitionVersion == "3.1" {
-		// Implementation for OpenAPI 3.1
-		// Refer above case for Implementation
-		document, err:= libopenapi.NewDocument(apiJsn)
+		document, err := libopenapi.NewDocument(apiJsn)
 		if err != nil {
 			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
-		} else{
-			v31Model, _:= document.BuildV3Model()
+		} else {
+			v31Model, _ := document.BuildV3Model()
 			infoOpenAPIErr := swagger.SetInfoOpenAPI31(v31Model.Model)
 			if infoOpenAPIErr != nil {
 				return infoOpenAPIErr
