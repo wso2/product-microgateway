@@ -1366,7 +1366,6 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 				return infoOpenAPIErr
 			}
 		}
-		
 
 	} else if definitionVersion == "asyncapi_2" {
 		var asyncAPISpec AsyncAPI
