@@ -246,7 +246,7 @@ func addDisableSecurityIfNotPresent31(vendorExtensions *orderedmap.Map[string, *
 	return vendorExtensions
 }
 
-// GetXW2Label31 extracts the vendor-extension (openapi v3.1) property.
+// GetXWso2Label31 extracts the vendor-extension (openapi v3.1) property.
 //
 // Default value is 'default'
 func GetXWso2Label31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) []string {
