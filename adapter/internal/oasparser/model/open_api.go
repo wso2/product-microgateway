@@ -27,12 +27,8 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
-	"github.com/pb33f/libopenapi/datamodel/high/base"
-	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
-	"github.com/pb33f/libopenapi/orderedmap"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"gopkg.in/yaml.v3"
 )
 
 // hostNameValidator regex is for validate the host name of the URL
@@ -108,54 +104,6 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	return nil
 }
 
-// SetInfoOpenAPI31 for OAS 3.1 should be created.
-func (swagger *MgwSwagger) SetInfoOpenAPI31(swagger31 v3.Document) error {
-	var err error
-	if swagger31.Info != nil {
-		swagger.description = swagger31.Info.Description
-		swagger.title = swagger31.Info.Title
-		swagger.version = swagger31.Info.Version
-	}
-
-	swagger.vendorExtensions = convertExtensibletoReadableFormat31(swagger31.Extensions)
-	swagger.securityScheme = setSecuritySchemesOpenAPI31(swagger31)
-	for _, security := range swagger31.Security {
-		securityMap := make(map[string][]string, security.Requirements.Len())
-		for key, val := range security.Requirements.FromOldest() {
-			securityMap[key] = val
-		}
-		swagger.security = append(swagger.security, securityMap)
-	}
-	swagger.resources, err = setResourcesOpenAPI31(swagger31)
-	if err != nil {
-		return err
-	}
-
-	swagger.apiType = HTTP
-	var productionUrls []Endpoint
-	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
-	// an exception is made where servers url is not processed when the API is prototyped.
-	if isServerURLIsAvailable31(swagger31.Servers) && !swagger.IsProtoTyped {
-		for _, serverEntry := range swagger31.Servers {
-			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
-				continue
-			}
-			endpoint, err := getHTTPEndpoint(serverEntry.URL)
-			if err == nil {
-				productionUrls = append(productionUrls, *endpoint)
-				swagger.xWso2Basepath = endpoint.Basepath
-			} else {
-				logger.LoggerOasparser.Info("Not considering the URL in servers object as parsing has failed. ", err)
-			}
-		}
-		if len(productionUrls) > 0 {
-			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
-			swagger.sandboxEndpoints = nil
-		}
-	}
-	return nil
-}
-
 func setPathInfoOpenAPI(path string, methods []*Operation, pathItem *openapi3.PathItem) Resource {
 	var resource Resource
 	if pathItem != nil {
@@ -170,22 +118,6 @@ func setPathInfoOpenAPI(path string, methods []*Operation, pathItem *openapi3.Pa
 			//tags: operation.Tags,
 			//security: pathItem.operation.Security.,
 			vendorExtensions: convertExtensibletoReadableFormat(pathItem.ExtensionProps),
-		}
-	}
-	return resource
-}
-
-// setPathInfoOpenAPI needs to be implemented for openapi 3.1: DONE
-func setPathInfoOpenAPI31(path string, methods []*Operation, pathItem *v3.PathItem) Resource {
-	var resource Resource
-	if pathItem != nil {
-		resource = Resource{
-			path:             path,
-			methods:          methods,
-			iD:               uuid.New().String(),
-			summary:          pathItem.Summary,
-			description:      pathItem.Description,
-			vendorExtensions: convertExtensibletoReadableFormat31(pathItem.Extensions),
 		}
 	}
 	return resource
@@ -248,79 +180,10 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 	return SortResources(resources), nil
 }
 
-// setResourcesOpenAPI needs to be implemented for openapi 3.1: DONE NOT Tested
-func setResourcesOpenAPI31(openAPI v3.Document) ([]*Resource, error) {
-	var resources []*Resource
-
-	// Check the disable security vendor ext at API level.
-	// If it's present, then the same value should be added to the
-	// resource level if vendor ext is not present at each resource level.
-	val, found := resolveDisableSecurity31(openAPI.Extensions)
-	if openAPI.Paths != nil {
-		conf, _ := config.ReadConfigs()
-		for path, pathItem := range openAPI.Paths.PathItems.FromOldest() {
-			if conf.Envoy.MaximumResourcePathLengthInKB != -1 &&
-				isResourcePathLimitExceeds(path, int(conf.Envoy.MaximumResourcePathLengthInKB)) {
-				return nil, errors.New("path: " + path + " exceeds maximum allowed length")
-			}
-			// Checks for resource level security. (security is disabled in resource level using x-wso2-disable-security extension)
-			isResourceLvlSecurityDisabled, foundInResourceLevel := resolveDisableSecurity31(pathItem.Extensions)
-			methodsArray := make([]*Operation, pathItem.GetOperations().Len())
-			var arrayIndex int = 0
-			for httpMethod, operation := range pathItem.GetOperations().FromOldest() {
-				if operation != nil {
-					if foundInResourceLevel {
-						operation.Extensions = addDisableSecurityIfNotPresent31(operation.Extensions, isResourceLvlSecurityDisabled)
-					} else if found {
-						operation.Extensions = addDisableSecurityIfNotPresent31(operation.Extensions, val)
-					}
-					methodsArray[arrayIndex] = getOperationLevelDetails31(operation, strings.ToUpper(httpMethod))
-					arrayIndex++
-				}
-			}
-
-			resource := setPathInfoOpenAPI31(path, methodsArray, pathItem)
-			var productionUrls []Endpoint
-			if isServerURLIsAvailable31(pathItem.Servers) {
-				for _, serverEntry := range pathItem.Servers {
-					if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
-						continue
-					}
-					endpoint, err := getHTTPEndpoint(serverEntry.URL)
-					if err == nil {
-						productionUrls = append(productionUrls, *endpoint)
-
-					} else {
-						logger.LoggerOasparser.Info("Not considering the URL in servers object as parsing has failed. ", err)
-					}
-
-				}
-				if len(productionUrls) > 0 {
-					resource.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
-				}
-			}
-			resources = append(resources, &resource)
-
-		}
-	}
-	return SortResources(resources), nil
-}
-
 func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 	var securitySchemes []SecurityScheme
 	for key, val := range openAPI.Components.SecuritySchemes {
 		scheme := SecurityScheme{DefinitionName: key, Type: val.Value.Type, Name: val.Value.Name, In: val.Value.In}
-		securitySchemes = append(securitySchemes, scheme)
-	}
-	logger.LoggerOasparser.Debugf("Security schemes in setSecuritySchemesOpenAPI method %v:", securitySchemes)
-	return securitySchemes
-}
-
-// setSecuritySchemesOpenAPI31 need to be implemented for openapi 3.1: DONE
-func setSecuritySchemesOpenAPI31(openAPI v3.Document) []SecurityScheme {
-	var securitySchemes []SecurityScheme
-	for key, val := range openAPI.Components.SecuritySchemes.FromOldest() {
-		scheme := SecurityScheme{DefinitionName: key, Type: val.Type, Name: val.Name, In: val.In}
 		securitySchemes = append(securitySchemes, scheme)
 	}
 	logger.LoggerOasparser.Debugf("Security schemes in setSecuritySchemesOpenAPI method %v:", securitySchemes)
@@ -338,28 +201,6 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) *Ope
 	var securityArray = make([]map[string][]string, len(securityData))
 	for i, security := range securityData {
 		securityArray[i] = security
-	}
-	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
-	return NewOperation(method, securityArray, extensions)
-
-}
-
-// getOperationLevelDetails31 needs to be implemented for openapi 3.1: DONE
-func getOperationLevelDetails31(operation *v3.Operation, method string) *Operation {
-	extensions := convertExtensibletoReadableFormat31(operation.Extensions)
-
-	if operation.Security == nil {
-		return NewOperation(method, nil, extensions)
-	}
-
-	var securityData []*base.SecurityRequirement = operation.Security
-	var securityArray = make([]map[string][]string, len(securityData))
-	for i, security := range securityData {
-		securityMap := make(map[string][]string, security.Requirements.Len())
-		for key, val := range security.Requirements.FromOldest() {
-			securityMap[key] = val
-		}
-		securityArray[i] = securityMap
 	}
 	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
 	return NewOperation(method, securityArray, extensions)
@@ -449,16 +290,6 @@ func isServerURLIsAvailable(servers openapi3.Servers) bool {
 	return false
 }
 
-// isServerURLIsAvailable31 needs to be implemented for openapi 3.1: DONE
-func isServerURLIsAvailable31(servers []*v3.Server) bool {
-	if servers != nil {
-		if len(servers) > 0 && (servers[0].URL != "") {
-			return true
-		}
-	}
-	return false
-}
-
 // convertExtensibletoReadableFormat unmarshalls the vendor extensible in open api3.
 func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps) map[string]interface{} {
 	jsnRawExtensible := vendorExtensions.Extensions
@@ -469,20 +300,6 @@ func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps)
 
 	var extensible map[string]interface{}
 	err = json.Unmarshal(b, &extensible)
-	if err != nil {
-		logger.LoggerOasparser.Error("Error unmarshalling vendor extensions: ", err)
-	}
-	return extensible
-}
-
-// convertExtensibletoReadableFormat31 needs to be implemented for openapi 3.1: DONE
-func convertExtensibletoReadableFormat31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) map[string]interface{} {
-	b, err := yaml.Marshal(vendorExtensions)
-	if err != nil {
-		logger.LoggerOasparser.Error("Error marshalling vendor extensions: ", err)
-	}
-	var extensible map[string]interface{}
-	err = yaml.Unmarshal(b, &extensible)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error unmarshalling vendor extensions: ", err)
 	}
@@ -505,18 +322,6 @@ func resolveDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, boo
 	return false, false
 }
 
-// resolveDisableSecurity need to be implemented for openapi 3.1: DONE
-func resolveDisableSecurity31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) (bool, bool) {
-	extensions := convertExtensibletoReadableFormat31(vendorExtensions)
-	if y, found := extensions[xWso2DisableSecurity]; found {
-		if val, ok := y.(bool); ok {
-			return val, found
-		}
-		logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
-	}
-	return false, false
-}
-
 // This method add the disable security to given vendor extensions, if it's not present.
 func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, val bool) openapi3.ExtensionProps {
 	_, found := resolveDisableSecurity(vendorExtensions)
@@ -526,40 +331,11 @@ func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, va
 	return vendorExtensions
 }
 
-// addDisableSecurityIfNotPresent31 need to be implemented for openapi 3.1: DONE
-func addDisableSecurityIfNotPresent31(vendorExtensions *orderedmap.Map[string, *yaml.Node], val bool) *orderedmap.Map[string, *yaml.Node] {
-	if _, found := vendorExtensions.Get(xWso2DisableSecurity); !found {
-		node := &yaml.Node{
-			Kind:  8,
-			Tag:   "!!bool",
-			Value: strconv.FormatBool(val),
-		}
-		vendorExtensions.Set(xWso2DisableSecurity, node)
-	}
-	return vendorExtensions
-}
-
 // GetXWso2Label extracts the vendor-extension (openapi v3) property.
 //
 // Default value is 'default'
 func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 	vendorExtensionsMap := convertExtensibletoReadableFormat(vendorExtensions)
-	var labelArray []string
-	if y, found := vendorExtensionsMap[xWso2Label]; found {
-		if val, ok := y.([]interface{}); ok {
-			for _, label := range val {
-				labelArray = append(labelArray, label.(string))
-			}
-			return labelArray
-		}
-		logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
-	}
-	return []string{"default"}
-}
-
-// GetXWso2Label31 need to be implemented for openapi 3.1: DONE
-func GetXWso2Label31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) []string {
-	vendorExtensionsMap := convertExtensibletoReadableFormat31(vendorExtensions)
 	var labelArray []string
 	if y, found := vendorExtensionsMap[xWso2Label]; found {
 		if val, ok := y.([]interface{}); ok {
