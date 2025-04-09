@@ -27,7 +27,7 @@ import (
 	"github.com/pb33f/libopenapi"
 	validator "github.com/pb33f/libopenapi-validator"
 	"github.com/pb33f/libopenapi/datamodel/high/base"
-	"github.com/pb33f/libopenapi/datamodel/high/v3"
+	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
 	"github.com/pb33f/libopenapi/orderedmap"
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -378,7 +378,7 @@ func TestSetResourcesOpenAPI31(t *testing.T) {
 	}
 }
 
-func TestGetXWso2Label31(t *testing.T) {
+func TestGetXWso2LabelOAS31(t *testing.T) {
 
 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_xwso2label.yaml"
 
@@ -397,6 +397,6 @@ func TestGetXWso2Label31(t *testing.T) {
 	valid, _ := openapiValidator.ValidateDocument()
 	assert.True(t, valid, "OpenAPI document is not valid.")
 
-	wso2Label := GetXWso2Label31(openapiModel.Model.Extensions)
+	wso2Label := GetXWso2LabelOAS31(openapiModel.Model.Extensions)
 	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
 }

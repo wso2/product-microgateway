@@ -48,7 +48,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI31(swagger31 v3.Document) error {
 		swagger.version = swagger31.Info.Version
 	}
 
-	swagger.vendorExtensions = convertExtensibletoReadableFormat31(swagger31.Extensions)
+	swagger.vendorExtensions = convertExtensibletoReadableFormatOAS31(swagger31.Extensions)
 	swagger.securityScheme = setSecuritySchemesOpenAPI31(swagger31)
 	for _, security := range swagger31.Security {
 		securityMap := make(map[string][]string, security.Requirements.Len())
@@ -66,7 +66,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI31(swagger31 v3.Document) error {
 	var productionUrls []Endpoint
 	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
 	// an exception is made where servers url is not processed when the API is prototyped.
-	if isServerURLIsAvailable31(swagger31.Servers) && !swagger.IsProtoTyped {
+	if isServerURLIsAvailableOAS31(swagger31.Servers) && !swagger.IsProtoTyped {
 		for _, serverEntry := range swagger31.Servers {
 			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 				continue
@@ -97,7 +97,7 @@ func setPathInfoOpenAPI31(path string, methods []*Operation, pathItem *v3.PathIt
 			iD:               uuid.New().String(),
 			summary:          pathItem.Summary,
 			description:      pathItem.Description,
-			vendorExtensions: convertExtensibletoReadableFormat31(pathItem.Extensions),
+			vendorExtensions: convertExtensibletoReadableFormatOAS31(pathItem.Extensions),
 		}
 	}
 	return resource
@@ -110,7 +110,7 @@ func setResourcesOpenAPI31(openAPI v3.Document) ([]*Resource, error) {
 	// Check the disable security vendor ext at API level.
 	// If it's present, then the same value should be added to the
 	// resource level if vendor ext is not present at each resource level.
-	val, found := resolveDisableSecurity31(openAPI.Extensions)
+	val, found := resolveDisableSecurityOAS31(openAPI.Extensions)
 	if openAPI.Paths != nil {
 		conf, _ := config.ReadConfigs()
 		for path, pathItem := range openAPI.Paths.PathItems.FromOldest() {
@@ -119,24 +119,24 @@ func setResourcesOpenAPI31(openAPI v3.Document) ([]*Resource, error) {
 				return nil, errors.New("path: " + path + " exceeds maximum allowed length")
 			}
 			// Checks for resource level security. (security is disabled in resource level using x-wso2-disable-security extension)
-			isResourceLvlSecurityDisabled, foundInResourceLevel := resolveDisableSecurity31(pathItem.Extensions)
+			isResourceLvlSecurityDisabled, foundInResourceLevel := resolveDisableSecurityOAS31(pathItem.Extensions)
 			methodsArray := make([]*Operation, pathItem.GetOperations().Len())
 			var arrayIndex int = 0
 			for httpMethod, operation := range pathItem.GetOperations().FromOldest() {
 				if operation != nil {
 					if foundInResourceLevel {
-						operation.Extensions = addDisableSecurityIfNotPresent31(operation.Extensions, isResourceLvlSecurityDisabled)
+						operation.Extensions = addDisableSecurityIfNotPresentOAS31(operation.Extensions, isResourceLvlSecurityDisabled)
 					} else if found {
-						operation.Extensions = addDisableSecurityIfNotPresent31(operation.Extensions, val)
+						operation.Extensions = addDisableSecurityIfNotPresentOAS31(operation.Extensions, val)
 					}
-					methodsArray[arrayIndex] = getOperationLevelDetails31(operation, strings.ToUpper(httpMethod))
+					methodsArray[arrayIndex] = getOperationLevelDetailsOAS31(operation, strings.ToUpper(httpMethod))
 					arrayIndex++
 				}
 			}
 
 			resource := setPathInfoOpenAPI31(path, methodsArray, pathItem)
 			var productionUrls []Endpoint
-			if isServerURLIsAvailable31(pathItem.Servers) {
+			if isServerURLIsAvailableOAS31(pathItem.Servers) {
 				for _, serverEntry := range pathItem.Servers {
 					if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 						continue
@@ -174,8 +174,8 @@ func setSecuritySchemesOpenAPI31(openAPI v3.Document) []SecurityScheme {
 	return securitySchemes
 }
 
-func getOperationLevelDetails31(operation *v3.Operation, method string) *Operation {
-	extensions := convertExtensibletoReadableFormat31(operation.Extensions)
+func getOperationLevelDetailsOAS31(operation *v3.Operation, method string) *Operation {
+	extensions := convertExtensibletoReadableFormatOAS31(operation.Extensions)
 
 	if operation.Security == nil {
 		return NewOperation(method, nil, extensions)
@@ -195,8 +195,8 @@ func getOperationLevelDetails31(operation *v3.Operation, method string) *Operati
 
 }
 
-// isServerURLIsAvailable31 checks if the servers object is present and has a valid URL.
-func isServerURLIsAvailable31(servers []*v3.Server) bool {
+// isServerURLIsAvailableOAS31 checks if the servers object is present and has a valid URL.
+func isServerURLIsAvailableOAS31(servers []*v3.Server) bool {
 	if servers != nil {
 		if len(servers) > 0 && (servers[0].URL != "") {
 			return true
@@ -205,8 +205,8 @@ func isServerURLIsAvailable31(servers []*v3.Server) bool {
 	return false
 }
 
-// convertExtensibletoReadableFormat31 converts the vendor extensions from the ordered map to a readable format.
-func convertExtensibletoReadableFormat31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) map[string]interface{} {
+// convertExtensibletoReadableFormatOAS31 converts the vendor extensions from the ordered map to a readable format.
+func convertExtensibletoReadableFormatOAS31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) map[string]interface{} {
 	b, err := yaml.Marshal(vendorExtensions)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marshalling vendor extensions: ", err)
@@ -224,8 +224,8 @@ func convertExtensibletoReadableFormat31(vendorExtensions *orderedmap.Map[string
 // If found, it will return two bool values which are the following in order.
 // 1st bool represnt the value of the vendor extension.
 // 2nd bool represent if the vendor extension present.
-func resolveDisableSecurity31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) (bool, bool) {
-	extensions := convertExtensibletoReadableFormat31(vendorExtensions)
+func resolveDisableSecurityOAS31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) (bool, bool) {
+	extensions := convertExtensibletoReadableFormatOAS31(vendorExtensions)
 	if y, found := extensions[xWso2DisableSecurity]; found {
 		if val, ok := y.(bool); ok {
 			return val, found
@@ -236,7 +236,7 @@ func resolveDisableSecurity31(vendorExtensions *orderedmap.Map[string, *yaml.Nod
 }
 
 // This method add the disable security to given vendor extensions, if it's not present.
-func addDisableSecurityIfNotPresent31(vendorExtensions *orderedmap.Map[string, *yaml.Node], val bool) *orderedmap.Map[string, *yaml.Node] {
+func addDisableSecurityIfNotPresentOAS31(vendorExtensions *orderedmap.Map[string, *yaml.Node], val bool) *orderedmap.Map[string, *yaml.Node] {
 	if _, found := vendorExtensions.Get(xWso2DisableSecurity); !found {
 		node := &yaml.Node{
 			Kind:  8,
@@ -248,11 +248,11 @@ func addDisableSecurityIfNotPresent31(vendorExtensions *orderedmap.Map[string, *
 	return vendorExtensions
 }
 
-// GetXWso2Label31 extracts the vendor-extension (openapi v3.1) property.
+// GetXWso2LabelOAS31 extracts the vendor-extension (openapi v3.1) property.
 //
 // Default value is 'default'
-func GetXWso2Label31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) []string {
-	vendorExtensionsMap := convertExtensibletoReadableFormat31(vendorExtensions)
+func GetXWso2LabelOAS31(vendorExtensions *orderedmap.Map[string, *yaml.Node]) []string {
+	vendorExtensionsMap := convertExtensibletoReadableFormatOAS31(vendorExtensions)
 	var labelArray []string
 	if y, found := vendorExtensionsMap[xWso2Label]; found {
 		if val, ok := y.([]interface{}); ok {
