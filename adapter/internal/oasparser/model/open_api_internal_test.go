@@ -24,6 +24,11 @@ import (
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/pb33f/libopenapi"
+	validator "github.com/pb33f/libopenapi-validator"
+	"github.com/pb33f/libopenapi/datamodel/high/base"
+	"github.com/pb33f/libopenapi/datamodel/high/v3"
+	"github.com/pb33f/libopenapi/orderedmap"
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
 )
@@ -223,4 +228,175 @@ func TestMalformedUrl(t *testing.T) {
 		assert.Nil(t, response)
 	}
 
+}
+
+func TestSetInfoOpenAPI31(t *testing.T) {
+	type setInfoTestItem struct {
+		input   v3.Document
+		result  MgwSwagger
+		message string
+	}
+	dataItems := []setInfoTestItem{
+		{
+			v3.Document{
+				Info: &base.Info{
+					Title:       "petsore",
+					Description: "Swagger definition",
+					Version:     "1.0",
+				},
+			},
+
+			MgwSwagger{
+				apiType:     "HTTP",
+				description: "Swagger definition",
+				title:       "petsore",
+				version:     "1.0",
+			},
+			"usual case",
+		},
+		{
+			v3.Document{
+				Info: nil,
+			},
+			MgwSwagger{
+				id:          "",
+				apiType:     "HTTP",
+				description: "",
+				title:       "",
+				version:     "",
+			},
+			"when info section is null",
+		},
+		{
+			input: v3.Document{},
+			result: MgwSwagger{
+				id:          "",
+				apiType:     "HTTP",
+				description: "",
+				title:       "",
+				version:     "",
+			},
+			message: "when openAPI struct is empty",
+		},
+	}
+	for _, item := range dataItems {
+		var mgwSwagger MgwSwagger
+		err := mgwSwagger.SetInfoOpenAPI31(item.input)
+		assert.Nil(t, err, "Error should not be present when openAPI v3 definition is converted to a MgwSwagger object")
+		assert.Equal(t, item.result, mgwSwagger, item.message)
+	}
+}
+
+func TestSetResourcesOpenAPI31(t *testing.T) {
+	type setResourcesTestItem struct {
+		input   v3.Document
+		result  []*Resource
+		message string
+	}
+
+	// Setting up a mock path item and path items ordered map.
+	// Mock PathItem with GET method
+	pathItem1 := &v3.PathItem{
+		Get: &v3.Operation{
+			OperationId: "petfindbyid",
+		},
+		Summary:     "pet find by id",
+		Description: "this retrieve data from id",
+	}
+	pathItems1 := orderedmap.New[string, *v3.PathItem]()
+	pathItems1.Set("/pet/{petId}", pathItem1)
+
+	// Mock PathItem without any methods
+	// OAS 3.1 can have paths without any path items defined inside.
+	pathItem2 := &v3.PathItem{
+		Summary:     "pet find by id",
+		Description: "this retrieve data from id",
+	}
+	pathItems2 := orderedmap.New[string, *v3.PathItem]()
+	pathItems2.Set("/pet/{petId}", pathItem2)
+
+	dataItems := []setResourcesTestItem{
+		{
+			v3.Document{
+				Paths: nil,
+			},
+			nil,
+			"when paths are nil",
+		},
+		{
+			v3.Document{
+				Paths: &v3.Paths{
+					PathItems:  pathItems1,
+					Extensions: nil,
+				},
+			},
+			[]*Resource{
+				{
+					path:        "/pet/{petId}",
+					methods:     []*Operation{{"", "GET", nil, "", false, nil, ""}},
+					description: "this retrieve data from id",
+					iD:          "petfindbyid",
+					summary:     "pet find by id",
+				},
+			},
+			"usual case",
+		},
+		{
+			v3.Document{
+				Paths: &v3.Paths{
+					PathItems:  pathItems2,
+					Extensions: nil,
+				},
+			},
+			[]*Resource{
+				{
+					path:        "/pet/{petId}",
+					methods:     []*Operation{},
+					description: "this retrieve data from id",
+					summary:     "pet find by id",
+				},
+			},
+			"PathItem without any methods",
+		},
+	}
+	for _, item := range dataItems {
+		resultResources, err := setResourcesOpenAPI31(item.input)
+		assert.Nil(t, err, "No error should be encountered when setting resources")
+		if item.result != nil {
+			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
+
+			if len(resultResources[0].GetMethod()) != 0 {
+				resultResources[0].GetMethod()[0].iD = item.result[0].methods[0].iD
+			}
+
+			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)
+			assert.Equal(t, item.result[0].description, resultResources[0].description, item.message)
+			assert.Equal(t, item.result[0].summary, resultResources[0].summary, item.message)
+		} else {
+			assert.Equal(t, item.result, resultResources, item.message)
+		}
+	}
+}
+
+func TestGetXWso2Label31(t *testing.T) {
+
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_xwso2label.yaml"
+
+	openapi, err := os.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "OpenAPI specification file loading failed.")
+
+	openapiDocument, err := libopenapi.NewDocument(openapi)
+	assert.Nil(t, err, "OpenAPI document creation failed.")
+
+	openapiModel, modelBuildErr := openapiDocument.BuildV3Model()
+	assert.Nil(t, modelBuildErr, "OpenAPI model creation failed.")
+
+	openapiValidator, validatorErrs := validator.NewValidator(openapiDocument)
+	assert.Nil(t, validatorErrs, "OpenAPI validator creation failed.")
+
+	valid, _ := openapiValidator.ValidateDocument()
+	assert.True(t, valid, "OpenAPI document is not valid.")
+
+	wso2Label := GetXWso2Label31(openapiModel.Model.Extensions)
+	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
 }
