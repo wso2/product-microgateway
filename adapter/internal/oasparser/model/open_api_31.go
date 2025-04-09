@@ -164,9 +164,11 @@ func setResourcesOpenAPI31(openAPI v3.Document) ([]*Resource, error) {
 // setSecuritySchemesOpenAPI31 extracts the security schemes from the openAPI v3.1 definition and returns a slice of SecurityScheme structs.
 func setSecuritySchemesOpenAPI31(openAPI v3.Document) []SecurityScheme {
 	var securitySchemes []SecurityScheme
-	for key, val := range openAPI.Components.SecuritySchemes.FromOldest() {
-		scheme := SecurityScheme{DefinitionName: key, Type: val.Type, Name: val.Name, In: val.In}
-		securitySchemes = append(securitySchemes, scheme)
+	if openAPI.Components != nil {
+		for key, val := range openAPI.Components.SecuritySchemes.FromOldest() {
+			scheme := SecurityScheme{DefinitionName: key, Type: val.Type, Name: val.Name, In: val.In}
+			securitySchemes = append(securitySchemes, scheme)
+		}
 	}
 	logger.LoggerOasparser.Debugf("Security schemes in setSecuritySchemesOpenAPI method %v:", securitySchemes)
 	return securitySchemes
