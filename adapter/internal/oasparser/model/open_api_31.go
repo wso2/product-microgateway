@@ -170,7 +170,7 @@ func setSecuritySchemesOpenAPI31(openAPI v3.Document) []SecurityScheme {
 			securitySchemes = append(securitySchemes, scheme)
 		}
 	}
-	logger.LoggerOasparser.Debugf("Security schemes in setSecuritySchemesOpenAPI method %v:", securitySchemes)
+	logger.LoggerOasparser.Debugf("Security schemes in setSecuritySchemesOpenAPI31 method %v:", securitySchemes)
 	return securitySchemes
 }
 
