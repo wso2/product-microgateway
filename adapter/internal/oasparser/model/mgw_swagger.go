@@ -1359,7 +1359,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		} else {
 			v31Model, _ := document.BuildV3Model()
-			infoOpenAPIErr := swagger.SetInfoOpenAPI31(v31Model.Model)
+			infoOpenAPIErr := swagger.SetInfoOpenAPIV31(v31Model.Model)
 			if infoOpenAPIErr != nil {
 				return infoOpenAPIErr
 			}

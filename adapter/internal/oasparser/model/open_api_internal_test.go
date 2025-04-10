@@ -281,7 +281,7 @@ func TestSetInfoOpenAPI31(t *testing.T) {
 	}
 	for _, item := range dataItems {
 		var mgwSwagger MgwSwagger
-		err := mgwSwagger.SetInfoOpenAPI31(item.input)
+		err := mgwSwagger.SetInfoOpenAPIV31(item.input)
 		assert.Nil(t, err, "Error should not be present when openAPI v3 definition is converted to a MgwSwagger object")
 		assert.Equal(t, item.result, mgwSwagger, item.message)
 	}
@@ -360,7 +360,7 @@ func TestSetResourcesOpenAPI31(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources, err := setResourcesOpenAPI31(item.input)
+		resultResources, err := setResourcesOpenAPIV31(item.input)
 		assert.Nil(t, err, "No error should be encountered when setting resources")
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
@@ -397,6 +397,10 @@ func TestGetXWso2LabelOAS31(t *testing.T) {
 	valid, _ := openapiValidator.ValidateDocument()
 	assert.True(t, valid, "OpenAPI document is not valid.")
 
-	wso2Label := GetXWso2LabelOAS31(openapiModel.Model.Extensions)
+	wso2Label := GetXWso2LabelV31(openapiModel.Model.Extensions)
 	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
+}
+
+func TestFullOAS(t *testing.T){
+
 }
