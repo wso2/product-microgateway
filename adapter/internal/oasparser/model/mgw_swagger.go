@@ -39,15 +39,21 @@ import (
 )
 
 var paidOrgsFromSubscriptionServiceEnabled bool
+var isCorsOverrideEnabled bool
 
 func init() {
 	envIsPaidOrgsFromSubscriptionServiceEnabled := os.Getenv("ENABLE_PAID_ORGS_FROM_SUBSCRIPTION_SERVICE")
+	isCorsOverrideEnabledString := os.Getenv("IS_CORS_OVERRIDE_ENABLED")
 
 	// Parse the environment variable to a boolean, defaulting to false if not set or if parsing fails
 	var err error
 	paidOrgsFromSubscriptionServiceEnabled, err = strconv.ParseBool(envIsPaidOrgsFromSubscriptionServiceEnabled)
 	if err != nil || envIsPaidOrgsFromSubscriptionServiceEnabled == "" {
 		paidOrgsFromSubscriptionServiceEnabled = false
+	}
+	isCorsOverrideEnabled, err = strconv.ParseBool(isCorsOverrideEnabledString)
+	if err != nil {
+		isCorsOverrideEnabled = false
 	}
 }
 
@@ -173,6 +179,7 @@ type CorsConfig struct {
 	AccessControlAllowMethods     []string `mapstructure:"accessControlAllowMethods"`
 	AccessControlAllowOrigins     []string `mapstructure:"accessControlAllowOrigins"`
 	AccessControlExposeHeaders    []string `mapstructure:"accessControlExposeHeaders"`
+	Override                      bool     `mapstructure:"override"`
 }
 
 // InterceptEndpoint contains the parameters of endpoint security
@@ -1112,12 +1119,20 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 				logger.LoggerOasparser.Errorf("Error while parsing %v: "+err.Error(), xWso2Cors)
 				return
 			}
-			if corsConfig.Enabled {
+			if isCorsOverrideEnabled {
+				if !corsConfig.Override && !corsConfig.Enabled {
+					logger.LoggerOasparser.Debugf("Applying global cors configuration since Enabled=%v and Override=%v", corsConfig.Enabled, corsConfig.Override)
+					swagger.xWso2Cors = generateGlobalCors()
+				} else {
+					logger.LoggerOasparser.Debugf("API Level Cors Configuration is applied : %+v\n", corsConfig)
+					swagger.xWso2Cors = corsConfig
+				}
+			} else if corsConfig.Enabled {
 				logger.LoggerOasparser.Debugf("API Level Cors Configuration is applied : %+v\n", corsConfig)
 				swagger.xWso2Cors = corsConfig
-				return
+			} else {
+				swagger.xWso2Cors = generateGlobalCors()
 			}
-			swagger.xWso2Cors = generateGlobalCors()
 			return
 		}
 		logger.LoggerOasparser.Errorf("Error while parsing %v .", xWso2Cors)
