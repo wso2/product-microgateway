@@ -26,6 +26,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/pb33f/libopenapi"
 	validator "github.com/pb33f/libopenapi-validator"
+
 	"github.com/pb33f/libopenapi/datamodel/high/base"
 	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
 	"github.com/pb33f/libopenapi/orderedmap"
@@ -401,6 +402,77 @@ func TestGetXWso2LabelOAS31(t *testing.T) {
 	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
 }
 
-func TestFullOAS(t *testing.T){
+func TestPopulationFromOpenAPIV31ToMgwSwagger(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/opeanapi_v31.yaml"
 
+	openapi, err := os.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "OpenAPI specification file loading failed.")
+
+	openapiDocument, err := libopenapi.NewDocument(openapi)
+	assert.Nil(t, err, "OpenAPI document creation failed.")
+
+	openapiv3Model, modelBuildErr := openapiDocument.BuildV3Model()
+	assert.Nil(t, modelBuildErr, "OpenAPI model creation failed.")
+
+	openapiValidator, validatorErrs := validator.NewValidator(openapiDocument)
+	assert.Nil(t, validatorErrs, "OpenAPI validator creation failed.")
+
+	valid, _ := openapiValidator.ValidateDocument()
+	assert.True(t, valid, "OpenAPI document is not valid.")
+
+	openapiModel := openapiv3Model.Model
+
+	wso2Label := GetXWso2LabelV31(openapiModel.Extensions)
+	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
+
+	var mgwSwagger MgwSwagger
+	mgwSwagger.SetInfoOpenAPIV31(openapiModel)
+
+	assert.Equal(t, mgwSwagger.vendorExtensions["x-wso2-auth-header"], "Authorization",
+		"Vendor Extensions are not properly populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.title, "Sample 3.1.1",
+		"API title is not properly populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.description, "This is a sample 3.1.1 openapi definition for testing",
+		"API description is not properly populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.version, "1.0.0",
+		"API version is not properly populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.productionEndpoints.Endpoints[0].Host, "www.sample-server.org",
+		"API production enpoint URLs are not properly configured in MgwSwagger.")
+
+	assert.Nil(t, mgwSwagger.sandboxEndpoints,
+		"API sandbox endpoint URLs are not properly configured in MgwSwagger.")
+
+	assert.Equal(t, len(mgwSwagger.resources), 2,
+		"Some API resources are missing from MgwSwagger.")
+
+	assert.Equal(t, len(mgwSwagger.resources[0].methods), 0,
+		"Paths without any path items are not properly populated properly in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.resources[0].path, "/pet/findByTags",
+		"Paths without any path items are not correctly populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.resources[0].summary,
+		"Sample path for finding pets by tag", "Summary field is not correctly populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.resources[1].methods[0].method, "GET",
+		"HTTP methods are not properly populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.resources[1].methods[0].vendorExtensions["x-throttling-tier"], "Unlimited",
+		"Resource vendor extensions are not correctly populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.resources[1].path, "/pet/{petId}",
+		"Resource paths are not correctly populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.resources[1].methods[0].security[0]["api_key"], []string(nil),
+		"Path Item security is properly not populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.resources[1].methods[0].security[1]["sample_oauth"], []string{"write:pets", "read:pets"},
+		"Path Item security is properly not populated in MgwSwagger.")
+
+	assert.Equal(t, mgwSwagger.securityScheme[1].DefinitionName, "api_key",
+		"Security Schemes are not populated properly in MgwSwagger.")
 }
