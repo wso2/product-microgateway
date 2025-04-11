@@ -12,20 +12,8 @@ info:
 x-wso2-basePath: '/cors'
 host: 'mockBackend:2383'
 basePath: /v2
-x-wso2-cors:
-  corsConfigurationEnabled: false
-  accessControlAllowOrigins:
-    - http://test1Invalid.com
-    - http://test2Invalid.com
-  accessControlAllowHeaders:
-    - Authorization
-    - X-PINGOTHER-INVALID
-  accessControlAllowMethods:
-    - DELETE
-    - POST
-  accessControlExposeHeaders:
-    - X-Custom-Header-Invalid
-  accessControlAllowCredentials: false
+# No CORS defined; the global CORS configuration will be used.
+#x-wso2-cors:
 tags:
   - name: pet
     description: Everything about your Pets
