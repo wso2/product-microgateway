@@ -58,6 +58,7 @@ public class APIConstants {
 
     public static final String NOT_FOUND_MESSAGE = "Not Found";
     public static final String NOT_FOUND_DESCRIPTION = "The requested resource is not available.";
+    public static final String CORS_FAILURE = "CORS_FAILURE";
 
     //headers and values
     public static final String CONTENT_TYPE_HEADER = "Content-type";
