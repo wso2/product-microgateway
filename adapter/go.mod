@@ -1,6 +1,8 @@
 module github.com/wso2/product-microgateway/adapter
 
-go 1.22.7
+go 1.23.0
+
+toolchain go1.23.3
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.6.0
@@ -26,7 +28,7 @@ require (
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/net v0.33.0
-	golang.org/x/text v0.21.0
+	golang.org/x/text v0.22.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98
 	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.34.1
@@ -65,8 +67,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	go.mongodb.org/mongo-driver v1.7.5 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	google.golang.org/genproto v0.0.0-20230711160842-782d3b101e98 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230711160842-782d3b101e98 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
