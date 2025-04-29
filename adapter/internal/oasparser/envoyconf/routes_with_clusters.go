@@ -635,6 +635,42 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TypedDnsResolverConfig: dnsResolverConf,
 	}
 
+	if conf.Envoy.HeadersPreserveCase {
+
+		// https://www.envoyproxy.io/docs/envoy/v1.24.12/configuration/http/http_conn_man/header_casing
+		httpProtocolOptions := &upstreams.HttpProtocolOptions{
+			UpstreamProtocolOptions: &upstreams.HttpProtocolOptions_ExplicitHttpConfig_{
+				ExplicitHttpConfig: &upstreams.HttpProtocolOptions_ExplicitHttpConfig{
+					ProtocolConfig: &upstreams.HttpProtocolOptions_ExplicitHttpConfig_HttpProtocolOptions{
+						HttpProtocolOptions: &corev3.Http1ProtocolOptions{
+							HeaderKeyFormat: &corev3.Http1ProtocolOptions_HeaderKeyFormat{
+								HeaderFormat: &corev3.Http1ProtocolOptions_HeaderKeyFormat_StatefulFormatter{
+									StatefulFormatter: &corev3.TypedExtensionConfig{
+										Name: perserveCaseFormatterName,
+										TypedConfig: &anypb.Any{
+											TypeUrl: perserveCaseFormatterConfigName,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		explicitHttpConfigPb, err := anypb.New(httpProtocolOptions)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		typedExtensionProtocolOptions := map[string]*anypb.Any{
+			extensionsHttpProtocolOptionsName: explicitHttpConfigPb,
+		}
+
+		cluster.TypedExtensionProtocolOptions = typedExtensionProtocolOptions
+	}
+
 	// If the endpoint is within the cluster, set the max requests per connection to 1
 	// This ensure cilium proxy will not reuse the connection
 	if withinClusterEndpoint && os.Getenv("ROUTER_DISABLE_IN_CLUSTER_CONNECTION_POOLING") == "true" {
