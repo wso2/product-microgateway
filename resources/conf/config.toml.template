@@ -89,7 +89,7 @@ soapErrorInXMLEnabled = false
     # Git personal access token or password
     accessToken = $env{git_access_token}
     # Path to the private key used for authentication (Use "" in the case of a public repository (only for GitHub))
-    sshKeyFile = "/home/wso2/ssh-keys/id_ed25519"
+    SSHKeyFile = "/home/wso2/ssh-keys/id_ed25519"
 
 # Configuration to expose adapter metrics
 [adapter.metrics]
