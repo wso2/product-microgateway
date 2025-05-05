@@ -34,6 +34,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
@@ -1341,7 +1342,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 	}
 	definitionVersion := utills.FindAPIDefinitionVersion(apiJsn)
 
-	if definitionVersion == "2" {
+	if definitionVersion == constants.SwaggerV2 {
 		// map json to struct
 		var apiData2 spec.Swagger
 		err = json.Unmarshal(apiJsn, &apiData2)
@@ -1354,7 +1355,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			}
 		}
 
-	} else if definitionVersion == "3" {
+	} else if definitionVersion == constants.OpenAPIV30 {
 		// map json to struct
 		var apiData3 openapi3.Swagger
 
@@ -1368,7 +1369,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			}
 		}
 
-	} else if definitionVersion == "3.1" {
+	} else if definitionVersion == constants.OpenAPIV31 {
 		document, err := libopenapi.NewDocument(apiJsn)
 		if err != nil {
 			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)

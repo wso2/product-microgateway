@@ -28,6 +28,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 // ToJSON converts a single YAML document into a JSON document
@@ -55,7 +56,7 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 // FindAPIDefinitionVersion finds the openapi version ("2" or "3") or Async API version for the given
 // API Definition.
 func FindAPIDefinitionVersion(jsn []byte) string {
-	var version string = "2"
+	var version string = constants.SwaggerV2
 	var result map[string]interface{}
 
 	err := json.Unmarshal(jsn, &result)
@@ -64,13 +65,13 @@ func FindAPIDefinitionVersion(jsn []byte) string {
 	}
 
 	if _, ok := result["swagger"]; ok {
-		return "2"
+		return constants.SwaggerV2
 	} else if _, ok := result["openapi"]; ok {
 		if versionNumber, ok := result["openapi"].(string); ok {
 			if strings.HasPrefix(versionNumber, "3.0") {
-				return "3"
+				return constants.OpenAPIV30
 			} else if strings.HasPrefix(versionNumber, "3.1") {
-				return "3.1"
+				return constants.OpenAPIV31
 			}
 			logger.LoggerOasparser.Errorf("OpenAPI version %v is not supported.", versionNumber)
 			return "not_supported_openapi_version" + versionNumber
