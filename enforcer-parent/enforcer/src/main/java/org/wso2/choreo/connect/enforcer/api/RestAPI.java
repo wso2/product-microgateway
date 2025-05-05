@@ -225,7 +225,8 @@ public class RestAPI implements API {
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
             }
-            if (analyticsEnabled && !FilterUtils.isSkippedAnalyticsFaultEvent(responseObject.getErrorCode())) {
+            if (analyticsEnabled && !APIConstants.CORS_FAILURE.equals(requestContext.getExtAuthDetails())
+                    && !FilterUtils.isSkippedAnalyticsFaultEvent(responseObject.getErrorCode())) {
                 AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
             }
             responseObject.setMetaDataMap(requestContext.getMetadataMap());

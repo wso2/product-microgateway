@@ -181,7 +181,7 @@ type CorsConfig struct {
 	AccessControlAllowMethods     []string `mapstructure:"accessControlAllowMethods"`
 	AccessControlAllowOrigins     []string `mapstructure:"accessControlAllowOrigins"`
 	AccessControlExposeHeaders    []string `mapstructure:"accessControlExposeHeaders"`
-	Override                      bool     `mapstructure:"override"`
+	OverrideEnabled               bool     `mapstructure:"corsOverrideEnabled"`
 }
 
 // InterceptEndpoint contains the parameters of endpoint security
@@ -1122,8 +1122,8 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 				return
 			}
 			if isCorsOverrideEnabled {
-				if !corsConfig.Override && !corsConfig.Enabled {
-					logger.LoggerOasparser.Debugf("Applying global cors configuration since Enabled=%v and Override=%v", corsConfig.Enabled, corsConfig.Override)
+				if !corsConfig.OverrideEnabled && !corsConfig.Enabled {
+					logger.LoggerOasparser.Debugf("Applying global cors configuration since Enabled=%v and OverrideEnabled=%v", corsConfig.Enabled, corsConfig.OverrideEnabled)
 					swagger.xWso2Cors = generateGlobalCors()
 				} else {
 					logger.LoggerOasparser.Debugf("API Level Cors Configuration is applied : %+v\n", corsConfig)
