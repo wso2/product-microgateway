@@ -25,6 +25,12 @@ package org.wso2.choreo.connect.enforcer.constants;
 public class AdapterConstants {
     // The header which should be populated to set the upstream cluster
     public static final String CLUSTER_HEADER = "x-wso2-cluster-header";
+    // The header which should be populated to set the upstream cluster when response caching is enabled
+    public static final String ACTUAL_CLUSTER_HEADER = "x-wso2-actual-cluster";
+    // The header which should be populated to set the actual request path when response caching is enabled
+    public static final String PATH_HEADER = "x-wso2-request-path";
+    // The header which should be populated to set the upstream cluster when response caching is enabled
+    public static final String ACTUAL_HOST_HEADER = "x-wso2-actual-host";
     // The key which specifies the production cluster name inside the request context
     public static final String PROD_CLUSTER_HEADER_KEY = "prodClusterName";
      // The key which specifies the sandbox cluster name inside the request context
