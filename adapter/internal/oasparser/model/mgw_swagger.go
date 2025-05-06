@@ -30,9 +30,11 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
 	parser "github.com/mitchellh/mapstructure"
+	"github.com/pb33f/libopenapi"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
@@ -120,7 +122,7 @@ type Endpoint struct {
 	Host string
 	// BasePath (which would be added as prefix to the path mentioned in openapi definition)
 	// In openAPI v2, it is determined from the basePath property
-	// In openAPi v3, it is determined from the server object's suffix
+	// In openAPI v3, it is determined from the server object's suffix
 	Basepath string
 	// https, http, ws, wss
 	// In openAPI v2, it is fetched from the schemes entry
@@ -1340,7 +1342,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 	}
 	definitionVersion := utills.FindAPIDefinitionVersion(apiJsn)
 
-	if definitionVersion == "2" {
+	if definitionVersion == constants.SwaggerV2 {
 		// map json to struct
 		var apiData2 spec.Swagger
 		err = json.Unmarshal(apiJsn, &apiData2)
@@ -1353,7 +1355,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			}
 		}
 
-	} else if definitionVersion == "3" {
+	} else if definitionVersion == constants.OpenAPIV30 {
 		// map json to struct
 		var apiData3 openapi3.Swagger
 
@@ -1362,6 +1364,18 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		} else {
 			infoOpenAPIErr := swagger.SetInfoOpenAPI(apiData3)
+			if infoOpenAPIErr != nil {
+				return infoOpenAPIErr
+			}
+		}
+
+	} else if definitionVersion == constants.OpenAPIV31 {
+		document, err := libopenapi.NewDocument(apiJsn)
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while unmarshalling the openAPI V3.1", err)
+		} else {
+			v31Model, _ := document.BuildV3Model()
+			infoOpenAPIErr := swagger.SetInfoOpenAPIV31(v31Model.Model)
 			if infoOpenAPIErr != nil {
 				return infoOpenAPIErr
 			}

@@ -24,6 +24,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
@@ -176,15 +177,15 @@ func testGetOpenAPIVersionAndJSONContent(t *testing.T, apiYamlFilePath string) {
 
 	// Check for swagger version
 	if strings.HasSuffix(apiYamlFilePath, "/openapi.yaml") {
-		assert.Equal(t, swaggerVerison, "3", "OpenAPI swagger version mismatch")
+		assert.Equal(t, swaggerVerison, constants.OpenAPIV30, "OpenAPI swagger version mismatch")
 	}
 
 	if strings.HasSuffix(apiYamlFilePath, "/api.yaml") {
-		assert.Equal(t, swaggerVerison, "2", "Default swaggerVersion should be 2")
+		assert.Equal(t, swaggerVerison, constants.SwaggerV2, "Default swaggerVersion should be 2")
 	}
 
 	if strings.HasSuffix(apiYamlFilePath, "/swagger_with_prod_sand_extensions.yaml") {
-		assert.Equal(t, swaggerVerison, "2", "swaggerVersion mismatch")
+		assert.Equal(t, swaggerVerison, constants.SwaggerV2, "swaggerVersion mismatch")
 	}
 
 	//validate apiJsn

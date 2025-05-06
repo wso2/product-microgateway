@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 )
 
@@ -38,7 +39,7 @@ func TestFindSwaggerVersion(t *testing.T) {
 				"basepath": "api/v2"
 							
 				}`,
-			result:  "2",
+			result:  constants.SwaggerV2,
 			message: "when swagger version is 2",
 		},
 		{
@@ -48,8 +49,18 @@ func TestFindSwaggerVersion(t *testing.T) {
 				"basepath": "api/v2"
 							
 				}`,
-			result:  "3",
-			message: "when openAPi version is 3",
+			result:  constants.OpenAPIV30,
+			message: "when openAPI version is 3",
+		},
+		{
+			inputSwagger: `{
+				"openapi": "3.1",
+				"host": "petstore.io",
+				"basepath": "api/v2"
+							
+				}`,
+			result:  constants.OpenAPIV31,
+			message: "when openAPI version is 3.1",
 		},
 		{
 			inputSwagger: `{
@@ -57,8 +68,8 @@ func TestFindSwaggerVersion(t *testing.T) {
 				"basepath": "api/v2"
 							
 				}`,
-			result:  "2",
-			message: "when openAPi version is not provided",
+			result:  constants.SwaggerV2,
+			message: "when openAPI version is not provided",
 		},
 	}
 

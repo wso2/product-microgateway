@@ -1,0 +1,227 @@
+openapi: 3.1.1
+info:
+  title: Sample 3.1.1
+  description: >-
+    This is a sample 3.1.1 openapi definition for testing
+  termsOfService: http://www.sample-toc.org
+  contact: {}
+  license:
+    name: Apache 
+    url: http://www.sample-url.org
+  version: 1.0.0
+externalDocs:
+  description: Sample Description
+  url: http://www.sample-externaldoc.org
+servers:
+  - url: http://www.sample-server.org
+security:
+  - default: []
+tags:
+  - name: pet
+    description: Sample Pets
+    externalDocs:
+      description: Extra Docs
+      url: http://www.sample-tag.org
+paths:  
+  /pet/findByTags:
+    summary: Sample path for finding pets by tag
+    description: This case is possible for v31
+
+  /pet/{petId}:
+    get:
+      tags:
+        - pet
+      summary: Sample path for finding pet by ID
+      description: Find pets
+      operationId: findPetByID
+      parameters:
+        - name: petID
+          in: path
+          description: ID to search
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+            format: int32
+            exclusiveMaximum: 5
+            exclusiveMinimum: 0
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '400':
+          description: Invalid ID
+        '404':
+          description: Not Found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - api_key: []
+        - sample_oauth:
+            - write:pets
+            - read:pets
+        - default:
+            - v31m:write:pets
+            - v31m:read:pets
+      x-throttling-tier: Unlimited
+      x-throttling-limit:
+        requestCount: -1
+        unit: MINUTE
+
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          examples:
+            - 1
+        name:
+          type: string
+          examples:
+            - Dogs
+      xml:
+        name: category
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      xml:
+        name: tag
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          examples:
+            - 10
+        name:
+          type: string
+          examples:
+            - doggie
+        category:
+          $ref: '#/components/schemas/Category'
+        photoUrls:
+          type: array
+          items:
+            type: string
+            xml:
+              name: photoUrl
+          xml:
+            wrapped: true
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+          xml:
+            wrapped: true
+        status:
+          type: string
+          description: Sample pet status
+          enum:
+            - available
+            - pending
+            - sold
+      required:
+        - name
+        - photoUrls
+      xml:
+        name: pet
+    
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+  requestBodies:
+    Pet:
+      description: Pet object that needs to be added to the store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Pet'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Pet'
+  securitySchemes:
+    sample_oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://test.com
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://test.com
+          scopes:
+            v31:write:pets: modify pets in your account
+            v31:read:pets: read your pets
+          x-scopes-bindings:
+            v31:write:pets: ''
+            v31:read:pets: ''
+x-wso2-disable-security: false
+x-wso2-auth-header: Authorization
+x-wso2-cors:
+  corsConfigurationEnabled: false
+  accessControlAllowOrigins:
+    - '*'
+  accessControlAllowCredentials: false
+  accessControlAllowHeaders:
+    - authorization
+    - Access-Control-Allow-Origin
+    - Content-Type
+    - SOAPAction
+    - apikey
+    - Internal-Key
+  accessControlAllowMethods:
+    - GET
+    - PUT
+    - POST
+    - DELETE
+    - PATCH
+    - OPTIONS
+x-wso2-production-endpoints:
+  urls:
+    - http://www.sample-production.org
+  type: http
+x-wso2-sandbox-endpoints:
+  urls:
+    - http://www.sample-sandbox.org
+  type: http
+x-wso2-basePath: /ps31/1.0.0
+x-wso2-transports:
+  - http
+x-wso2-response-cache:
+  enabled: false
+  cacheTimeoutInSeconds: 300
