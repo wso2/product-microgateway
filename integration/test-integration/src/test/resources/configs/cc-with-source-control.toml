@@ -26,7 +26,7 @@ artifactsDirectory = "/home/wso2/git-artifacts"
     branch = ""
     username = "username"
     accessToken = "556018e1140708b97d5f3d189055a37e89b9ba82"
-    sshKeyFile = ""
+    SSHKeyFile = ""
 
 [router]
   listenerPort = 9090
