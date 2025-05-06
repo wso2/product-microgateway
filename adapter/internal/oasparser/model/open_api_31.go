@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2025, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import (
 // and pathItem level information are populated here.
 //
 // for each pathItem; vendor extensions, endpoints (based on servers object), available http Methods,
-// are populated. Each resource corresponding to a pathItem, has the property called iD, which is a
+// are populated. Each resource corresponding to a pathItem, has the property called ID, which is a
 // UUID.
 //
 // No operation specific information is extracted.

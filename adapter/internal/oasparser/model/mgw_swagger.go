@@ -122,7 +122,7 @@ type Endpoint struct {
 	Host string
 	// BasePath (which would be added as prefix to the path mentioned in openapi definition)
 	// In openAPI v2, it is determined from the basePath property
-	// In openAPi v3, it is determined from the server object's suffix
+	// In openAPI v3, it is determined from the server object's suffix
 	Basepath string
 	// https, http, ws, wss
 	// In openAPI v2, it is fetched from the schemes entry
@@ -1372,7 +1372,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 	} else if definitionVersion == constants.OpenAPIV31 {
 		document, err := libopenapi.NewDocument(apiJsn)
 		if err != nil {
-			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
+			logger.LoggerOasparser.Error("Error while unmarshalling the openAPI V3.1", err)
 		} else {
 			v31Model, _ := document.BuildV3Model()
 			infoOpenAPIErr := swagger.SetInfoOpenAPIV31(v31Model.Model)

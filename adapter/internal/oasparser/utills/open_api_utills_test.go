@@ -50,7 +50,7 @@ func TestFindSwaggerVersion(t *testing.T) {
 							
 				}`,
 			result:  constants.OpenAPIV30,
-			message: "when openAPi version is 3",
+			message: "when openAPI version is 3",
 		},
 		{
 			inputSwagger: `{
@@ -60,7 +60,7 @@ func TestFindSwaggerVersion(t *testing.T) {
 							
 				}`,
 			result:  constants.OpenAPIV31,
-			message: "when openAPi version is 3.1",
+			message: "when openAPI version is 3.1",
 		},
 		{
 			inputSwagger: `{
@@ -69,7 +69,7 @@ func TestFindSwaggerVersion(t *testing.T) {
 							
 				}`,
 			result:  constants.SwaggerV2,
-			message: "when openAPi version is not provided",
+			message: "when openAPI version is not provided",
 		},
 	}
 
