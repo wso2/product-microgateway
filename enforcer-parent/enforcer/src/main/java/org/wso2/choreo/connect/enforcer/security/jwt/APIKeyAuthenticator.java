@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * API Key authenticator.
@@ -83,6 +84,10 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
             // Add the new header.
             requestContext.addOrModifyHeaders(APIKeyConstants.INTERNAL_API_KEY_HEADER, newAPIKeyHeaderValue);
         }
+        // Drop all the api-key headers except the choreo-api-key-header.
+        requestContext.getRemoveHeaders().addAll(getAPIKeyInternalHeaders(requestContext).stream().filter(
+                        header -> !APIKeyConstants.INTERNAL_API_KEY_HEADER.equals(header))
+                .collect(Collectors.toList()));
     }
 
     private String getAPIKeyFromRequest(RequestContext requestContext) {
