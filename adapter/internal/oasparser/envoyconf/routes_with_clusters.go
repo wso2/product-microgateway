@@ -37,6 +37,7 @@ import (
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
+	extProcessorv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_proc/v3"
 	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
@@ -1118,6 +1119,40 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	corsFilter, _ := anypb.New(corsPolicy)
 
+	var filterExtProc *any.Any
+
+	logger.LoggerOasparser.Info("API Type: ", apiType)
+	if apiType == "MCP" {
+		// Overrding the default processing mode for MCP APIs
+		perFilterConfigExtProc := extProcessorv3.ExtProcPerRoute{
+			Override: &extProcessorv3.ExtProcPerRoute_Overrides{
+				Overrides: &extProcessorv3.ExtProcOverrides{
+					ProcessingMode: &extProcessorv3.ProcessingMode{
+						RequestHeaderMode:  extProcessorv3.ProcessingMode_SEND,
+						ResponseHeaderMode: extProcessorv3.ProcessingMode_SKIP,
+						RequestBodyMode:    extProcessorv3.ProcessingMode_BUFFERED,
+					},
+				},
+			},
+		}
+		dataExtProc, _ := proto.Marshal(&perFilterConfigExtProc)
+		filterExtProc = &any.Any{
+			TypeUrl: extProcPerRouteName,
+			Value:   dataExtProc,
+		}
+	} else {
+		perFilterConfigExtProc := extProcessorv3.ExtProcPerRoute{
+			Override: &extProcessorv3.ExtProcPerRoute_Disabled{
+				Disabled: true,
+			},
+		}
+		dataExtProc, _ := proto.Marshal(&perFilterConfigExtProc)
+		filterExtProc = &any.Any{
+			TypeUrl: extProcPerRouteName,
+			Value:   dataExtProc,
+		}
+	}
+
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 	router = routev3.Route{
 		Name:      getRouteName(params.apiUUID), //Categorize routes with same base path
@@ -1129,6 +1164,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			wellknown.HTTPExternalAuthorization: extAuthzFilter,
 			wellknown.Lua:                       luaFilter,
 			wellknown.CORS:                      corsFilter,
+			extProcFilterName:                   filterExtProc,
 		},
 	}
 
@@ -1608,6 +1644,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 			}
 		}
 	}
+	logger.LoggerOasparser.Info("MGWAPI4 Type =======================>", swagger.GetAPIType())
 	params := &routeCreateParams{
 		organizationID:      organizationID,
 		apiUUID:             swagger.GetID(),
