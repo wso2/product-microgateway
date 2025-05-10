@@ -357,4 +357,28 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getApiKeyHeaderBytes();
+
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  java.util.List<org.wso2.choreo.connect.discovery.api.ExtendedOperation> 
+      getExtendedOperationsList();
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.ExtendedOperation getExtendedOperations(int index);
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  int getExtendedOperationsCount();
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  java.util.List<? extends org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder> 
+      getExtendedOperationsOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder getExtendedOperationsOrBuilder(
+      int index);
 }

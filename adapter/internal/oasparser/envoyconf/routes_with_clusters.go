@@ -1121,7 +1121,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	var filterExtProc *any.Any
 
-	logger.LoggerOasparser.Info("API Type: ", apiType)
+	metaData := &corev3.Metadata{}
 	if apiType == "MCP" {
 		// Overrding the default processing mode for MCP APIs
 		perFilterConfigExtProc := extProcessorv3.ExtProcPerRoute{
@@ -1131,6 +1131,45 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 						RequestHeaderMode:  extProcessorv3.ProcessingMode_SEND,
 						ResponseHeaderMode: extProcessorv3.ProcessingMode_SKIP,
 						RequestBodyMode:    extProcessorv3.ProcessingMode_BUFFERED,
+					},
+				},
+			},
+		}
+		// Set the metadata for MCP routes to be used in the ext_proc filter
+		metaData = &corev3.Metadata{
+			FilterMetadata: map[string]*structpb.Struct{
+				"envoy.filters.http.ext_proc": &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						pathContextExtension: &structpb.Value{
+							Kind: &structpb.Value_StringValue{
+								StringValue: resourcePath,
+							},
+						},
+						vHostContextExtension: &structpb.Value{
+							Kind: &structpb.Value_StringValue{
+								StringValue: vHost,
+							},
+						},
+						apiVersionContextExtension: &structpb.Value{
+							Kind: &structpb.Value_StringValue{
+								StringValue: version,
+							},
+						},
+						apiNameContextExtension: &structpb.Value{
+							Kind: &structpb.Value_StringValue{
+								StringValue: title,
+							},
+						},
+						basePathContextExtension: &structpb.Value{
+							Kind: &structpb.Value_StringValue{
+								StringValue: func() string {
+									if xWso2Basepath != "" {
+										return xWso2Basepath
+									}
+									return endpointBasepath
+								}(),
+							},
+						},
 					},
 				},
 			},
@@ -1158,7 +1197,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Name:      getRouteName(params.apiUUID), //Categorize routes with same base path
 		Match:     match,
 		Action:    action,
-		Metadata:  nil,
+		Metadata:  metaData,
 		Decorator: decorator,
 		TypedPerFilterConfig: map[string]*any.Any{
 			wellknown.HTTPExternalAuthorization: extAuthzFilter,

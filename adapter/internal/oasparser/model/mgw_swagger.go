@@ -94,6 +94,28 @@ type MgwSwagger struct {
 	EnvironmentID       string
 	EnvironmentName     string
 	ChoreoComponentInfo *ChoreoComponentInfo
+	ExtendedOperations  []*ExtendedOperation
+}
+
+// ExtendedOperation represents the structure of an extended operation such as an MCP tool
+// or a GraphQL operation.
+type ExtendedOperation struct {
+	Name         string
+	Verb         string
+	Description  string
+	Schema       string
+	Mode         string
+	ProxyMapping *ProxyMapping
+}
+
+// ProxyMapping represents the structure of a proxy mapping. i.e. the details of the
+// API proxy which is available in the gateway
+type ProxyMapping struct {
+	Name    string
+	Context string
+	Version string
+	Target  string
+	Verb    string
 }
 
 // ChoreoComponentInfo represents the information of the Choreo component
@@ -346,6 +368,11 @@ func (swagger *MgwSwagger) GetSecurityScheme() []SecurityScheme {
 // GetSecurity returns the API level security of the API
 func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 	return swagger.security
+}
+
+// GetExtendedOperations returns the array of extended operations
+func (swagger *MgwSwagger) GetExtendedOperations() []*ExtendedOperation {
+	return swagger.ExtendedOperations
 }
 
 // SanitizeAPISecurity this will validate api level and operation level swagger security
@@ -1548,5 +1575,35 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 				endpointConfig.APIEndpointSecurity.Sandbox.Type)
 		}
 	}
+	// Set MCP tools as extended operations to MGWSwagger
+	if apiType == MCP {
+		if data.Operations != nil {
+			var extendedOperations []*ExtendedOperation
+			for _, operation := range data.Operations {
+				extOperation := ExtendedOperation{
+					Name:        operation.Target,
+					Verb:        operation.Verb,
+					Description: operation.Description,
+				}
+				if operation.OperationProxyMapping == nil {
+					extOperation.Mode = "Passthrough"
+				} else {
+					extOperation.Mode = "Served"
+					proxyMapping := &ProxyMapping{
+						Name:    operation.OperationProxyMapping.Target.Name,
+						Context: operation.OperationProxyMapping.Target.Context,
+						Version: operation.OperationProxyMapping.Target.Version,
+						Target:  operation.OperationProxyMapping.Target.Target,
+						Verb:    operation.OperationProxyMapping.Target.Verb,
+					}
+					extOperation.ProxyMapping = proxyMapping
+					extOperation.Schema = operation.OperationProxyMapping.Schema
+				}
+				extendedOperations = append(extendedOperations, &extOperation)
+			}
+			swagger.ExtendedOperations = extendedOperations
+		}
+	}
+
 	return nil
 }

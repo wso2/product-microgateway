@@ -24,6 +24,7 @@ import "wso2/discovery/api/endpoint_security.proto";
 import "wso2/discovery/api/security_scheme.proto";
 import "wso2/discovery/api/backend_jwt_configuration.proto";
 import "wso2/discovery/api/choreo_component_info.proto";
+import "wso2/discovery/api/ExtendedOperation.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
 option java_package = "org.wso2.choreo.connect.discovery.api";
@@ -60,4 +61,5 @@ message Api {
 	BackendJWTConfiguration backendJWTConfiguration = 24;
 	ChoreoComponentInfo choreoComponentInfo = 25;
 	string apiKeyHeader = 26;
+	repeated ExtendedOperation extendedOperations = 27;
 }

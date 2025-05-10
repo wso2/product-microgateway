@@ -204,6 +204,26 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		choreoComponentInfo.ProjectID = mgwSwagger.ChoreoComponentInfo.ProjectID
 	}
 
+	extendedOperations := []*api.ExtendedOperation{}
+	for _, extOp := range mgwSwagger.GetExtendedOperations() {
+		proxyMapping := &api.ProxyMapping{}
+		if extOp.ProxyMapping != nil {
+			proxyMapping.Name = extOp.ProxyMapping.Name
+			proxyMapping.Context = extOp.ProxyMapping.Context
+			proxyMapping.Version = extOp.ProxyMapping.Version
+			proxyMapping.Target = extOp.ProxyMapping.Target
+			proxyMapping.Verb = extOp.ProxyMapping.Verb
+		}
+		extOpObj := &api.ExtendedOperation{
+			Name:         extOp.Name,
+			Verb:         extOp.Verb,
+			Description:  extOp.Description,
+			Schema:       extOp.Schema,
+			ProxyMapping: proxyMapping,
+		}
+		extendedOperations = append(extendedOperations, extOpObj)
+	}
+
 	return &api.Api{
 		Id:                      mgwSwagger.GetID(),
 		Title:                   mgwSwagger.GetTitle(),
@@ -231,6 +251,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		EnvironmentId:           mgwSwagger.EnvironmentID,
 		EnvironmentName:         mgwSwagger.EnvironmentName,
 		ChoreoComponentInfo:     choreoComponentInfo,
+		ExtendedOperations:      extendedOperations,
 	}
 }
 
