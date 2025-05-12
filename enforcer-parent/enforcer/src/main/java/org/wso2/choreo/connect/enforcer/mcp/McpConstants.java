@@ -12,8 +12,13 @@ public class McpConstants {
     public static final String METHOD_TOOL_CALL = "tools/call";
     public static final List<String> ALLOWED_METHODS = Arrays.asList(METHOD_INITIALIZE, METHOD_TOOL_LIST,
             METHOD_TOOL_CALL);
+    public static final String PROTOCOL_VERSION_KEY = "protocolVersion";
     public static final String PROTOCOL_VERSION_2025_MARCH = "2025-03-26";
     public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = List.of(PROTOCOL_VERSION_2025_MARCH);
+    public static final String PARAMS_KEY = "params";
+    public static final String TOOL_NAME_KEY = "toolName";
+    public static final String REQUIRED_KEY = "required";
+    public static final String PROPERTIES_KEY = "properties";
 
     /**
      * This class contains constants used for RPC processing

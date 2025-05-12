@@ -36,7 +36,7 @@ public class PayloadGenerator {
         McpResponse response = new McpResponse(id);
         JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
         JsonObject result = new JsonObject();
-        result.addProperty("protocolVersion", McpConstants.PROTOCOL_VERSION_2025_MARCH);
+        result.addProperty(McpConstants.PROTOCOL_VERSION_KEY, McpConstants.PROTOCOL_VERSION_2025_MARCH);
 
         JsonObject capabilities = new JsonObject();
         JsonObject toolCapabilities = new JsonObject();
@@ -61,7 +61,7 @@ public class PayloadGenerator {
         JsonArray toolsArray = new JsonArray();
         for (ExtendedOperation extendedOperation : extendedOperations) {
             JsonObject toolObject = new JsonObject();
-            toolObject.addProperty("toolName", extendedOperation.getName());
+            toolObject.addProperty(McpConstants.TOOL_NAME_KEY, extendedOperation.getName());
             toolObject.addProperty("toolDescription", extendedOperation.getDescription());
             String schema = extendedOperation.getSchema();
             if (schema != null) {
@@ -81,7 +81,7 @@ public class PayloadGenerator {
             return inputObject;
         }
 
-        JsonArray requiredArray = inputObject.getAsJsonArray("required");
+        JsonArray requiredArray = inputObject.getAsJsonArray(McpConstants.REQUIRED_KEY);
         JsonArray sanitizedArray = new JsonArray();
 
         // remove the header, query, and path prefixes from the required fields
@@ -90,10 +90,10 @@ public class PayloadGenerator {
             String newRequiredField = requiredField.split("_", 2)[1];
             sanitizedArray.add(newRequiredField);
         }
-        inputObject.add("required", sanitizedArray);
+        inputObject.add(McpConstants.REQUIRED_KEY, sanitizedArray);
 
         // remove the header, query, and path prefixes from the properties keys
-        JsonObject propertiesObject = inputObject.getAsJsonObject("properties");
+        JsonObject propertiesObject = inputObject.getAsJsonObject(McpConstants.PROPERTIES_KEY);
         JsonObject sanitizedPropertiesObject = new JsonObject();
         for (Map.Entry<String, JsonElement> entry : propertiesObject.entrySet()) {
             String key = entry.getKey();
@@ -104,7 +104,7 @@ public class PayloadGenerator {
             String sanitizedKey = key.split("_", 2)[1];
             sanitizedPropertiesObject.add(sanitizedKey, entry.getValue().getAsJsonObject());
         }
-        inputObject.add("properties", sanitizedPropertiesObject);
+        inputObject.add(McpConstants.PROPERTIES_KEY, sanitizedPropertiesObject);
         return inputObject;
     }
 

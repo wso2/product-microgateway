@@ -6,8 +6,11 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
+import org.wso2.choreo.connect.enforcer.commons.model.ExtendedOperation;
 import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
 import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
+
+import java.util.List;
 
 /**
  * This class is used to process the MCP requests.
@@ -23,10 +26,31 @@ public class McpRequestProcessor {
         JsonObject requestObject = JsonParser.parseString(requestBody).getAsJsonObject();
         String id = requestObject.get(McpConstants.RpcConstants.ID).getAsString();
         String method = requestObject.get(McpConstants.RpcConstants.METHOD).getAsString();
+        API matchedMcpApi = APIFactory.getInstance().getMatchedAPIByKey(apikey);
+        if (matchedMcpApi == null) {
+            // Handle the case where the API is not found
+            // This cannot happen as the gateway will return 404 before this point
+            return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.INTERNAL_ERROR_CODE,
+                    McpConstants.RpcConstants.INTERNAL_ERROR_MESSAGE, "MCP Proxy is not available");
+        }
         if (McpConstants.METHOD_INITIALIZE.equals(method)) {
-            return handleMcpInitialize(id, apikey);
+            String validationResult = validateInitializeRequest(requestObject);
+            if (validationResult != null) {
+                return validationResult;
+            }
+            return handleMcpInitialize(id, matchedMcpApi);
         } else if (McpConstants.METHOD_TOOL_LIST.equals(method)) {
-            return handleMcpToolList(id, apikey);
+            return handleMcpToolList(id, matchedMcpApi);
+        } else if (McpConstants.METHOD_TOOL_CALL.equals(method)) {
+            String validationResult = validateToolsCallRequest(requestObject, matchedMcpApi);
+            if (validationResult != null) {
+                return validationResult;
+            }
+            // Handle the tool call method
+            // This is not implemented yet
+            return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.METHOD_NOT_FOUND_CODE,
+                    McpConstants.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not implemented");
+
         }
 
         return null;
@@ -73,11 +97,6 @@ public class McpRequestProcessor {
                     return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.METHOD_NOT_FOUND_CODE,
                             McpConstants.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not allowed");
                 }
-                if (McpConstants.METHOD_INITIALIZE.equals(method)) {
-                    if (validateInitializeRequest(jsonObject) != null) {
-                        return validateInitializeRequest(jsonObject);
-                    }
-                }
             } else {
                 return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
                         McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing method field");
@@ -90,10 +109,10 @@ public class McpRequestProcessor {
     }
 
     public static String validateInitializeRequest(JsonObject requestObject) {
-        if (requestObject.has("params")) {
-            JsonObject params = requestObject.getAsJsonObject("params");
-            if (params.has("protocolVersion")) {
-                String protocolVersion = params.get("protocolVersion").getAsString();
+        if (requestObject.has(McpConstants.PARAMS_KEY)) {
+            JsonObject params = requestObject.getAsJsonObject(McpConstants.PARAMS_KEY);
+            if (params.has(McpConstants.PROTOCOL_VERSION_KEY)) {
+                String protocolVersion = params.get(McpConstants.PROTOCOL_VERSION_KEY).getAsString();
                 if (!McpConstants.SUPPORTED_PROTOCOL_VERSIONS.contains(protocolVersion)) {
                     return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.INVALID_PARAMS_CODE,
                             McpConstants.RpcConstants.INVALID_PARAMS_MESSAGE, "Supported protocol versions are: "
@@ -110,32 +129,56 @@ public class McpRequestProcessor {
         return null;
     }
 
-    private static String handleMcpInitialize(String id, String apikey) {
-        API matchedMcpApi = APIFactory.getInstance().getMatchedAPIByKey(apikey);
-        if (matchedMcpApi == null) {
-            // Handle the case where the API is not found
-            // This cannot happen as the gateway will return 404 before this point
-            return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.INTERNAL_ERROR_CODE,
-                    McpConstants.RpcConstants.INTERNAL_ERROR_MESSAGE, "MCP Proxy is not available");
+    private static String validateToolsCallRequest(JsonObject jsonObject, API matchedApi) {
+        if (jsonObject.has(McpConstants.PARAMS_KEY)) {
+            JsonObject params = jsonObject.getAsJsonObject(McpConstants.PARAMS_KEY);
+            if (params.has(McpConstants.TOOL_NAME_KEY)) {
+                String toolName = params.get(McpConstants.TOOL_NAME_KEY).getAsString();
+                if (toolName == null || toolName.isEmpty()) {
+                    return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
+                            McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing toolName field");
+                } else {
+                    if (!validateToolName(toolName, matchedApi)) {
+                        return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
+                                McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE,
+                                "The requested tool does not exist");
+                    }
+                    return null;
+                }
+            } else {
+                return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
+                        McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing toolName field");
+            }
         } else {
-            String name = matchedMcpApi.getAPIConfig().getName();
-            String version = matchedMcpApi.getAPIConfig().getVersion();
-            String description = "This is an MCP Server";
-            return PayloadGenerator
-                    .getInitializeResponse(id, name, version, description, false);
+            return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
+                    McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing params field");
         }
     }
 
-    private static String handleMcpToolList(String id, String apikey) {
-        API matchedMcpApi = APIFactory.getInstance().getMatchedAPIByKey(apikey);
-        if (matchedMcpApi == null) {
-            // Handle the case where the API is not found
-            // This cannot happen as the gateway will return 404 before this point
-            return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.INTERNAL_ERROR_CODE,
-                    McpConstants.RpcConstants.INTERNAL_ERROR_MESSAGE, "MCP Proxy is not available");
-        } else {
-            return PayloadGenerator
-                    .generateToolListPayload(id, matchedMcpApi.getAPIConfig().getExtendedOperations());
+    private static boolean validateToolName(String toolName, API matchedApi) {
+        List<ExtendedOperation> extendedOperations = matchedApi.getAPIConfig().getExtendedOperations();
+        for (ExtendedOperation extendedOperation : extendedOperations) {
+            if (toolName.equals(extendedOperation.getName())) {
+                return true;
+            }
         }
+        return false;
+    }
+
+    private static String handleMcpInitialize(String id, API matchedApi) {
+        String name = matchedApi.getAPIConfig().getName();
+        String version = matchedApi.getAPIConfig().getVersion();
+        String description = "This is an MCP Server";
+        return PayloadGenerator
+                .getInitializeResponse(id, name, version, description, false);
+    }
+
+    private static String handleMcpToolList(String id, API matchedApi) {
+        return PayloadGenerator
+                .generateToolListPayload(id, matchedApi.getAPIConfig().getExtendedOperations());
+    }
+
+    private static void handleMcpToolsCall(String id, API matchedApi) {
+
     }
 }
