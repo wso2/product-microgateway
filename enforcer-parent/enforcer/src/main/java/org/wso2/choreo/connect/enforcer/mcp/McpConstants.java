@@ -19,6 +19,7 @@ public class McpConstants {
     public static final String TOOL_NAME_KEY = "toolName";
     public static final String REQUIRED_KEY = "required";
     public static final String PROPERTIES_KEY = "properties";
+    public static final String ARGUMENTS_KEY = "arguments";
 
     /**
      * This class contains constants used for RPC processing
