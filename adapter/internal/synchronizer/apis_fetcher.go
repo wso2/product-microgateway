@@ -95,7 +95,7 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 			logger.LoggerSync.Errorf("API file not found: %v", err)
 			return err
 		}
-		gaProvidedAPIEnvMap := xdsOptions.ApiIDEnvMap
+		gaProvidedAPIEnvMap := xdsOptions.APIIDEnvMap
 		vhostToEnvsMap := make(map[string][]*synchronizer.GatewayLabel)
 		for index := range deployment.Environments {
 			env := deployment.Environments[index]

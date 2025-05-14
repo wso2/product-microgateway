@@ -62,7 +62,7 @@ var (
 	isFirstResponse bool
 	// gaAPIChannelStart is used to block the GAAPIChannel consuming until the startup is completed.
 	gaAPIChannelStart chan bool
-	// gaAPIChannelInitialMap is used to send the Initial API UUID Map to fetch APIs from controlplane as a bulk.
+	// GAAPIChannelInitialMap is used to send the Initial API UUID Map to fetch APIs from controlplane as a bulk.
 	GAAPIChannelInitialMap chan map[string]map[string]*ga_model.Api
 	// Last Received Response from the global adapter
 	// Last Recieved Response is always is equal to the lastAckedResponse according to current implementation as there is no

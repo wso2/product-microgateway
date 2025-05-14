@@ -352,7 +352,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string, apiMap map[st
 			isNotFinalChunk := i != len(chunkedAPIUuidsList)-1
 			options := common.XdsOptions{SkipUpdatingXdsCache: isNotFinalChunk}
 			if os.Getenv("FEATURE_ENV_BASED_FILTERING_IN_STARTUP") == "true" {
-				options.ApiIDEnvMap = apiMap
+				options.APIIDEnvMap = apiMap
 			}
 			fetchChunkedAPIsOnStartUp(conf, chunkedAPIUuids, options)
 		}

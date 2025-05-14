@@ -22,5 +22,5 @@ import ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/
 // XdsOptions represents the options for xDS.
 type XdsOptions struct {
 	SkipUpdatingXdsCache bool
-	ApiIDEnvMap          map[string]map[string]*ga_model.Api
+	APIIDEnvMap          map[string]map[string]*ga_model.Api
 }
