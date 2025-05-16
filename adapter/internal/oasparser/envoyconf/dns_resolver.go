@@ -18,13 +18,18 @@ package envoyconf
 
 import (
 	"fmt"
+	"time"
 
+	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	dnsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/clusters/common/dns/v3"
+	dnsclusterv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/clusters/dns/v3"
 	caresv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/network/dns_resolver/cares/v3"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 func getDNSResolverConf() (*corev3.TypedExtensionConfig, error) {
@@ -82,4 +87,40 @@ func getDNSResolverConf() (*corev3.TypedExtensionConfig, error) {
 		}
 	}
 	return dnsResolverConfig, nil
+}
+
+func getDNSClusterConfig() (*clusterv3.Cluster_CustomClusterType, error) {
+	conf, _ := config.ReadConfigs()
+	var dnsClusterConf proto.Message
+
+	dnsResolverConf, err := getDNSResolverConf()
+	if err != nil {
+		return nil, err
+	}
+
+	dnsClusterConf = &dnsclusterv3.DnsCluster{
+		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
+		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+		DnsJitter:              durationpb.New(1 * time.Second),
+		TypedDnsResolverConfig: dnsResolverConf,
+		DnsLookupFamily:        dnsv3.DnsLookupFamily_V4_ONLY,
+	}
+
+	dnsClusterConfPbAny, err := anypb.New(dnsClusterConf)
+	if err != nil {
+		return nil, err
+	}
+
+	dnsClusterConfig := &clusterv3.Cluster_CustomClusterType{
+		Name:        "DNS Cluster",
+		TypedConfig: dnsClusterConfPbAny,
+	}
+
+	if enableRouterConfigValidation {
+		err = dnsClusterConfig.Validate()
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while validating DNS Cluster configs. ", err)
+		}
+	}
+	return dnsClusterConfig, nil
 }
