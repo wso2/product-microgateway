@@ -30,7 +30,7 @@ public class PayloadGenerator {
     }
 
     public static String getInitializeResponse(String id, String serverName, String serverVersion,
-            String serverDescription, boolean toolListChangeNotified) {
+                                               String serverDescription, boolean toolListChangeNotified) {
         // Create the response object as specified in
         // https://modelcontextprotocol.io/specification/2025-03-26/basic/lifecycle#initialization
         McpResponse response = new McpResponse(id);
@@ -107,5 +107,54 @@ public class PayloadGenerator {
         inputObject.add(McpConstants.PROPERTIES_KEY, sanitizedPropertiesObject);
         return inputObject;
     }
+
+    public static JsonObject generateTransformationRequestPayload(String toolName, String vHost, String args,
+                                                                  ExtendedOperation extendedOperation,
+                                                                  String authParam) {
+        StringBuilder sb = new StringBuilder("https://");
+        JsonObject payload = new JsonObject();
+        payload.addProperty(McpConstants.PAYLOAD_TOOL_NAME, toolName);
+        payload.addProperty(McpConstants.PAYLOAD_SCHEMA, extendedOperation.getSchema());
+
+        JsonObject apiInfo = new JsonObject();
+        apiInfo.addProperty(McpConstants.PAYLOAD_API_NAME, extendedOperation.getApiName());
+        apiInfo.addProperty(McpConstants.PAYLOAD_CONTEXT, extendedOperation.getApiContext());
+        apiInfo.addProperty(McpConstants.PAYLOAD_VERSION, extendedOperation.getApiVersion());
+        apiInfo.addProperty(McpConstants.PAYLOAD_PATH, extendedOperation.getApiTarget());
+        apiInfo.addProperty(McpConstants.PAYLOAD_VERB, extendedOperation.getApiVerb());
+        if (!authParam.isEmpty()) {
+            apiInfo.addProperty(McpConstants.PAYLOAD_AUTH, authParam);
+        }
+        if ("localhost".equals(vHost)) {
+            sb.append("router").append(":").append("9095");
+        } else {
+            sb.append(vHost);
+        }
+        apiInfo.addProperty(McpConstants.PAYLOAD_ENDPOINT, sb.toString());
+        payload.add("api", apiInfo);
+
+        payload.addProperty(McpConstants.ARGUMENTS_KEY, args);
+        return payload;
+    }
+
+    public static String generateMcpResponsePayload(String id, boolean isError, String body) {
+        McpResponse response = new McpResponse(id);
+        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
+
+        JsonObject result = new JsonObject();
+        result.addProperty("isError", isError);
+
+        JsonArray content = new JsonArray();
+        JsonObject contentObject = new JsonObject();
+        contentObject.addProperty("type", "text");
+        contentObject.addProperty("text", body);
+
+        content.add(contentObject);
+        result.add("content", content);
+        responseObject.add("result", result);
+
+        return gson.toJson(responseObject);
+    }
+
 
 }

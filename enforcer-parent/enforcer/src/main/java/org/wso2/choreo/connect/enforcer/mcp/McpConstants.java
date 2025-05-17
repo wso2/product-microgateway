@@ -20,6 +20,18 @@ public class McpConstants {
     public static final String REQUIRED_KEY = "required";
     public static final String PROPERTIES_KEY = "properties";
     public static final String ARGUMENTS_KEY = "arguments";
+    public static final String VHOST_HEADER = "x-wso2-mcp-vhost";
+    public static final String BASEPATH_HEADER = "x-wso2-mcp-basepath";
+    public static final String VERSION_HEADER = "x-wso2-mcp-version";
+    public static final String PAYLOAD_TOOL_NAME = "tool_name";
+    public static final String PAYLOAD_SCHEMA = "schema";
+    public static final String PAYLOAD_API_NAME = "api_name";
+    public static final String PAYLOAD_CONTEXT = "context";
+    public static final String PAYLOAD_VERSION = "version";
+    public static final String PAYLOAD_PATH = "path";
+    public static final String PAYLOAD_VERB = "verb";
+    public static final String PAYLOAD_AUTH = "auth";
+    public static final String PAYLOAD_ENDPOINT = "endpoint";
 
     /**
      * This class contains constants used for RPC processing

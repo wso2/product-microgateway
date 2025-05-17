@@ -122,6 +122,10 @@ public class APIFactory {
         return apis.get(apiKey);
     }
 
+    public API getMatchedAPIByKey(String apikey) {
+        return apis.get(apikey);
+    }
+
     public WebSocketAPI getMatchedAPI(WebSocketFrameRequest webSocketFrameRequest) {
         Map<String, String> extAuthMetadata = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap();
         String vHost = extAuthMetadata.get(APIConstants.GW_VHOST_PARAM);
@@ -170,7 +174,7 @@ public class APIFactory {
                 vhost, apiConfig.getBasePath(), apiConfig.getVersion());
     }
 
-    private String getApiKey(String vhost, String basePath, String version) {
+    public String getApiKey(String vhost, String basePath, String version) {
         return String.format("%s:%s:%s", vhost, basePath, version);
     }
 }

@@ -358,6 +358,7 @@ public class APIConstants {
     public static class ApiType {
         public static final String WEB_SOCKET = "WS";
         public static final String REST = "HTTP";
+        public static final String MCP = "MCP";
     }
 
 }

@@ -4,20 +4,31 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.commons.model.ExtendedOperation;
 import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
 import org.wso2.choreo.connect.enforcer.mcp.McpException;
 import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
 
 /**
  * This class is used to process the MCP requests.
  */
 public class McpRequestProcessor {
 
-    public static String processRequest(String requestBody) {
-        String apikey = "localhost:/somevalue/zfzu/defaultsdfdsf/v1.0:v1.0";
+    public static String processRequest(String apikey, String requestBody, String authParam) {
         try {
             validateRequest(requestBody);
             JsonObject requestObject = JsonParser.parseString(requestBody).getAsJsonObject();
@@ -37,11 +48,7 @@ public class McpRequestProcessor {
                 return handleMcpToolList(id, matchedMcpApi);
             } else if (McpConstants.METHOD_TOOL_CALL.equals(method)) {
                 validateToolsCallRequest(requestObject, matchedMcpApi);
-                // Handle the tool call method
-                // This is not implemented yet
-                return PayloadGenerator.getErrorResponse(McpConstants.RpcConstants.METHOD_NOT_FOUND_CODE,
-                        McpConstants.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not implemented");
-
+                return handleMcpToolsCall(id, matchedMcpApi, requestObject, authParam);
             }
         } catch (McpException e) {
             return e.toJsonRpcErrorPayload();
@@ -76,7 +83,7 @@ public class McpRequestProcessor {
             }
             if (jsonObject.has(McpConstants.RpcConstants.ID)) {
                 JsonElement idElement = jsonObject.get(McpConstants.RpcConstants.ID);
-                if (idElement == null || idElement.isJsonNull() ) {
+                if (idElement == null || idElement.isJsonNull()) {
                     throw new McpException(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
                             McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing id field");
                 }
@@ -136,8 +143,8 @@ public class McpRequestProcessor {
     private static void validateToolsCallRequest(JsonObject jsonObject, API matchedApi) throws McpException {
         if (jsonObject.has(McpConstants.PARAMS_KEY)) {
             JsonObject params = jsonObject.getAsJsonObject(McpConstants.PARAMS_KEY);
-            if (params.has(McpConstants.TOOL_NAME_KEY)) {
-                JsonElement toolNameElement = params.get(McpConstants.TOOL_NAME_KEY);
+            if (params.has("name")) {
+                JsonElement toolNameElement = params.get("name");
                 if (toolNameElement == null || toolNameElement.isJsonNull()) {
                     throw new McpException(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
                             McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing toolName field");
@@ -181,9 +188,10 @@ public class McpRequestProcessor {
                 .generateToolListPayload(id, matchedApi.getAPIConfig().getExtendedOperations());
     }
 
-    private static void handleMcpToolsCall(String id, API matchedApi, JsonObject jsonObject) {
+    private static String handleMcpToolsCall(String id, API matchedApi, JsonObject jsonObject, String authParam)
+            throws McpException {
         String toolName = jsonObject.getAsJsonObject(McpConstants.PARAMS_KEY)
-                .get(McpConstants.TOOL_NAME_KEY).getAsString();
+                .get("name").getAsString();
         ExtendedOperation extendedOperation = matchedApi.getAPIConfig().getExtendedOperations()
                 .stream()
                 .filter(operation -> operation.getName().equals(toolName))
@@ -193,9 +201,52 @@ public class McpRequestProcessor {
         String vHost = matchedApi.getAPIConfig().getVhost();
         JsonObject params = jsonObject.getAsJsonObject(McpConstants.PARAMS_KEY);
         if (params.has(McpConstants.ARGUMENTS_KEY)) {
-            args = params.get(McpConstants.ARGUMENTS_KEY).getAsString();
+            args = params.get(McpConstants.ARGUMENTS_KEY).toString();
         } else {
             args = "{}";
+        }
+        JsonObject payload = PayloadGenerator
+                .generateTransformationRequestPayload(toolName, vHost, args, extendedOperation, authParam);
+
+        try {
+            CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient("https");
+            String endpoint = "https://mcp:8080/mcp";
+            HttpPost httpPost = new HttpPost(endpoint);
+            httpPost.setHeader("Content-Type", "application/json");
+            httpPost.setEntity(new StringEntity(payload.toString(), ContentType.APPLICATION_JSON));
+
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+            if (response.getStatusLine().getStatusCode() == 500) {
+                return PayloadGenerator.generateMcpResponsePayload(id, true,
+                        "Error while processing the request");
+            } else if (response.getStatusLine().getStatusCode() == 404) {
+                return PayloadGenerator.generateMcpResponsePayload(id, true,
+                        "Error occurred while accessing the requested service");
+            } else if (response.getStatusLine().getStatusCode() >= 400) {
+                return PayloadGenerator.generateMcpResponsePayload(id, true,
+                        "Authentication error while processing the request");
+            } else {
+                HttpEntity entity = response.getEntity();
+                try (InputStream inputStream = entity.getContent()) {
+                    String output = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                    JsonElement element = JsonParser.parseString(output);
+                    String resString;
+                    if (element.isJsonObject()) {
+                        JsonObject obj = element.getAsJsonObject();
+                        resString = obj.toString();
+                    } else if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
+                        String unescaped = element.getAsString();
+                        JsonObject obj = JsonParser.parseString(unescaped).getAsJsonObject();
+                        resString = obj.toString();
+                    } else {
+                        resString = element.toString();
+                    }
+                    return PayloadGenerator.generateMcpResponsePayload(id, false, resString);
+                }
+            }
+        } catch (Exception e) {
+            throw new McpException(McpConstants.RpcConstants.INTERNAL_ERROR_CODE,
+                    McpConstants.RpcConstants.INTERNAL_ERROR_MESSAGE, "Error while processing the service call");
         }
     }
 }
