@@ -30,6 +30,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
+import org.wso2.choreo.connect.enforcer.config.dto.McpConfigDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.MetricsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.PATDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
@@ -63,6 +64,7 @@ public class EnforcerConfig {
     private FilterDTO[] customFilters;
     private APIKeyDTO apiKeyConfig;
     private PATDTO patConfig;
+    private McpConfigDTO mcpConfig;
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -214,6 +216,14 @@ public class EnforcerConfig {
 
     public void setPatConfig(PATDTO patConfig) {
         this.patConfig = patConfig;
+    }
+
+    public McpConfigDTO getMcpConfig() {
+        return mcpConfig;
+    }
+
+    public void setMcpConfig(McpConfigDTO mcpConfig) {
+        this.mcpConfig = mcpConfig;
     }
 }
 

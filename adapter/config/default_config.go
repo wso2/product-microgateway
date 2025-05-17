@@ -280,6 +280,9 @@ var defaultConfig = &Config{
 			Enabled: false,
 			Type:    "azure",
 		},
+		Mcp: mcp{
+			ServiceURL: "https://mcp-service:8080",
+		},
 		Throttling: throttlingConfig{
 			EnableGlobalEventPublishing:        false,
 			EnableHeaderConditions:             false,

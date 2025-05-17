@@ -32,12 +32,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.commons.model.ExtendedOperation;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
 import org.wso2.choreo.connect.enforcer.mcp.McpException;
 import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 
@@ -227,8 +230,10 @@ public class McpRequestProcessor {
                 .generateTransformationRequestPayload(toolName, vHost, args, extendedOperation, authParam);
 
         try {
-            CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient("https");
-            String endpoint = "https://mcp:8080/mcp";
+            EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
+            String endpoint = enforcerConfig.getMcpConfig().getServerUrl() + "/mcp";
+            URL url = new URL(endpoint);
+            CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol());
             HttpPost httpPost = new HttpPost(endpoint);
             httpPost.setHeader("Content-Type", "application/json");
             httpPost.setEntity(new StringEntity(payload.toString(), ContentType.APPLICATION_JSON));

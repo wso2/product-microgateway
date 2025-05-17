@@ -225,4 +225,19 @@ public interface ConfigOrBuilder extends
    */
   org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder getFiltersOrBuilder(
       int index);
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+   * @return Whether the mcp field is set.
+   */
+  boolean hasMcp();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+   * @return The mcp.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.Mcp getMcp();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.McpOrBuilder getMcpOrBuilder();
 }
