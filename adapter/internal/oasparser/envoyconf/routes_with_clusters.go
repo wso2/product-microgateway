@@ -37,7 +37,6 @@ import (
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
-	extProcessorv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_proc/v3"
 	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
@@ -116,6 +115,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// Enable retry for the routes if the upstream is within the same cluster
 	enableRSTRetry := false
 
+	isMCP := mgwSwagger.GetAPIType() == model.MCP
+
 	// check API level production endpoints available
 	if mgwSwagger.GetProdEndpoints() != nil && len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
 		apiLevelEndpointProd := mgwSwagger.GetProdEndpoints()
@@ -129,7 +130,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			apiVersion, "")
 		if !strings.Contains(apiLevelEndpointProd.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
 			cluster, address, err := processEndpoints(apiLevelClusterNameProd, apiLevelEndpointProd,
-				upstreamCerts, timeout, apiLevelbasePath)
+				upstreamCerts, timeout, apiLevelbasePath, isMCP)
 			if err != nil {
 				apiLevelClusterNameProd = ""
 				logger.LoggerOasparser.Errorf("Error while adding api level production endpoints for %s. %v , skipping api...", apiTitle, err.Error())
@@ -152,7 +153,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			}
 			epClusterName := getClusterName(endpointCluster.EndpointPrefix, organizationID, vHost, apiTitle,
 				apiVersion, "")
-			cluster, addresses, err := processEndpoints(epClusterName, endpointCluster, upstreamCerts, timeout, apiLevelbasePath)
+			cluster, addresses, err := processEndpoints(epClusterName, endpointCluster, upstreamCerts, timeout, apiLevelbasePath, isMCP)
 			if err != nil {
 				logger.LoggerOasparser.Errorf("Error while adding x-wso2-endpoints cluster %v for %s. %v, skipping api...", epName, apiTitle, err.Error())
 			} else {
@@ -219,7 +220,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			if !strings.Contains(endpointProd.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
 				clusterNameProd = getClusterName(endpointProd.EndpointPrefix, organizationID, vHost,
 					mgwSwagger.GetTitle(), apiVersion, resource.GetID())
-				clusterProd, addressProd, err := processEndpoints(clusterNameProd, endpointProd, upstreamCerts, timeout, resourceBasePath)
+				clusterProd, addressProd, err := processEndpoints(clusterNameProd, endpointProd, upstreamCerts, timeout, resourceBasePath, isMCP)
 				if err != nil {
 					clusterNameProd = apiLevelClusterNameProd
 					// reverting resource base path setting as production cluster creation has failed
@@ -347,7 +348,7 @@ func getClusterName(epPrefix string, organizationID string, vHost string, swagge
 // CreateLuaCluster creates lua cluster configuration.
 func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.InterceptEndpoint) (*clusterv3.Cluster, []*corev3.Address, error) {
 	logger.LoggerOasparser.Debug("creating a lua cluster ", endpoint.ClusterName)
-	return processEndpoints(endpoint.ClusterName, &endpoint.EndpointCluster, interceptorCerts, endpoint.ClusterTimeout, endpoint.EndpointCluster.Endpoints[0].Basepath)
+	return processEndpoints(endpoint.ClusterName, &endpoint.EndpointCluster, interceptorCerts, endpoint.ClusterTimeout, endpoint.EndpointCluster.Endpoints[0].Basepath, false)
 }
 
 // CreateRateLimitCluster creates cluster relevant to the rate limit service
@@ -368,7 +369,7 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 			},
 		},
 	}
-	cluster, address, rlErr := processEndpoints(rateLimitClusterName, rlCluster, nil, 20, "")
+	cluster, address, rlErr := processEndpoints(rateLimitClusterName, rlCluster, nil, 20, "", false)
 	if rlErr != nil {
 		return nil, nil, rlErr
 	}
@@ -496,14 +497,14 @@ func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Ad
 	epCluster.Endpoints[0].Port = epPort
 	epCluster.Endpoints[0].Basepath = epPath
 
-	return processEndpoints(tracingClusterName, epCluster, nil, epTimeout, epPath)
+	return processEndpoints(tracingClusterName, epCluster, nil, epTimeout, epPath, false)
 }
 
 // processEndpoints creates cluster configuration. AddressConfiguration, cluster name and
 // urlType (http or https) is required to be provided.
 // timeout cluster timeout
 func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster, upstreamCerts map[string][]byte,
-	timeout time.Duration, basePath string) (*clusterv3.Cluster, []*corev3.Address, error) {
+	timeout time.Duration, basePath string, isMCP bool) (*clusterv3.Cluster, []*corev3.Address, error) {
 	// tls configs
 	var transportSocketMatches []*clusterv3.Cluster_TransportSocketMatch
 	// create loadbalanced/failover endpoints
@@ -577,7 +578,13 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 				epCert = defaultCerts
 			}
 
-			upstreamtlsContext := createUpstreamTLSContext(epCert, address)
+			var upstreamtlsContext *tlsv3.UpstreamTlsContext
+			if isMCP {
+				upstreamtlsContext = createUpstreamTLSContextForMCP(address)
+			} else {
+				upstreamtlsContext = createUpstreamTLSContext(epCert, address)
+			}
+			logger.LoggerOasparser.Info("UPSTREEEEEEEEEM TLS CONTEXT: ", upstreamtlsContext)
 			marshalledTLSContext, err := anypb.New(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
@@ -765,6 +772,73 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 					Filename: conf.Envoy.Upstream.TLS.TrustedCertPath,
 				},
 			}
+		}
+
+		upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
+			ValidationContext: &tlsv3.CertificateValidationContext{
+				TrustedCa: trustedCASrc,
+			},
+		}
+	}
+
+	if conf.Envoy.Upstream.TLS.VerifyHostName && !conf.Envoy.Upstream.TLS.DisableSslVerification {
+		addressString := address.GetSocketAddress().GetAddress()
+		subjectAltNames := []*tlsv3.SubjectAltNameMatcher{
+			{
+				SanType: sanType,
+				Matcher: &envoy_type_matcherv3.StringMatcher{
+					MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
+						Exact: addressString,
+					},
+				},
+			},
+		}
+		upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchTypedSubjectAltNames = subjectAltNames
+	}
+	return upstreamTLSContext
+}
+
+// createUpstreamTLSContextForMCP creates a TLS context for MCP APIs.
+// Here, the validation context will be created using the enforcer cert as the upstream service resides in enforcer.
+func createUpstreamTLSContextForMCP(address *corev3.Address) *tlsv3.UpstreamTlsContext {
+	conf, errReadConfig := config.ReadConfigs()
+	var tlsCert *tlsv3.TlsCertificate
+	//TODO: (VirajSalaka) Error Handling
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+		return nil
+	}
+	tlsCert = generateTLSCert(conf.Envoy.KeyStore.KeyPath, conf.Envoy.KeyStore.CertPath)
+
+	// Convert the cipher string to a string array
+	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
+	for i := range ciphersArray {
+		ciphersArray[i] = strings.TrimSpace(ciphersArray[i])
+	}
+
+	upstreamTLSContext := &tlsv3.UpstreamTlsContext{
+		CommonTlsContext: &tlsv3.CommonTlsContext{
+			TlsParams: &tlsv3.TlsParameters{
+				TlsMinimumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MinimumProtocolVersion),
+				TlsMaximumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MaximumProtocolVersion),
+				CipherSuites:              ciphersArray,
+			},
+			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
+		},
+	}
+
+	sanType := tlsv3.SubjectAltNameMatcher_IP_ADDRESS
+	// Sni should be assigned when there is a hostname
+	if net.ParseIP(address.GetSocketAddress().GetAddress()) == nil {
+		upstreamTLSContext.Sni = address.GetSocketAddress().GetAddress()
+		sanType = tlsv3.SubjectAltNameMatcher_DNS
+	}
+
+	if !conf.Envoy.Upstream.TLS.DisableSslVerification {
+		trustedCASrc := &corev3.DataSource{
+			Specifier: &corev3.DataSource_Filename{
+				Filename: conf.Envoy.KeyStore.CertPath,
+			},
 		}
 
 		upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
@@ -1119,23 +1193,16 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	corsFilter, _ := anypb.New(corsPolicy)
 
-	var filterExtProc *any.Any
-
 	metaData := &corev3.Metadata{}
-	if apiType == "MCP" {
-		// Overrding the default processing mode for MCP APIs
-		perFilterConfigExtProc := extProcessorv3.ExtProcPerRoute{
-			Override: &extProcessorv3.ExtProcPerRoute_Overrides{
-				Overrides: &extProcessorv3.ExtProcOverrides{
-					ProcessingMode: &extProcessorv3.ProcessingMode{
-						RequestHeaderMode:  extProcessorv3.ProcessingMode_SEND,
-						ResponseHeaderMode: extProcessorv3.ProcessingMode_SKIP,
-						RequestBodyMode:    extProcessorv3.ProcessingMode_BUFFERED,
-					},
-				},
-			},
+	requestHeaders := []*corev3.HeaderValueOption{}
+	if apiType == model.MCP {
+		var basepath string
+		if xWso2Basepath != "" {
+			basepath = xWso2Basepath
+		} else {
+			basepath = endpointBasepath
 		}
-		// Set the metadata for MCP routes to be used in the ext_proc filter
+		// Set the metadata for MCP routes
 		metaData = &corev3.Metadata{
 			FilterMetadata: map[string]*structpb.Struct{
 				"envoy.filters.http.ext_proc": &structpb.Struct{
@@ -1162,48 +1229,51 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 						},
 						basePathContextExtension: &structpb.Value{
 							Kind: &structpb.Value_StringValue{
-								StringValue: func() string {
-									if xWso2Basepath != "" {
-										return xWso2Basepath
-									}
-									return endpointBasepath
-								}(),
+								StringValue: basepath,
 							},
 						},
 					},
 				},
 			},
 		}
-		dataExtProc, _ := proto.Marshal(&perFilterConfigExtProc)
-		filterExtProc = &any.Any{
-			TypeUrl: extProcPerRouteName,
-			Value:   dataExtProc,
-		}
-	} else {
-		perFilterConfigExtProc := extProcessorv3.ExtProcPerRoute{
-			Override: &extProcessorv3.ExtProcPerRoute_Disabled{
-				Disabled: true,
+
+		requestHeaders = []*corev3.HeaderValueOption{
+			{
+				Header: &corev3.HeaderValue{
+					Key:   "x-wso2-mcp-vhost",
+					Value: vHost,
+				},
+				AppendAction: corev3.HeaderValueOption_OVERWRITE_IF_EXISTS_OR_ADD,
 			},
-		}
-		dataExtProc, _ := proto.Marshal(&perFilterConfigExtProc)
-		filterExtProc = &any.Any{
-			TypeUrl: extProcPerRouteName,
-			Value:   dataExtProc,
+			{
+				Header: &corev3.HeaderValue{
+					Key:   "x-wso2-mcp-version",
+					Value: version,
+				},
+				AppendAction: corev3.HeaderValueOption_OVERWRITE_IF_EXISTS_OR_ADD,
+			},
+			{
+				Header: &corev3.HeaderValue{
+					Key:   "x-wso2-mcp-basepath",
+					Value: basepath,
+				},
+				AppendAction: corev3.HeaderValueOption_OVERWRITE_IF_EXISTS_OR_ADD,
+			},
 		}
 	}
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 	router = routev3.Route{
-		Name:      getRouteName(params.apiUUID), //Categorize routes with same base path
-		Match:     match,
-		Action:    action,
-		Metadata:  metaData,
-		Decorator: decorator,
+		Name:                getRouteName(params.apiUUID), //Categorize routes with same base path
+		Match:               match,
+		Action:              action,
+		Metadata:            metaData,
+		Decorator:           decorator,
+		RequestHeadersToAdd: requestHeaders,
 		TypedPerFilterConfig: map[string]*any.Any{
 			wellknown.HTTPExternalAuthorization: extAuthzFilter,
 			wellknown.Lua:                       luaFilter,
 			wellknown.CORS:                      corsFilter,
-			extProcFilterName:                   filterExtProc,
 		},
 	}
 
@@ -1683,7 +1753,6 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 			}
 		}
 	}
-	logger.LoggerOasparser.Info("MGWAPI4 Type =======================>", swagger.GetAPIType())
 	params := &routeCreateParams{
 		organizationID:      organizationID,
 		apiUUID:             swagger.GetID(),

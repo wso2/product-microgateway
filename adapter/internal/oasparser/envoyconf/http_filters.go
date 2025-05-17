@@ -27,7 +27,6 @@ import (
 	envoy_config_ratelimit_v3 "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
-	ext_process "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_proc/v3"
 	local_ratelimit_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	luav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	rate_limit "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ratelimit/v3"
@@ -57,13 +56,11 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	lua := getLuaFilter()
 	cors := getCorsHTTPFilter()
 	localRateLimit := getHTTPLocalRateLimitFilter()
-	extProc := getExtProcFilter()
 
 	httpFilters := []*hcmv3.HttpFilter{
 		cors,
 		localRateLimit,
 		extAauth,
-		extProc,
 		lua,
 		router,
 	}
@@ -72,7 +69,6 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		rateLimit := getRateLimitFilter()
 		httpFilters = httpFilters[:len(httpFilters)-2]
 		httpFilters = append(httpFilters, rateLimit)
-		httpFilters = append(httpFilters, extProc)
 		httpFilters = append(httpFilters, lua)
 		httpFilters = append(httpFilters, router)
 	}
@@ -388,40 +384,4 @@ func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
 	}
 	return &mgwWebSocketFilter
 
-}
-
-func getExtProcFilter() *hcmv3.HttpFilter {
-	conf, _ := config.ReadConfigs()
-	extProcessor := &ext_process.ExternalProcessor{
-		GrpcService: &corev3.GrpcService{
-			TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
-				EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
-					ClusterName: extAuthzClusterName,
-				},
-			},
-			Timeout: durationpb.New(conf.Envoy.EnforcerResponseTimeoutInSeconds * time.Second),
-		},
-		FailureModeAllow: true,
-		// The header processing mode is set to SKIP to overrde the default behavior of SEND
-		// This will basically disable the ext_proc filter globally.
-		ProcessingMode: &ext_process.ProcessingMode{
-			RequestHeaderMode:  ext_process.ProcessingMode_SKIP,
-			ResponseHeaderMode: ext_process.ProcessingMode_SKIP,
-		},
-		RequestAttributes:  []string{"xds.route_metadata", "request.method", "request.id"},
-		ResponseAttributes: []string{"xds.route_metadata"},
-		MessageTimeout:     durationpb.New(conf.Envoy.EnforcerResponseTimeoutInSeconds * time.Second),
-		AllowModeOverride:  true,
-	}
-	ext, err := anypb.New(extProcessor)
-	if err != nil {
-		logger.LoggerOasparser.Error(err)
-	}
-	extProcFilter := hcmv3.HttpFilter{
-		Name: extProcFilterName,
-		ConfigType: &hcmv3.HttpFilter_TypedConfig{
-			TypedConfig: ext,
-		},
-	}
-	return &extProcFilter
 }
