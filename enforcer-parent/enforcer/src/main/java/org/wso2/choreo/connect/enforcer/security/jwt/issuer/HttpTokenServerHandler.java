@@ -23,11 +23,10 @@ import io.grpc.netty.shaded.io.netty.buffer.Unpooled;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFuture;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFutureListener;
 import io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext;
-import io.grpc.netty.shaded.io.netty.channel.SimpleChannelInboundHandler;
+import io.grpc.netty.shaded.io.netty.channel.ChannelInboundHandlerAdapter;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpResponse;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObject;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpUtil;
@@ -46,7 +45,7 @@ import java.util.Base64;
 /**
  * This is the http token server handler implementation.
  */
-public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObject> {
+public class HttpTokenServerHandler extends ChannelInboundHandlerAdapter {
     private static final String CONTENT_LENGTH = "content-length";
     private static final String KEEP_ALIVE = "keep-alive";
     private static final String TEXT_PLAIN = "text/plain";
@@ -69,7 +68,7 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         FullHttpResponse response = null;
 
         if (msg instanceof HttpRequest) {
