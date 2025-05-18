@@ -22,7 +22,7 @@ import io.grpc.netty.shaded.io.netty.buffer.Unpooled;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFuture;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFutureListener;
 import io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext;
-import io.grpc.netty.shaded.io.netty.channel.SimpleChannelInboundHandler;
+import io.grpc.netty.shaded.io.netty.channel.ChannelInboundHandlerAdapter;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpResponse;
@@ -31,9 +31,9 @@ import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderValues;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaders;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObject;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
+import io.grpc.netty.shaded.io.netty.util.ReferenceCountUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
@@ -45,13 +45,18 @@ import java.nio.charset.StandardCharsets;
 /**
  * MCP Request Handler for MCP Proxies
  */
-public class McpRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
+public class McpRequestHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LogManager.getLogger(McpRequestHandler.class);
     private static final String mcp = "/mcp";
-    private static final String wellKnown = "/.well-known/authorization-server";
+    private static final String wellKnown = "/.well-known/oauth-authorization-server";
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
+    public void channelReadComplete(ChannelHandlerContext ctx) {
+        ctx.flush();
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
             String path = req.uri().split("\\?")[0];
@@ -60,7 +65,7 @@ public class McpRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
                     if (req.method() == HttpMethod.POST) {
                         logger.info("Received request for /mcp");
                         handleMcpRequest(ctx, msg);
-                        ctx.fireChannelRead(msg);
+                        ReferenceCountUtil.release(req);
                         return;
                     }
                     break;
@@ -68,7 +73,7 @@ public class McpRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
                     if (req.method() == HttpMethod.GET) {
                         logger.info("Received request for /well-known");
                         handleWellKnownRequest(ctx, msg);
-                        ctx.fireChannelRead(msg);
+                        ReferenceCountUtil.release(req);
                         return;
                     }
                     break;
@@ -81,7 +86,7 @@ public class McpRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
         }
     }
 
-    private void handleMcpRequest(ChannelHandlerContext ctx, HttpObject msg) {
+    private void handleMcpRequest(ChannelHandlerContext ctx, Object msg) {
         FullHttpRequest req = (FullHttpRequest) msg;
         HttpHeaders headers = req.headers();
         String vhostHeader = headers.get(McpConstants.VHOST_HEADER);
@@ -118,12 +123,15 @@ public class McpRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
         if (requestContent.content().isReadable()) {
             String body = requestContent.content().toString(StandardCharsets.UTF_8);
             String jsonResponse = McpRequestProcessor.processRequest(apikey, body, tokenHeader.toString());
-            res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.OK,
-                    Unpooled.wrappedBuffer(jsonResponse.getBytes(StandardCharsets.UTF_8)));
-            res.headers()
-                    .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
-                    .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
-            cf = ctx.writeAndFlush(res);
+            if (jsonResponse != null) {
+                res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.OK,
+                        Unpooled.wrappedBuffer(jsonResponse.getBytes(StandardCharsets.UTF_8)));
+                res.headers()
+                        .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
+                        .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
+            } else {
+                res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.ACCEPTED);
+            }
         } else {
             logger.info("Received empty request body");
             String jsonResponse = PayloadGenerator
@@ -134,13 +142,35 @@ public class McpRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
             res.headers()
                     .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
                     .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
-            cf = ctx.writeAndFlush(res);
-
         }
+        cf = ctx.writeAndFlush(res);
         cf.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
-    private void handleWellKnownRequest(ChannelHandlerContext ctx, HttpObject msg) {
-        //todo
+    private void handleWellKnownRequest(ChannelHandlerContext ctx, Object msg) {
+        FullHttpRequest req = (FullHttpRequest) msg;
+        HttpHeaders headers = req.headers();
+        String orgHeaderValue = headers.get(McpConstants.ORG_HEADER);
+        if (orgHeaderValue == null) {
+            logger.error("Missing required header: " + McpConstants.ORG_HEADER);
+            ctx.fireChannelRead(msg);
+            return;
+        }
+        String jsonResponse = McpRequestProcessor.processWellKnownRequest(orgHeaderValue);
+        FullHttpResponse res;
+        ChannelFuture cf;
+        if (jsonResponse != null) {
+            res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.OK,
+                    Unpooled.wrappedBuffer(jsonResponse.getBytes(StandardCharsets.UTF_8)));
+            res.headers()
+                    .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
+                    .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
+            res.headers().set(McpConstants.MCP_PROTOCOL_VERSION_HEADER,
+                    McpConstants.PROTOCOL_VERSION_2025_MARCH);
+        } else {
+            res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+        }
+        cf = ctx.writeAndFlush(res);
+        cf.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 }

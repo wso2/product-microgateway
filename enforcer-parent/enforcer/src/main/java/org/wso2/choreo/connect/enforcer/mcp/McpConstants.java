@@ -28,19 +28,29 @@ public class McpConstants {
     public static final String METHOD_INITIALIZE = "initialize";
     public static final String METHOD_TOOL_LIST = "tools/list";
     public static final String METHOD_TOOL_CALL = "tools/call";
+    public static final String METHOD_PING = "ping";
+    public static final String METHOD_NOTIFICATION_INITIALIZED = "notifications/initialized";
+    public static final String METHOD_RESOURCES_LIST = "resources/list";
+    public static final String METHOD_RESOURCE_TEMPLATE_LIST = "resources/templates/list";
+    public static final String METHOD_PROMPTS_LIST = "prompts/list";
     public static final List<String> ALLOWED_METHODS = Arrays.asList(METHOD_INITIALIZE, METHOD_TOOL_LIST,
-            METHOD_TOOL_CALL);
+            METHOD_TOOL_CALL, METHOD_PING, METHOD_NOTIFICATION_INITIALIZED, METHOD_RESOURCES_LIST, METHOD_PROMPTS_LIST,
+            METHOD_RESOURCE_TEMPLATE_LIST);
     public static final String PROTOCOL_VERSION_KEY = "protocolVersion";
+    public static final String PROTOCOL_VERSION_2024_NOVEMBER = "2024-11-05";
     public static final String PROTOCOL_VERSION_2025_MARCH = "2025-03-26";
-    public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = List.of(PROTOCOL_VERSION_2025_MARCH);
+    public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = Arrays.asList(PROTOCOL_VERSION_2025_MARCH);
     public static final String PARAMS_KEY = "params";
-    public static final String TOOL_NAME_KEY = "toolName";
+    public static final String TOOL_NAME_KEY = "name";
+    public static final String TOOL_DESC_KEY = "description";
     public static final String REQUIRED_KEY = "required";
     public static final String PROPERTIES_KEY = "properties";
     public static final String ARGUMENTS_KEY = "arguments";
+    public static final String RESULT_KEY = "result";
     public static final String VHOST_HEADER = "x-wso2-mcp-vhost";
     public static final String BASEPATH_HEADER = "x-wso2-mcp-basepath";
     public static final String VERSION_HEADER = "x-wso2-mcp-version";
+    public static final String ORG_HEADER = "x-wso2-mcp-organization";
     public static final String PAYLOAD_TOOL_NAME = "tool_name";
     public static final String PAYLOAD_SCHEMA = "schema";
     public static final String PAYLOAD_API_NAME = "api_name";
@@ -50,6 +60,9 @@ public class McpConstants {
     public static final String PAYLOAD_VERB = "verb";
     public static final String PAYLOAD_AUTH = "auth";
     public static final String PAYLOAD_ENDPOINT = "endpoint";
+    public static final String ASGARDEO_WK_PLACEHOLDER
+            = "https://api.asgardeo.io/t/{organization}/oauth2/token/.well-known/openid-configuration";
+    public static final String MCP_PROTOCOL_VERSION_HEADER = "MCP-Protocol-Version";
 
     /**
      * This class contains constants used for RPC processing

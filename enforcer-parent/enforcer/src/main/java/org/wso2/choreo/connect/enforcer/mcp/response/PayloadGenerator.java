@@ -47,7 +47,7 @@ public class PayloadGenerator {
         return gson.toJson(errorResponse);
     }
 
-    public static String getInitializeResponse(String id, String serverName, String serverVersion,
+    public static String getInitializeResponse(Object id, String serverName, String serverVersion,
                                                String serverDescription, boolean toolListChangeNotified) {
         // Create the response object as specified in
         // https://modelcontextprotocol.io/specification/2025-03-26/basic/lifecycle#initialization
@@ -60,6 +60,10 @@ public class PayloadGenerator {
         JsonObject toolCapabilities = new JsonObject();
         toolCapabilities.addProperty("listChanged", toolListChangeNotified);
         capabilities.add("tools", toolCapabilities);
+        // Add empty objects for unsupported capabilities
+        capabilities.add("resources", new JsonObject());
+        capabilities.add("prompts", new JsonObject());
+        capabilities.add("logging", new JsonObject());
         result.add("capabilities", capabilities);
 
         JsonObject serverInfo = new JsonObject();
@@ -68,11 +72,11 @@ public class PayloadGenerator {
         serverInfo.addProperty("description", serverDescription);
         result.add("serverInfo", serverInfo);
 
-        responseObject.add("result", result);
+        responseObject.add(McpConstants.RESULT_KEY, result);
         return gson.toJson(responseObject);
     }
 
-    public static String generateToolListPayload(String id, List<ExtendedOperation> extendedOperations) {
+    public static String generateToolListPayload(Object id, List<ExtendedOperation> extendedOperations) {
         McpResponse response = new McpResponse(id);
         JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
         JsonObject result = new JsonObject();
@@ -80,7 +84,7 @@ public class PayloadGenerator {
         for (ExtendedOperation extendedOperation : extendedOperations) {
             JsonObject toolObject = new JsonObject();
             toolObject.addProperty(McpConstants.TOOL_NAME_KEY, extendedOperation.getName());
-            toolObject.addProperty("toolDescription", extendedOperation.getDescription());
+            toolObject.addProperty(McpConstants.TOOL_DESC_KEY, extendedOperation.getDescription());
             String schema = extendedOperation.getSchema();
             if (schema != null) {
                 JsonObject schemaObject = gson.fromJson(schema, JsonObject.class);
@@ -89,15 +93,19 @@ public class PayloadGenerator {
             toolsArray.add(toolObject);
         }
         result.add("tools", toolsArray);
-        responseObject.add("result", result);
+        responseObject.add(McpConstants.RESULT_KEY, result);
 
         return gson.toJson(responseObject);
     }
 
     private static JsonObject sanitizeInputSchema(JsonObject inputObject) {
         if (inputObject == null || inputObject.isEmpty()) {
-            return inputObject;
+            JsonObject emptyObject = new JsonObject();
+            emptyObject.addProperty("type", "object");
+            emptyObject.add("properties", new JsonObject());
+            return emptyObject;
         }
+        inputObject.remove("contentType");
 
         JsonArray requiredArray = inputObject.getAsJsonArray(McpConstants.REQUIRED_KEY);
         JsonArray sanitizedArray = new JsonArray();
@@ -155,7 +163,7 @@ public class PayloadGenerator {
         return payload;
     }
 
-    public static String generateMcpResponsePayload(String id, boolean isError, String body) {
+    public static String generateMcpResponsePayload(Object id, boolean isError, String body) {
         McpResponse response = new McpResponse(id);
         JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
 
@@ -169,7 +177,35 @@ public class PayloadGenerator {
 
         content.add(contentObject);
         result.add("content", content);
-        responseObject.add("result", result);
+        responseObject.add(McpConstants.RESULT_KEY, result);
+
+        return gson.toJson(responseObject);
+    }
+
+    public static String generatePingResponse(Object id) {
+        return generateEmptyResult(id);
+    }
+
+    public static String generateResourceListResponse(Object id) {
+        // Resources are not supported at the moment
+        return generateEmptyResult(id);
+    }
+
+    public static String generateResourceTemplateListResponse(Object id) {
+        // Resource templates are not supported at the moment
+        return generateEmptyResult(id);
+    }
+
+    public static String generatePromptListResponse(Object id) {
+        // Prompts are not supported at the moment
+        return generateEmptyResult(id);
+    }
+
+    private static String generateEmptyResult(Object id) {
+        McpResponse response = new McpResponse(id);
+        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
+        JsonObject result = new JsonObject();
+        responseObject.add(McpConstants.RESULT_KEY, result);
 
         return gson.toJson(responseObject);
     }
