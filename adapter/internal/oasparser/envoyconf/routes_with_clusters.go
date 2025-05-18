@@ -584,7 +584,6 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			} else {
 				upstreamtlsContext = createUpstreamTLSContext(epCert, address)
 			}
-			logger.LoggerOasparser.Info("UPSTREEEEEEEEEM TLS CONTEXT: ", upstreamtlsContext)
 			marshalledTLSContext, err := anypb.New(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
