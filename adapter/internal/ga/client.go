@@ -350,12 +350,12 @@ func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
 
 		currentGAAPI, apiFound := apiEnvRevisionMap[api.ApiUUID][api.DeployedEnv]
 		if apiFound {
+			if _, found := removedAPIEnvMap[api.ApiUUID]; found {
+				delete(removedAPIEnvMap[api.ApiUUID], api.DeployedEnv)
+			}
 			if currentGAAPI.RevisionUUID == api.RevisionUUID {
 				logger.LoggerGA.Debugf("Current GA API revision ID and API event revision ID: %s in "+
 					"environment: %s are equal", currentGAAPI.RevisionUUID, currentGAAPI.DeployedEnv)
-				if _, found := removedAPIEnvMap[api.ApiUUID]; found {
-					delete(removedAPIEnvMap[api.ApiUUID], api.DeployedEnv)
-				}
 				continue
 			}
 		}

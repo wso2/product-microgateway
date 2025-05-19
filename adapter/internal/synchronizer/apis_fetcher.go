@@ -267,6 +267,6 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 	if !receivedArtifact {
 		// This logs statement is used to trigger the alert if the API is not fetched from the control plane.
 		logger.LoggerSync.Errorf("Stop retrying to fetch data from control plane for the API %q: for environments %v as no artifact received after %d retries.",
-			updatedAPIID, finalEnvs, retryLimit)
+			updatedAPIID, finalEnvs, retryCounter)
 	}
 }
