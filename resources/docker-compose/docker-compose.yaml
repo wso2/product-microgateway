@@ -134,3 +134,9 @@ services:
       test: [ "CMD", "redis-cli", "ping" ]
     ports:
       - "6379:6379"
+  mcp:
+    image: wso2/mcp-transformer:1.1.0-m1-SNAPSHOT
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./conf/mcp/config.toml:/config.toml
