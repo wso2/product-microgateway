@@ -17,7 +17,8 @@ FROM envoyproxy/envoy:v1.24.7
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apt-get update && apt-get upgrade -y \
-    && apt-get install --no-install-recommends --no-install-suggests -y gettext-base
+    && apt-get install --no-install-recommends --no-install-suggests -y gettext-base \
+    && apt-get install --reinstall ca-certificates -y
 
 ENV LANG=C.UTF-8
 
@@ -72,7 +73,6 @@ ENV ENVOY_GID=0
 
 COPY maven/LICENSE.txt .
 COPY --from=wso2/choreo-connect-router:1.2.0 ${MG_USER_HOME}/wasm ${MG_USER_HOME}/wasm
-COPY maven/security/truststore/ca-certificates.crt /etc/ssl/certs
 COPY maven/interceptor /home/wso2/interceptor
 COPY maven/envoy.yaml /etc/envoy/envoy.yaml
 COPY maven/envoy.yaml.template /home/wso2/envoy.yaml.template
