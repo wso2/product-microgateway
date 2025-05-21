@@ -148,29 +148,10 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void handleWellKnownRequest(ChannelHandlerContext ctx, Object msg) {
+        // Send a 501 Not Implemented response as this is not implemented yet
         FullHttpRequest req = (FullHttpRequest) msg;
-        HttpHeaders headers = req.headers();
-        String orgHeaderValue = headers.get(McpConstants.ORG_HEADER);
-        if (orgHeaderValue == null) {
-            logger.error("Missing required header: " + McpConstants.ORG_HEADER);
-            ctx.fireChannelRead(msg);
-            return;
-        }
-        String jsonResponse = McpRequestProcessor.processWellKnownRequest(orgHeaderValue);
-        FullHttpResponse res;
-        ChannelFuture cf;
-        if (jsonResponse != null) {
-            res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.OK,
-                    Unpooled.wrappedBuffer(jsonResponse.getBytes(StandardCharsets.UTF_8)));
-            res.headers()
-                    .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
-                    .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
-            res.headers().set(McpConstants.MCP_PROTOCOL_VERSION_HEADER,
-                    McpConstants.PROTOCOL_VERSION_2025_MARCH);
-        } else {
-            res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        }
-        cf = ctx.writeAndFlush(res);
+        FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.NOT_IMPLEMENTED);
+        ChannelFuture cf = ctx.writeAndFlush(res);
         cf.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 }
