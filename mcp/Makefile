@@ -38,7 +38,7 @@ build-linux-arm:
 
 build-darwin:
 	mkdir -p $(BUILD_DIR)/darwin
-	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.version=$(BUILD_VERSION)" \
+	GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-X main.version=$(BUILD_VERSION)" \
 	-o $(BUILD_DIR)/darwin/transform-mcp $(PROJECT_ROOT)/main.go
 
 # Clean build artifacts

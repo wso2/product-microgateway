@@ -149,8 +149,8 @@ func processQueryParameters(args map[string]any, schemaMapping *SchemaMapping) (
 				continue
 			}
 			// URL encode the parameter name and value
-			urlEncodedParam := url.QueryEscape(fmt.Sprintf("%v", paramName))
-			urlEncodedValue := url.QueryEscape(fmt.Sprintf("%v", paramValue))
+			urlEncodedParam := url.PathEscape(fmt.Sprintf("%v", paramName))
+			urlEncodedValue := url.PathEscape(fmt.Sprintf("%v", paramValue))
 			queryString += fmt.Sprintf("%s=%s&", urlEncodedParam, urlEncodedValue)
 		}
 		queryString = strings.TrimSuffix(queryString, "&")
@@ -173,8 +173,8 @@ func processPathParameters(args map[string]any, schemaMapping *SchemaMapping, un
 				return "", fmt.Errorf("path parameter %s is missing", param)
 			}
 			// URL encode the parameter name and value
-			urlEncodedParam := url.QueryEscape(fmt.Sprintf("%v", param))
-			urlEncodedValue := url.QueryEscape(fmt.Sprintf("%v", paramValue))
+			urlEncodedParam := url.PathEscape(fmt.Sprintf("%v", param))
+			urlEncodedValue := url.PathEscape(fmt.Sprintf("%v", paramValue))
 			processedUrl := strings.Replace(transformedUrl, "{"+urlEncodedParam+"}", urlEncodedValue, 1)
 			transformedUrl = processedUrl
 		}
