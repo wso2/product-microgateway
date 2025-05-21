@@ -1,0 +1,23 @@
+# +required Version of the endpoint configuration YAML
+version: 0.1
+
+# +required List of endpoints to create
+endpoints:
+  # +required Unique name for the endpoint.
+  # This name will be used when generating the managed API
+- name: MCP Transformation Service
+  # +required Numeric port value that gets exposed via this endpoint
+  port: 8080
+  # +required Type of the traffic this endpoint is accepting.
+  # Allowed values: REST, GraphQL, GRPC, UDP, TCP, WS.
+  type: REST
+  # +optional Network level visibility of this endpoint. Defaults to Public
+  # Accepted values: Project|Organization|Public.
+  networkVisibility: Public
+  # +optional Context (base path) of the API that is exposed via this endpoint.
+  # This is mandatory if the endpoint type is set to REST, GraphQL or WS.
+  context: /
+  # +optional Path to the schema definition file. Defaults to wild card route if not provided
+  # This is only applicable to REST and WS endpoint types.
+  # The path should be relative to the docker context.
+  schemaFilePath: src/main/resources/openapi.yaml

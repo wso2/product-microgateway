@@ -3,7 +3,7 @@ port = 8080
 host = "0.0.0.0"
 keyPath = "resources/security/private.key"
 certPath = "resources/security/server.pem"
-secure = true
+secure = false
 
 [http]
 insecure = false
