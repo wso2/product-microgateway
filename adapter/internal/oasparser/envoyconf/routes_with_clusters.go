@@ -1262,18 +1262,33 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
-	router = routev3.Route{
-		Name:                getRouteName(params.apiUUID), //Categorize routes with same base path
-		Match:               match,
-		Action:              action,
-		Metadata:            metaData,
-		Decorator:           decorator,
-		RequestHeadersToAdd: requestHeaders,
-		TypedPerFilterConfig: map[string]*any.Any{
-			wellknown.HTTPExternalAuthorization: extAuthzFilter,
-			wellknown.Lua:                       luaFilter,
-			wellknown.CORS:                      corsFilter,
-		},
+	if apiType == model.MCP {
+		router = routev3.Route{
+			Name:                getRouteName(params.apiUUID),
+			Match:               match,
+			Action:              action,
+			Metadata:            metaData,
+			Decorator:           decorator,
+			RequestHeadersToAdd: requestHeaders,
+			TypedPerFilterConfig: map[string]*any.Any{
+				wellknown.HTTPExternalAuthorization: extAuthzFilter,
+				wellknown.Lua:                       luaFilter,
+				wellknown.CORS:                      corsFilter,
+			},
+		}
+	} else {
+		router = routev3.Route{
+			Name:      getRouteName(params.apiUUID), //Categorize routes with same base path
+			Match:     match,
+			Action:    action,
+			Metadata:  nil,
+			Decorator: decorator,
+			TypedPerFilterConfig: map[string]*any.Any{
+				wellknown.HTTPExternalAuthorization: extAuthzFilter,
+				wellknown.Lua:                       luaFilter,
+				wellknown.CORS:                      corsFilter,
+			},
+		}
 	}
 
 	if enableRouterConfigValidation {

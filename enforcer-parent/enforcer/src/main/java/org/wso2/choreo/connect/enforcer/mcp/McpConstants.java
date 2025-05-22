@@ -25,6 +25,7 @@ import java.util.List;
  * This class contains constants used for MCP processing
  */
 public class McpConstants {
+    public static final String MCP_ENABLED = "MCP_ENABLED";
     public static final String METHOD_INITIALIZE = "initialize";
     public static final String METHOD_TOOL_LIST = "tools/list";
     public static final String METHOD_TOOL_CALL = "tools/call";

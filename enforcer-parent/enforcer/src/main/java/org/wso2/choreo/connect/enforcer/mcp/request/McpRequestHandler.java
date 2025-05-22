@@ -36,7 +36,9 @@ import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import io.grpc.netty.shaded.io.netty.util.ReferenceCountUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
 import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
 
@@ -63,7 +65,6 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
             switch (path) {
                 case mcp:
                     if (req.method() == HttpMethod.POST) {
-                        logger.info("Received request for /mcp");
                         handleMcpRequest(ctx, msg);
                         ReferenceCountUtil.release(req);
                         return;
@@ -71,7 +72,6 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case wellKnown:
                     if (req.method() == HttpMethod.GET) {
-                        logger.info("Received request for /well-known");
                         handleWellKnownRequest(ctx, msg);
                         ReferenceCountUtil.release(req);
                         return;
@@ -107,16 +107,25 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
             ctx.fireChannelRead(msg);
             return;
         }
+        String apikey = APIFactory.getInstance().getApiKey(vhostHeader, basepathHeader, versionHeader);
+        API matchedAPI = APIFactory.getInstance().getMatchedAPIByKey(apikey);
+        String authHeaderName;
+        String testKeyName = ConfigHolder.getInstance().getConfig().getAuthHeader()
+                .getTestConsoleHeaderName().toLowerCase();
+        if (matchedAPI != null) {
+            authHeaderName = matchedAPI.getAPIConfig().getAuthHeader();
+        } else {
+            authHeaderName = String.valueOf(HttpHeaderNames.AUTHORIZATION);
+        }
         StringBuilder tokenHeader = new StringBuilder();
-        if (headers.get(HttpHeaderNames.AUTHORIZATION) != null) {
-            String auth = headers.get(HttpHeaderNames.AUTHORIZATION);
-            tokenHeader.append(HttpHeaderNames.AUTHORIZATION).append(":").append(auth);
-        } else if (headers.get("test-key") != null) {
-            tokenHeader.append("test-key").append(":").append(headers.get("test-key"));
+        if (headers.get(authHeaderName) != null) {
+            tokenHeader.append(HttpHeaderNames.AUTHORIZATION).append(":").append(headers.get(authHeaderName));
+        } else if (headers.get(testKeyName) != null) {
+            tokenHeader.append(testKeyName).append(":").append(headers.get(testKeyName));
         } else {
             logger.info("Authorization header is not available. Assuming no authorization needed for this request");
         }
-        String apikey = APIFactory.getInstance().getApiKey(vhostHeader, basepathHeader, versionHeader);
+
         HttpContent requestContent = (HttpContent) msg;
         FullHttpResponse res;
         ChannelFuture cf;

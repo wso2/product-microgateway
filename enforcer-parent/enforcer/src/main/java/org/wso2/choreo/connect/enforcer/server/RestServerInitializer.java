@@ -28,6 +28,7 @@ import org.wso2.choreo.connect.enforcer.admin.AdminServerHandler;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.jwks.JWKSRequestHandler;
+import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
 import org.wso2.choreo.connect.enforcer.mcp.request.McpRequestHandler;
 import org.wso2.choreo.connect.enforcer.security.jwt.issuer.HttpTokenServerHandler;
 
@@ -61,7 +62,10 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
             p.addLast(new HttpTokenServerHandler());
         }
         // This handler will act as the upstream for all MCP APIs
-        p.addLast(new McpRequestHandler());
+        boolean mcpEnabled = Boolean.parseBoolean(System.getenv(McpConstants.MCP_ENABLED));
+        if (mcpEnabled) {
+            p.addLast(new McpRequestHandler());
+        }
         if (enforcerConfig.getRestServer().isEnable()) {
             p.addLast(new AdminServerHandler());
         }
