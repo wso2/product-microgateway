@@ -1591,6 +1591,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	}
 	// Set MCP tools as extended operations to MGWSwagger
 	if apiType == MCP {
+		logger.LoggerXds.Info("Setting extended operations for MCP tools")
 		if data.Operations != nil {
 			var extendedOperations []*ExtendedOperation
 			for _, operation := range data.Operations {
