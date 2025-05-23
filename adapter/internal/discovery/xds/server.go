@@ -313,7 +313,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 		return nil, err
 	}
 
-	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK || apiProject.APIType == mgw.WS {
+	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.MCP || apiProject.APIType == mgw.WEBHOOK || apiProject.APIType == mgw.WS {
 		err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
 		if err != nil {
 			logger.LoggerXds.Error("Error while populating swagger from api definition. ", err)

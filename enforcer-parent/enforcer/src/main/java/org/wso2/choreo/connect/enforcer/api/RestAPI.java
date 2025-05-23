@@ -32,6 +32,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.BackendJWTConfiguration;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
+import org.wso2.choreo.connect.enforcer.commons.model.ExtendedOperation;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
@@ -78,6 +79,7 @@ public class RestAPI implements API {
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
         BackendJWTConfiguration backendJWTConfiguration = new BackendJWTConfiguration();
+        List<ExtendedOperation> extendedOperations = new ArrayList<>();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -136,6 +138,24 @@ public class RestAPI implements API {
             }
         }
 
+        for (org.wso2.choreo.connect.discovery.api.ExtendedOperation extendedOperation
+                : api.getExtendedOperationsList()) {
+            ExtendedOperation extendedOperationConfig = new ExtendedOperation();
+            extendedOperationConfig.setName(extendedOperation.getName());
+            extendedOperationConfig.setVerb(extendedOperation.getVerb());
+            extendedOperationConfig.setDescription(extendedOperation.getDescription());
+            extendedOperationConfig.setSchema(extendedOperation.getSchema());
+            extendedOperationConfig.setMode(extendedOperation.getMode());
+            if (extendedOperation.getProxyMapping() != null) {
+                extendedOperationConfig.setApiName(extendedOperation.getProxyMapping().getName());
+                extendedOperationConfig.setApiVersion(extendedOperation.getProxyMapping().getVersion());
+                extendedOperationConfig.setApiContext(extendedOperation.getProxyMapping().getContext());
+                extendedOperationConfig.setApiTarget(extendedOperation.getProxyMapping().getTarget());
+                extendedOperationConfig.setApiVerb(extendedOperation.getProxyMapping().getVerb());
+            }
+            extendedOperations.add(extendedOperationConfig);
+        }
+
         if (api.getEndpointSecurity().hasProductionSecurityInfo()) {
             endpointSecurity.setProductionSecurityInfo(
                     APIProcessUtils.convertProtoEndpointSecurity(
@@ -162,6 +182,7 @@ public class RestAPI implements API {
                 .environmentId(api.getEnvironmentId())
                 .environmentName(api.getEnvironmentName())
                 .choreoComponentInfo(choreoComponentInfo)
+                .extendedOperations(extendedOperations)
                 .build();
 
         initFilters();

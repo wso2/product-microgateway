@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: MCP Transformation Service
+  description: >-
+    This is a sample API specification for MCP transformation service
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /mcp:
+    summary: Transform the MCP request
+    post:
+      summary: Transform the MCP request
+      operationId: TransformMCP
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid request body
+        "500":
+          description: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MCPRequest"
+  /health:
+    summary: Healthcheck endpoint
+    get:
+      summary: Healthcheck
+      operationId: Healthcheck
+      responses:
+        "200":
+          description: Healthy response
+
+components:
+  schemas:
+    MCPRequest:
+      type: object
+      properties:
+        tool_name:
+          type: string
+        api:
+          $ref: '#/components/schemas/APIInfo'
+        arguments:
+          type: string
+          nullable: true
+        schema:
+          type: string
+          nullable: true
+      required:
+        - tool_name
+        - api
+
+    APIInfo:
+      type: object
+      properties:
+        api_name:
+          type: string
+        endpoint:
+          type: string
+        context:
+          type: string
+        version:
+          type: string
+        path:
+          type: string
+        verb:
+          type: string
+        auth:
+          type: string
+          nullable: true
+      required:
+        - api_name
+        - endpoint
+        - context
+        - version
+        - path
+        - verb

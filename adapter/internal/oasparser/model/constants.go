@@ -83,6 +83,8 @@ const (
 	WEBHOOK string = "WEBHOOK"
 	// GRAPHQL - API type for GRAPHQL APIs
 	GRAPHQL string = "GRAPHQL"
+	// MCP - API type for MCP Proxy APIs
+	MCP string = "MCP"
 )
 
 // Constants to represent errors

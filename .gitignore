@@ -43,3 +43,4 @@ envoy-filters/.idea
 
 # executable
 adapter/micro-gw
+mcp/build

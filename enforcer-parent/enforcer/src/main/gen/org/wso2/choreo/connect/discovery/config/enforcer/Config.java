@@ -232,6 +232,19 @@ private static final long serialVersionUID = 0L;
                 input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Filter.parser(), extensionRegistry));
             break;
           }
+          case 122: {
+            org.wso2.choreo.connect.discovery.config.enforcer.Mcp.Builder subBuilder = null;
+            if (mcp_ != null) {
+              subBuilder = mcp_.toBuilder();
+            }
+            mcp_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Mcp.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(mcp_);
+              mcp_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -645,6 +658,32 @@ private static final long serialVersionUID = 0L;
     return filters_.get(index);
   }
 
+  public static final int MCP_FIELD_NUMBER = 15;
+  private org.wso2.choreo.connect.discovery.config.enforcer.Mcp mcp_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+   * @return Whether the mcp field is set.
+   */
+  @java.lang.Override
+  public boolean hasMcp() {
+    return mcp_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+   * @return The mcp.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.Mcp getMcp() {
+    return mcp_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Mcp.getDefaultInstance() : mcp_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.McpOrBuilder getMcpOrBuilder() {
+    return getMcp();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -700,6 +739,9 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < filters_.size(); i++) {
       output.writeMessage(14, filters_.get(i));
+    }
+    if (mcp_ != null) {
+      output.writeMessage(15, getMcp());
     }
     unknownFields.writeTo(output);
   }
@@ -765,6 +807,10 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < filters_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(14, filters_.get(i));
+    }
+    if (mcp_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(15, getMcp());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -848,6 +894,11 @@ private static final long serialVersionUID = 0L;
     }
     if (!getFiltersList()
         .equals(other.getFiltersList())) return false;
+    if (hasMcp() != other.hasMcp()) return false;
+    if (hasMcp()) {
+      if (!getMcp()
+          .equals(other.getMcp())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -914,6 +965,10 @@ private static final long serialVersionUID = 0L;
     if (getFiltersCount() > 0) {
       hash = (37 * hash) + FILTERS_FIELD_NUMBER;
       hash = (53 * hash) + getFiltersList().hashCode();
+    }
+    if (hasMcp()) {
+      hash = (37 * hash) + MCP_FIELD_NUMBER;
+      hash = (53 * hash) + getMcp().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -1137,6 +1192,12 @@ private static final long serialVersionUID = 0L;
       } else {
         filtersBuilder_.clear();
       }
+      if (mcpBuilder_ == null) {
+        mcp_ = null;
+      } else {
+        mcp_ = null;
+        mcpBuilder_ = null;
+      }
       return this;
     }
 
@@ -1237,6 +1298,11 @@ private static final long serialVersionUID = 0L;
         result.filters_ = filters_;
       } else {
         result.filters_ = filtersBuilder_.build();
+      }
+      if (mcpBuilder_ == null) {
+        result.mcp_ = mcp_;
+      } else {
+        result.mcp_ = mcpBuilder_.build();
       }
       onBuilt();
       return result;
@@ -1350,6 +1416,9 @@ private static final long serialVersionUID = 0L;
             filtersBuilder_.addAllMessages(other.filters_);
           }
         }
+      }
+      if (other.hasMcp()) {
+        mergeMcp(other.getMcp());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -3166,6 +3235,125 @@ private static final long serialVersionUID = 0L;
         filters_ = null;
       }
       return filtersBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.Mcp mcp_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Mcp, org.wso2.choreo.connect.discovery.config.enforcer.Mcp.Builder, org.wso2.choreo.connect.discovery.config.enforcer.McpOrBuilder> mcpBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+     * @return Whether the mcp field is set.
+     */
+    public boolean hasMcp() {
+      return mcpBuilder_ != null || mcp_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+     * @return The mcp.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Mcp getMcp() {
+      if (mcpBuilder_ == null) {
+        return mcp_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Mcp.getDefaultInstance() : mcp_;
+      } else {
+        return mcpBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+     */
+    public Builder setMcp(org.wso2.choreo.connect.discovery.config.enforcer.Mcp value) {
+      if (mcpBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        mcp_ = value;
+        onChanged();
+      } else {
+        mcpBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+     */
+    public Builder setMcp(
+        org.wso2.choreo.connect.discovery.config.enforcer.Mcp.Builder builderForValue) {
+      if (mcpBuilder_ == null) {
+        mcp_ = builderForValue.build();
+        onChanged();
+      } else {
+        mcpBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+     */
+    public Builder mergeMcp(org.wso2.choreo.connect.discovery.config.enforcer.Mcp value) {
+      if (mcpBuilder_ == null) {
+        if (mcp_ != null) {
+          mcp_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.Mcp.newBuilder(mcp_).mergeFrom(value).buildPartial();
+        } else {
+          mcp_ = value;
+        }
+        onChanged();
+      } else {
+        mcpBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+     */
+    public Builder clearMcp() {
+      if (mcpBuilder_ == null) {
+        mcp_ = null;
+        onChanged();
+      } else {
+        mcp_ = null;
+        mcpBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Mcp.Builder getMcpBuilder() {
+      
+      onChanged();
+      return getMcpFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.McpOrBuilder getMcpOrBuilder() {
+      if (mcpBuilder_ != null) {
+        return mcpBuilder_.getMessageOrBuilder();
+      } else {
+        return mcp_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.Mcp.getDefaultInstance() : mcp_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Mcp mcp = 15;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Mcp, org.wso2.choreo.connect.discovery.config.enforcer.Mcp.Builder, org.wso2.choreo.connect.discovery.config.enforcer.McpOrBuilder> 
+        getMcpFieldBuilder() {
+      if (mcpBuilder_ == null) {
+        mcpBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.Mcp, org.wso2.choreo.connect.discovery.config.enforcer.Mcp.Builder, org.wso2.choreo.connect.discovery.config.enforcer.McpOrBuilder>(
+                getMcp(),
+                getParentForChildren(),
+                isClean());
+        mcp_ = null;
+      }
+      return mcpBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

@@ -27,6 +27,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
@@ -93,6 +94,8 @@ public class Utils {
             return;
         }
 
+        String apiType = requestContext.getMatchedAPI().getApiType();
+
         // Choreo-API-Key is considered as a protected header, hence header value should be treated
         // same as other security headers.
         if (ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeaders() != null) {
@@ -106,7 +109,9 @@ public class Utils {
         if (ConfigHolder.getInstance().getConfig().getAuthHeader().isDropConsoleTestHeaders()) {
             String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
                     .getTestConsoleHeaderName().toLowerCase();
-            requestContext.getRemoveHeaders().add(internalKeyHeader);
+            if (!APIConstants.ApiType.MCP.equals(apiType)) {
+                requestContext.getRemoveHeaders().add(internalKeyHeader);
+            }
             // Avoid internal key being published to the Traffic Manager
             requestContext.getProtectedHeaders().add(internalKeyHeader);
         }
@@ -126,7 +131,8 @@ public class Utils {
         // Remove Authorization Header
         AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
         String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
-        if (!authHeader.isEnableOutboundAuthHeader()) {
+        // We need to keep the Authorization header in case of MCP APIs as we need to pass it to the underlying API.
+        if (!authHeader.isEnableOutboundAuthHeader() && !APIConstants.ApiType.MCP.equals(apiType)) {
             requestContext.getRemoveHeaders().add(authHeaderName);
         }
         // Authorization Header should not be included in the throttle publishing event.

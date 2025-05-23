@@ -78,3 +78,6 @@
 [enforcer.metrics]
   enabled = false
 
+[enforcer.mcp]
+  serviceUrl = "https://mcp:8080"
+

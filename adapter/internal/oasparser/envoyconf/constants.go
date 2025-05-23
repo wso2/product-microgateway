@@ -27,6 +27,7 @@ const (
 
 const (
 	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
+	extProcFilterName          string = "envoy.filters.http.ext_proc"
 	rateLimitFilterName        string = "envoy.filters.http.ratelimit"
 	luaFilterName              string = "envoy.filters.http.lua"
 	transportSocketName        string = "envoy.transport_sockets.tls"
@@ -35,6 +36,7 @@ const (
 	httpConManagerStartPrefix  string = "ingress_http"
 	corsFilterName             string = "type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors"
 	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
+	extProcPerRouteName        string = "type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExtProcPerRoute"
 	luaPerRouteName            string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
 	localRateLimitPerRouteName string = "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit"
 	httpProtocolOptionsName    string = "type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions"

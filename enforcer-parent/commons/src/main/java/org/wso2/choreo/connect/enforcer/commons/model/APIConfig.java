@@ -52,6 +52,7 @@ public class APIConfig {
     private String environmentId;
     private String environmentName;
     private ChoreoComponentInfo choreoComponentInfo;
+    private List<ExtendedOperation> extendedOperations = new ArrayList<>();
 
     /**
      * getApiType returns the API type. This could be one of the following.
@@ -244,6 +245,18 @@ public class APIConfig {
     }
 
     /**
+     * Returns the API level extended operations such as MCP tools
+     * @return List of extended operations
+     */
+    public List<ExtendedOperation> getExtendedOperations() {
+        return extendedOperations;
+    }
+
+    public void setExtendedOperations(List<ExtendedOperation> extendedOperations) {
+        this.extendedOperations = extendedOperations;
+    }
+
+    /**
      * Implements builder pattern to build an API Config object.
      */
     public static class Builder {
@@ -272,6 +285,7 @@ public class APIConfig {
         private boolean enableBackendJWT;
         private BackendJWTConfiguration backendJWTConfiguration;
         private ChoreoComponentInfo choreoComponentInfo;
+        private List<ExtendedOperation> extendedOperations;
 
         public Builder(String name) {
             this.name = name;
@@ -398,6 +412,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder extendedOperations(List<ExtendedOperation> extendedOperations) {
+            this.extendedOperations = extendedOperations;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -424,6 +443,7 @@ public class APIConfig {
             apiConfig.environmentId = this.environmentId;
             apiConfig.environmentName = this.environmentName;
             apiConfig.choreoComponentInfo = this.choreoComponentInfo;
+            apiConfig.extendedOperations = this.extendedOperations;
             return apiConfig;
         }
     }

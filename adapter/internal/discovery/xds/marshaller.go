@@ -272,6 +272,9 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Management: management,
 		RestServer: restServer,
 		Filters:    filters,
+		Mcp: &enforcer.Mcp{
+			ServiceUrl: config.Enforcer.Mcp.ServiceURL,
+		},
 	}
 }
 

@@ -39,6 +39,7 @@ private static final long serialVersionUID = 0L;
     environmentId_ = "";
     environmentName_ = "";
     apiKeyHeader_ = "";
+    extendedOperations_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -270,6 +271,15 @@ private static final long serialVersionUID = 0L;
             apiKeyHeader_ = s;
             break;
           }
+          case 218: {
+            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+              extendedOperations_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.ExtendedOperation>();
+              mutable_bitField0_ |= 0x00000008;
+            }
+            extendedOperations_.add(
+                input.readMessage(org.wso2.choreo.connect.discovery.api.ExtendedOperation.parser(), extensionRegistry));
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -293,6 +303,9 @@ private static final long serialVersionUID = 0L;
       }
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
         security_ = java.util.Collections.unmodifiableList(security_);
+      }
+      if (((mutable_bitField0_ & 0x00000008) != 0)) {
+        extendedOperations_ = java.util.Collections.unmodifiableList(extendedOperations_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -1191,6 +1204,46 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int EXTENDEDOPERATIONS_FIELD_NUMBER = 27;
+  private java.util.List<org.wso2.choreo.connect.discovery.api.ExtendedOperation> extendedOperations_;
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.wso2.choreo.connect.discovery.api.ExtendedOperation> getExtendedOperationsList() {
+    return extendedOperations_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder> 
+      getExtendedOperationsOrBuilderList() {
+    return extendedOperations_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  @java.lang.Override
+  public int getExtendedOperationsCount() {
+    return extendedOperations_.size();
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.ExtendedOperation getExtendedOperations(int index) {
+    return extendedOperations_.get(index);
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder getExtendedOperationsOrBuilder(
+      int index) {
+    return extendedOperations_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1282,6 +1335,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getApiKeyHeaderBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 26, apiKeyHeader_);
+    }
+    for (int i = 0; i < extendedOperations_.size(); i++) {
+      output.writeMessage(27, extendedOperations_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -1380,6 +1436,10 @@ private static final long serialVersionUID = 0L;
     if (!getApiKeyHeaderBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(26, apiKeyHeader_);
     }
+    for (int i = 0; i < extendedOperations_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(27, extendedOperations_.get(i));
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1462,6 +1522,8 @@ private static final long serialVersionUID = 0L;
     }
     if (!getApiKeyHeader()
         .equals(other.getApiKeyHeader())) return false;
+    if (!getExtendedOperationsList()
+        .equals(other.getExtendedOperationsList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1543,6 +1605,10 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + APIKEYHEADER_FIELD_NUMBER;
     hash = (53 * hash) + getApiKeyHeader().hashCode();
+    if (getExtendedOperationsCount() > 0) {
+      hash = (37 * hash) + EXTENDEDOPERATIONS_FIELD_NUMBER;
+      hash = (53 * hash) + getExtendedOperationsList().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1678,6 +1744,7 @@ private static final long serialVersionUID = 0L;
         getResourcesFieldBuilder();
         getSecuritySchemeFieldBuilder();
         getSecurityFieldBuilder();
+        getExtendedOperationsFieldBuilder();
       }
     }
     @java.lang.Override
@@ -1767,6 +1834,12 @@ private static final long serialVersionUID = 0L;
       }
       apiKeyHeader_ = "";
 
+      if (extendedOperationsBuilder_ == null) {
+        extendedOperations_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+      } else {
+        extendedOperationsBuilder_.clear();
+      }
       return this;
     }
 
@@ -1864,6 +1937,15 @@ private static final long serialVersionUID = 0L;
         result.choreoComponentInfo_ = choreoComponentInfoBuilder_.build();
       }
       result.apiKeyHeader_ = apiKeyHeader_;
+      if (extendedOperationsBuilder_ == null) {
+        if (((bitField0_ & 0x00000008) != 0)) {
+          extendedOperations_ = java.util.Collections.unmodifiableList(extendedOperations_);
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.extendedOperations_ = extendedOperations_;
+      } else {
+        result.extendedOperations_ = extendedOperationsBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -2074,6 +2156,32 @@ private static final long serialVersionUID = 0L;
       if (!other.getApiKeyHeader().isEmpty()) {
         apiKeyHeader_ = other.apiKeyHeader_;
         onChanged();
+      }
+      if (extendedOperationsBuilder_ == null) {
+        if (!other.extendedOperations_.isEmpty()) {
+          if (extendedOperations_.isEmpty()) {
+            extendedOperations_ = other.extendedOperations_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureExtendedOperationsIsMutable();
+            extendedOperations_.addAll(other.extendedOperations_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.extendedOperations_.isEmpty()) {
+          if (extendedOperationsBuilder_.isEmpty()) {
+            extendedOperationsBuilder_.dispose();
+            extendedOperationsBuilder_ = null;
+            extendedOperations_ = other.extendedOperations_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+            extendedOperationsBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getExtendedOperationsFieldBuilder() : null;
+          } else {
+            extendedOperationsBuilder_.addAllMessages(other.extendedOperations_);
+          }
+        }
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -4696,6 +4804,246 @@ private static final long serialVersionUID = 0L;
       apiKeyHeader_ = value;
       onChanged();
       return this;
+    }
+
+    private java.util.List<org.wso2.choreo.connect.discovery.api.ExtendedOperation> extendedOperations_ =
+      java.util.Collections.emptyList();
+    private void ensureExtendedOperationsIsMutable() {
+      if (!((bitField0_ & 0x00000008) != 0)) {
+        extendedOperations_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.ExtendedOperation>(extendedOperations_);
+        bitField0_ |= 0x00000008;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.ExtendedOperation, org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder, org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder> extendedOperationsBuilder_;
+
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.ExtendedOperation> getExtendedOperationsList() {
+      if (extendedOperationsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(extendedOperations_);
+      } else {
+        return extendedOperationsBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public int getExtendedOperationsCount() {
+      if (extendedOperationsBuilder_ == null) {
+        return extendedOperations_.size();
+      } else {
+        return extendedOperationsBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.ExtendedOperation getExtendedOperations(int index) {
+      if (extendedOperationsBuilder_ == null) {
+        return extendedOperations_.get(index);
+      } else {
+        return extendedOperationsBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public Builder setExtendedOperations(
+        int index, org.wso2.choreo.connect.discovery.api.ExtendedOperation value) {
+      if (extendedOperationsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExtendedOperationsIsMutable();
+        extendedOperations_.set(index, value);
+        onChanged();
+      } else {
+        extendedOperationsBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public Builder setExtendedOperations(
+        int index, org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder builderForValue) {
+      if (extendedOperationsBuilder_ == null) {
+        ensureExtendedOperationsIsMutable();
+        extendedOperations_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        extendedOperationsBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public Builder addExtendedOperations(org.wso2.choreo.connect.discovery.api.ExtendedOperation value) {
+      if (extendedOperationsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExtendedOperationsIsMutable();
+        extendedOperations_.add(value);
+        onChanged();
+      } else {
+        extendedOperationsBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public Builder addExtendedOperations(
+        int index, org.wso2.choreo.connect.discovery.api.ExtendedOperation value) {
+      if (extendedOperationsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExtendedOperationsIsMutable();
+        extendedOperations_.add(index, value);
+        onChanged();
+      } else {
+        extendedOperationsBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public Builder addExtendedOperations(
+        org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder builderForValue) {
+      if (extendedOperationsBuilder_ == null) {
+        ensureExtendedOperationsIsMutable();
+        extendedOperations_.add(builderForValue.build());
+        onChanged();
+      } else {
+        extendedOperationsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public Builder addExtendedOperations(
+        int index, org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder builderForValue) {
+      if (extendedOperationsBuilder_ == null) {
+        ensureExtendedOperationsIsMutable();
+        extendedOperations_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        extendedOperationsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public Builder addAllExtendedOperations(
+        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.ExtendedOperation> values) {
+      if (extendedOperationsBuilder_ == null) {
+        ensureExtendedOperationsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, extendedOperations_);
+        onChanged();
+      } else {
+        extendedOperationsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public Builder clearExtendedOperations() {
+      if (extendedOperationsBuilder_ == null) {
+        extendedOperations_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+      } else {
+        extendedOperationsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public Builder removeExtendedOperations(int index) {
+      if (extendedOperationsBuilder_ == null) {
+        ensureExtendedOperationsIsMutable();
+        extendedOperations_.remove(index);
+        onChanged();
+      } else {
+        extendedOperationsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder getExtendedOperationsBuilder(
+        int index) {
+      return getExtendedOperationsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder getExtendedOperationsOrBuilder(
+        int index) {
+      if (extendedOperationsBuilder_ == null) {
+        return extendedOperations_.get(index);  } else {
+        return extendedOperationsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder> 
+         getExtendedOperationsOrBuilderList() {
+      if (extendedOperationsBuilder_ != null) {
+        return extendedOperationsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(extendedOperations_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder addExtendedOperationsBuilder() {
+      return getExtendedOperationsFieldBuilder().addBuilder(
+          org.wso2.choreo.connect.discovery.api.ExtendedOperation.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder addExtendedOperationsBuilder(
+        int index) {
+      return getExtendedOperationsFieldBuilder().addBuilder(
+          index, org.wso2.choreo.connect.discovery.api.ExtendedOperation.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.ExtendedOperation extendedOperations = 27;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder> 
+         getExtendedOperationsBuilderList() {
+      return getExtendedOperationsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.ExtendedOperation, org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder, org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder> 
+        getExtendedOperationsFieldBuilder() {
+      if (extendedOperationsBuilder_ == null) {
+        extendedOperationsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.ExtendedOperation, org.wso2.choreo.connect.discovery.api.ExtendedOperation.Builder, org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder>(
+                extendedOperations_,
+                ((bitField0_ & 0x00000008) != 0),
+                getParentForChildren(),
+                isClean());
+        extendedOperations_ = null;
+      }
+      return extendedOperationsBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

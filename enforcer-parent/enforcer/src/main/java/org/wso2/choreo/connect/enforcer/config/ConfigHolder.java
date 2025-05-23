@@ -46,6 +46,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.Keypair;
 import org.wso2.choreo.connect.discovery.config.enforcer.Management;
+import org.wso2.choreo.connect.discovery.config.enforcer.Mcp;
 import org.wso2.choreo.connect.discovery.config.enforcer.Metrics;
 import org.wso2.choreo.connect.discovery.config.enforcer.PATConfig;
 import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
@@ -67,6 +68,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
+import org.wso2.choreo.connect.enforcer.config.dto.McpConfigDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.MetricsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.PATDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
@@ -193,6 +195,9 @@ public class ConfigHolder {
 
         // Populates the custom filter configurations applied along with enforcer filters.
         populateCustomFilters(config.getFiltersList());
+
+        // Populates MCP related configurations
+        populateMcpConfiguration(config.getMcp());
 
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);
@@ -377,6 +382,12 @@ public class ConfigHolder {
         throttleAgent.setPassword(binary.getPassword());
         throttleAgent.setPublisher(pubConf);
         config.getThrottleConfig().setThrottleAgent(throttleAgent);
+    }
+
+    private void populateMcpConfiguration(Mcp mcpConfig) {
+        McpConfigDTO mcpConfigDto = new McpConfigDTO();
+        mcpConfigDto.setServerUrl(mcpConfig.getServiceUrl());
+        config.setMcpConfig(mcpConfigDto);
     }
 
     private void loadTrustStore() {

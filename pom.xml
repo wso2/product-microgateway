@@ -53,6 +53,7 @@
                 <module>adapter</module>
                 <module>enforcer-parent</module>
                 <module>rate-limiter</module>
+                <module>mcp</module>
                 <module>distribution</module>
                 <module>integration</module>
             </modules>
@@ -67,6 +68,7 @@
                 <module>adapter</module>
                 <module>enforcer-parent</module>
                 <module>rate-limiter</module>
+                <module>mcp</module>
                 <module>distribution</module>
                 <module>integration</module>
             </modules>

@@ -23,12 +23,11 @@ import io.grpc.netty.shaded.io.netty.buffer.Unpooled;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFuture;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFutureListener;
 import io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext;
-import io.grpc.netty.shaded.io.netty.channel.SimpleChannelInboundHandler;
+import io.grpc.netty.shaded.io.netty.channel.ChannelInboundHandlerAdapter;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpResponse;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObject;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpVersion;
@@ -41,12 +40,17 @@ import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 /**
  * JWKS Request Handler for Backend JWTs
  */
-public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
+public class JWKSRequestHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LogManager.getLogger(JWKSRequestHandler.class);
     private static final String route = "/jwks";
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) {
+    public void channelReadComplete(ChannelHandlerContext ctx) {
+        ctx.flush();
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         FullHttpResponse res = null;
         FullHttpRequest req = null;
         BackendJWKSDto backendJWKSDto = ConfigHolder.getInstance().getConfig().getBackendJWKSDto();
@@ -65,7 +69,7 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
                     .set(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE)
                     .set(HTTP.CONTENT_TYPE, HttpConstants.APPLICATION_JSON)
                     .setInt(HTTP.CONTENT_LEN, res.content().readableBytes());
-            ChannelFuture f = ctx.write(res);
+            ChannelFuture f = ctx.writeAndFlush(res);
             f.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         }
     }

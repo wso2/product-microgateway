@@ -181,16 +181,33 @@ type endpointConfigStruct struct {
 
 // OperationYaml holds attributes of APIM operations
 type OperationYaml struct {
-	ID              string          `json:"id,omitempty"`
-	Target          string          `json:"target,omitempty"`
-	Verb            string          `json:"verb,omitempty"`
-	ThrottlingLimit ThrottlingLimit `json:"throttlingLimit,omitempty"`
+	ID                    string                 `json:"id,omitempty"`
+	Target                string                 `json:"target,omitempty"`
+	Verb                  string                 `json:"verb,omitempty"`
+	Description           string                 `json:"description,omitempty"`
+	ThrottlingLimit       ThrottlingLimit        `json:"throttlingLimit,omitempty"`
+	OperationProxyMapping *OperationProxyMapping `json:"operationProxyMapping,omitempty"`
 }
 
 // ThrottlingLimit details
 type ThrottlingLimit struct {
 	RequestCount int    `json:"requestCount,omitempty"`
 	Unit         string `json:"unit,omitempty"`
+}
+
+// OperationProxyMapping holds proxy mapping details
+type OperationProxyMapping struct {
+	Schema string      `json:"schema,omitempty"`
+	Target ProxyTarget `json:"target,omitempty"`
+}
+
+// ProxyTarget holds proxy target details
+type ProxyTarget struct {
+	Name    string `json:"name,omitempty"`
+	Context string `json:"context,omitempty"`
+	Version string `json:"version,omitempty"`
+	Target  string `json:"target,omitempty"`
+	Verb    string `json:"verb,omitempty"`
 }
 
 // APIRateLimitPolicy holds policy details relevant to the rate limiting
@@ -219,7 +236,7 @@ func (apiProject *ProjectAPI) ValidateAPIType() error {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")
 		return err
-	} else if apiProject.APIType != HTTP && apiProject.APIType != WS && apiProject.APIType != WEBHOOK {
+	} else if apiProject.APIType != HTTP && apiProject.APIType != WS && apiProject.APIType != WEBHOOK && apiProject.APIType != MCP {
 		errMsg := "API type is not currently supported with Choreo Connect"
 		err = errors.New(errMsg)
 		return err

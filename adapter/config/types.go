@@ -166,6 +166,7 @@ type enforcer struct {
 	RestServer   restServer
 	Filters      []filter
 	Metrics      metrics
+	Mcp          mcp
 }
 
 type server struct {
@@ -478,6 +479,10 @@ type tracing struct {
 type metrics struct {
 	Enabled bool
 	Type    string
+}
+
+type mcp struct {
+	ServiceURL string `toml:"serviceUrl"`
 }
 
 type analyticsAdapter struct {

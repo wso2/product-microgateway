@@ -176,6 +176,22 @@
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
         </file>
         <file>
+            <source>../resources/mcp/conf/config.toml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf/mcp</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/mcp/security/server.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/enforcer/security/truststore</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/mcp/security/server.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/mcp/security</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/mcp/security/private.key</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/mcp/security</outputDirectory>
+        </file>
+        <file>
             <source>../resources/conf/log4j2.properties</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
             </outputDirectory>
