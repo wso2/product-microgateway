@@ -800,6 +800,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 // createUpstreamTLSContextForMCP creates a TLS context for MCP APIs.
 // Here, the validation context will be created using the enforcer cert as the upstream service resides in enforcer.
 func createUpstreamTLSContextForMCP(address *corev3.Address) *tlsv3.UpstreamTlsContext {
+	logger.LoggerOasparser.Info("Creating TLS context for MCP APIs")
 	conf, errReadConfig := config.ReadConfigs()
 	var tlsCert *tlsv3.TlsCertificate
 	//TODO: (VirajSalaka) Error Handling
