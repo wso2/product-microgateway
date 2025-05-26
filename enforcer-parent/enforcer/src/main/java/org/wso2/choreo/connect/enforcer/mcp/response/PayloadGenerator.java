@@ -107,16 +107,23 @@ public class PayloadGenerator {
         }
         inputObject.remove("contentType");
 
-        JsonArray requiredArray = inputObject.getAsJsonArray(McpConstants.REQUIRED_KEY);
-        JsonArray sanitizedArray = new JsonArray();
+        if (inputObject.has(McpConstants.REQUIRED_KEY)) {
+            JsonArray requiredArray = inputObject.getAsJsonArray(McpConstants.REQUIRED_KEY);
+            JsonArray sanitizedArray = new JsonArray();
 
-        // remove the header, query, and path prefixes from the required fields
-        for (JsonElement element : requiredArray) {
-            String requiredField = element.getAsString();
-            String newRequiredField = requiredField.split("_", 2)[1];
-            sanitizedArray.add(newRequiredField);
+            // remove the header, query, and path prefixes from the required fields
+            for (JsonElement element : requiredArray) {
+                String newRequiredField;
+                String requiredField = element.getAsString();
+                if (requiredField.contains("_")) {
+                    newRequiredField = requiredField.split("_", 2)[1];
+                } else {
+                    newRequiredField = requiredField;
+                }
+                sanitizedArray.add(newRequiredField);
+            }
+            inputObject.add(McpConstants.REQUIRED_KEY, sanitizedArray);
         }
-        inputObject.add(McpConstants.REQUIRED_KEY, sanitizedArray);
 
         // remove the header, query, and path prefixes from the properties keys
         JsonObject propertiesObject = inputObject.getAsJsonObject(McpConstants.PROPERTIES_KEY);
@@ -143,8 +150,10 @@ public class PayloadGenerator {
         payload.addProperty(McpConstants.PAYLOAD_SCHEMA, extendedOperation.getSchema());
 
         JsonObject apiInfo = new JsonObject();
+        String context = "/" + extendedOperation.getApiContext().split("/", 3)[2];
+        context = context.substring(0, context.lastIndexOf('/'));
         apiInfo.addProperty(McpConstants.PAYLOAD_API_NAME, extendedOperation.getApiName());
-        apiInfo.addProperty(McpConstants.PAYLOAD_CONTEXT, extendedOperation.getApiContext());
+        apiInfo.addProperty(McpConstants.PAYLOAD_CONTEXT, context);
         apiInfo.addProperty(McpConstants.PAYLOAD_VERSION, extendedOperation.getApiVersion());
         apiInfo.addProperty(McpConstants.PAYLOAD_PATH, extendedOperation.getApiTarget());
         apiInfo.addProperty(McpConstants.PAYLOAD_VERB, extendedOperation.getApiVerb());

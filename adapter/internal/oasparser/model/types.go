@@ -265,9 +265,11 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 			return conversionErr
 		}
 		apiProject.APIDefinition = swaggerJsn
-		apiProject.APIType = HTTP
-		if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+asyncAPIFilename) {
-			apiProject.APIType = WS
+		if !(apiProject.APIType == MCP) {
+			apiProject.APIType = HTTP
+			if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+asyncAPIFilename) {
+				apiProject.APIType = WS
+			}
 		}
 	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&
 		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
