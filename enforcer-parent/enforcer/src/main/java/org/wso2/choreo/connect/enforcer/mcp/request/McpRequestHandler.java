@@ -43,6 +43,7 @@ import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
 import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * MCP Request Handler for MCP Proxies
@@ -112,6 +113,8 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
         String authHeaderName;
         String testKeyName = ConfigHolder.getInstance().getConfig().getAuthHeader()
                 .getTestConsoleHeaderName().toLowerCase();
+        List<String> apiKeyHeaderNames = ConfigHolder.getInstance().getConfig()
+                .getApiKeyConfig().getApiKeyInternalHeaders();
         if (matchedAPI != null) {
             authHeaderName = matchedAPI.getAPIConfig().getAuthHeader();
         } else {
@@ -122,6 +125,13 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
             tokenHeader.append(HttpHeaderNames.AUTHORIZATION).append(":").append(headers.get(authHeaderName));
         } else if (headers.get(testKeyName) != null) {
             tokenHeader.append(testKeyName).append(":").append(headers.get(testKeyName));
+        } else if (!apiKeyHeaderNames.isEmpty()) {
+            for (String headerName : apiKeyHeaderNames) {
+                if ("api-key".equals(headerName) && headers.get(headerName) != null) {
+                    tokenHeader.append(headerName).append(":").append(headers.get(headerName));
+                    break;
+                }
+            }
         } else {
             logger.info("Authorization header is not available. Assuming no authorization needed for this request");
         }

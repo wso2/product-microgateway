@@ -85,9 +85,12 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
             requestContext.addOrModifyHeaders(APIKeyConstants.INTERNAL_API_KEY_HEADER, newAPIKeyHeaderValue);
         }
         // Drop all the api-key headers except the choreo-api-key-header.
-        requestContext.getRemoveHeaders().addAll(getAPIKeyInternalHeaders(requestContext).stream().filter(
-                        header -> !APIKeyConstants.INTERNAL_API_KEY_HEADER.equals(header))
-                .collect(Collectors.toList()));
+        String apiType = requestContext.getMatchedAPI().getApiType();
+        if (!APIConstants.ApiType.MCP.equals(apiType)) {
+            requestContext.getRemoveHeaders().addAll(getAPIKeyInternalHeaders(requestContext).stream().filter(
+                            header -> !APIKeyConstants.INTERNAL_API_KEY_HEADER.equals(header))
+                    .collect(Collectors.toList()));
+        }
     }
 
     private String getAPIKeyFromRequest(RequestContext requestContext) {
