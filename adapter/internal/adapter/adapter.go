@@ -80,8 +80,10 @@ var (
 )
 
 const (
-	ads          = "ads"
-	amqpProtocol = "amqp"
+	ads           = "ads"
+	aws           = "aws"
+	awsBrokerType = "awsActiveMQ"
+	amqpProtocol  = "amqp"
 )
 
 func init() {
@@ -289,8 +291,10 @@ func Run(conf *config.Config) {
 		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
 		if len(conf.ControlPlane.ASBDataplaneTopics) > 0 {
 			messaging.InitiateAndProcessEvents(conf)
-		} else if strings.Contains(connectionURLList[0], amqpProtocol) {
+		} else if strings.Contains(connectionURLList[0], amqpProtocol) && !strings.Contains(connectionURLList[0], aws) {
 			go messaging.ProcessEvents(conf)
+		} else if conf.ControlPlane.BrokerConnectionParameters.BrokerType == awsBrokerType {
+			messaging.InitiateAndProcessAWSActiveMQEvents(conf)
 		} else {
 			messaging.InitiateAndProcessEvents(conf)
 		}
