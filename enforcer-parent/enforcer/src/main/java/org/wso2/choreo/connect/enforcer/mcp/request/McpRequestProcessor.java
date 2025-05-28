@@ -261,41 +261,43 @@ public class McpRequestProcessor {
             EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
             String endpoint = enforcerConfig.getMcpConfig().getServerUrl() + "/mcp";
             URL url = new URL(endpoint);
-            CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol());
-            HttpPost httpPost = new HttpPost(endpoint);
-            httpPost.setHeader("Content-Type", "application/json");
-            httpPost.setEntity(new StringEntity(payload.toString(), ContentType.APPLICATION_JSON));
-
-            CloseableHttpResponse response = httpClient.execute(httpPost);
-            if (response.getStatusLine().getStatusCode() == 500) {
-                return PayloadGenerator.generateMcpResponsePayload(id, true,
-                        "Error while processing the request");
-            } else if (response.getStatusLine().getStatusCode() == 404) {
-                return PayloadGenerator.generateMcpResponsePayload(id, true,
-                        "Error occurred while accessing the requested service");
-            } else if (response.getStatusLine().getStatusCode() >= 400) {
-                return PayloadGenerator.generateMcpResponsePayload(id, true,
-                        "Authentication error while processing the request");
-            } else {
-                HttpEntity entity = response.getEntity();
-                try (InputStream inputStream = entity.getContent()) {
-                    String output = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-                    JsonElement element = JsonParser.parseString(output);
-                    String resString;
-                    if (element.isJsonObject()) {
-                        JsonObject obj = element.getAsJsonObject();
-                        resString = obj.toString();
-                    } else if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
-                        String unescaped = element.getAsString();
-                        JsonObject obj = JsonParser.parseString(unescaped).getAsJsonObject();
-                        resString = obj.toString();
+            try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol())) {
+                HttpPost httpPost = new HttpPost(endpoint);
+                httpPost.setHeader("Content-Type", "application/json");
+                httpPost.setEntity(new StringEntity(payload.toString(), ContentType.APPLICATION_JSON));
+                try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                    if (response.getStatusLine().getStatusCode() == 500) {
+                        return PayloadGenerator.generateMcpResponsePayload(id, true,
+                                "Error while processing the request");
+                    } else if (response.getStatusLine().getStatusCode() == 404) {
+                        return PayloadGenerator.generateMcpResponsePayload(id, true,
+                                "Error occurred while accessing the requested service");
+                    } else if (response.getStatusLine().getStatusCode() >= 400) {
+                        return PayloadGenerator.generateMcpResponsePayload(id, true,
+                                "Authentication error while processing the request");
                     } else {
-                        resString = element.toString();
+                        HttpEntity entity = response.getEntity();
+                        try (InputStream inputStream = entity.getContent()) {
+                            String output = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                            JsonElement element = JsonParser.parseString(output);
+                            String resString;
+                            if (element.isJsonObject()) {
+                                JsonObject obj = element.getAsJsonObject();
+                                resString = obj.toString();
+                            } else if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
+                                String unescaped = element.getAsString();
+                                JsonObject obj = JsonParser.parseString(unescaped).getAsJsonObject();
+                                resString = obj.toString();
+                            } else {
+                                resString = element.toString();
+                            }
+                            return PayloadGenerator.generateMcpResponsePayload(id, false, resString);
+                        }
                     }
-                    return PayloadGenerator.generateMcpResponsePayload(id, false, resString);
                 }
             }
         } catch (Exception e) {
+            logger.error("Error while processing the service call", e);
             throw new McpException(McpConstants.RpcConstants.INTERNAL_ERROR_CODE,
                     McpConstants.RpcConstants.INTERNAL_ERROR_MESSAGE, "Error while processing the service call");
         }

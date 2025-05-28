@@ -24,6 +24,8 @@ import io.grpc.netty.shaded.io.netty.channel.socket.SocketChannel;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObjectAggregator;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpServerCodec;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.admin.AdminServerHandler;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
@@ -39,6 +41,7 @@ import org.wso2.choreo.connect.enforcer.security.jwt.issuer.HttpTokenServerHandl
  Fire next channel read if context doesn't match
  */
 public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
+    private static final Logger logger = LogManager.getLogger(RestServerInitializer.class);
     private final SslContext sslCtx;
     public RestServerInitializer(SslContext sslCtx) {
         this.sslCtx = sslCtx;
@@ -64,6 +67,7 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
         // This handler will act as the upstream for all MCP APIs
         boolean mcpEnabled = Boolean.parseBoolean(System.getenv(McpConstants.MCP_ENABLED));
         if (mcpEnabled) {
+            logger.info("Initializing MCP handler...");
             p.addLast(new McpRequestHandler());
         }
         if (enforcerConfig.getRestServer().isEnable()) {
