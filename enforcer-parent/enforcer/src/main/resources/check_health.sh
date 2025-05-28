@@ -15,6 +15,8 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+
+
 ENFORCER_PORT="${ENFORCER_PORT:-8081}"
 grpc_health_probe -addr "localhost:${ENFORCER_PORT}" \
     -tls \
