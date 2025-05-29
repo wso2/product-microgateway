@@ -19,6 +19,7 @@ package messaging
 
 import (
 	"context"
+	"time"
 
 	"github.com/Azure/go-amqp"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -33,6 +34,7 @@ func InitAwsActiveMqConnection(ctx context.Context, connectionString string, use
 			SASLType: amqp.SASLTypePlain(
 				userName,
 				password),
+			IdleTimeout: (60 * time.Second),
 		},
 	)
 	if err != nil {
