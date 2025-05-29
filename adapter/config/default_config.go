@@ -380,6 +380,7 @@ var defaultConfig = &Config{
 			ActiveMqUsername:                     "admin",
 			ActiveMqPassword:                     "password",
 			MaximumAllowedUnacknowledgedMessages: 10,
+			ActiveMqIdleTimeoutDurationInSeconds: 120,
 		},
 		SendRevisionUpdate: false,
 		HTTPClient: httpClient{

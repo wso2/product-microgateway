@@ -35,9 +35,10 @@ func InitiateAndProcessAWSActiveMQEvents(conf *config.Config) {
 		connectionString := conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints[0]
 		username := conf.ControlPlane.BrokerConnectionParameters.ActiveMqUsername
 		password := conf.ControlPlane.BrokerConnectionParameters.ActiveMqPassword
+		idleTimeoutDuration := conf.ControlPlane.BrokerConnectionParameters.ActiveMqIdleTimeoutDurationInSeconds
 		ctx := context.Background()
 
-		con, err := msg.InitAwsActiveMqConnection(ctx, connectionString, username, password)
+		con, err := msg.InitAwsActiveMqConnection(ctx, connectionString, username, password, idleTimeoutDuration)
 		if err != nil {
 			logger.LoggerMgw.Errorf("Failed to connect to AWS ActiveMQ broker for topic: %s error:%s", topic, err.Error())
 			return

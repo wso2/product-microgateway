@@ -26,7 +26,7 @@ import (
 )
 
 // InitAwsActiveMqConnection initializes a connection to the AWS ActiveMQ broker
-func InitAwsActiveMqConnection(ctx context.Context, connectionString string, userName string, password string) (*amqp.Conn, error) {
+func InitAwsActiveMqConnection(ctx context.Context, connectionString string, userName string, password string, idleTimeoutDuration time.Duration) (*amqp.Conn, error) {
 	con, err := amqp.Dial(
 		ctx,
 		connectionString,
@@ -34,7 +34,7 @@ func InitAwsActiveMqConnection(ctx context.Context, connectionString string, use
 			SASLType: amqp.SASLTypePlain(
 				userName,
 				password),
-			IdleTimeout: (60 * time.Second),
+			IdleTimeout: idleTimeoutDuration,
 		},
 	)
 	if err != nil {

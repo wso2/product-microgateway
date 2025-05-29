@@ -607,6 +607,7 @@ type brokerConnectionParameters struct {
 	ActiveMqUsername                     string
 	ActiveMqPassword                     string
 	MaximumAllowedUnacknowledgedMessages int
+	ActiveMqIdleTimeoutDurationInSeconds time.Duration
 }
 
 // Configuration for Enforcer admin rest api
