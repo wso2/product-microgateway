@@ -16,6 +16,9 @@
 FROM envoyproxy/envoy:v1.24.7
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
+# Switch to the root user to run apt-get
+USER root
+
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install --no-install-recommends --no-install-suggests -y gettext-base \
     && apt-get install --reinstall ca-certificates -y
