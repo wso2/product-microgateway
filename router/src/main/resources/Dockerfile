@@ -16,6 +16,8 @@
 FROM envoyproxy/envoy:v1.24.7
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
+USER root
+
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install --no-install-recommends --no-install-suggests -y gettext-base
 
