@@ -41,34 +41,51 @@ func serveRequest(c *gin.Context) {
 		logger.Error("Tool name is required")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Tool name is required"})
 		return
-	} else if mcpRequest.API.APIName == "" {
-		logger.Warn("API name is not proided")
-	} else if mcpRequest.API.Endpoint == "" {
-		logger.Error("API endpoint is required")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "API endpoint is required"})
-		return
-	} else if mcpRequest.API.Context == "" {
-		logger.Error("API context is required")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "API context is required"})
-		return
-	} else if mcpRequest.API.Version == "" {
-		logger.Error("API version is required")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "API version is required"})
-		return
-	} else if mcpRequest.API.Path == "" {
-		logger.Error("Resource path is required")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Resource path is required"})
-		return
-	} else if mcpRequest.API.Verb == "" {
-		logger.Error("HTTP verb is required")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "HTTP verb is required"})
-		return
 	} else if mcpRequest.Arguments == "" {
 		logger.Error("Arguments are required")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Arguments are required"})
 		return
 	} else if mcpRequest.Schema == "" {
 		logger.Warn("Input schema is not provided")
+	}
+	if mcpRequest.IsProxy {
+		if mcpRequest.API.APIName == "" {
+			logger.Warn("API name is not proided")
+		} else if mcpRequest.API.Endpoint == "" {
+			logger.Error("API endpoint is required")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "API endpoint is required"})
+			return
+		} else if mcpRequest.API.Context == "" {
+			logger.Error("API context is required")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "API context is required"})
+			return
+		} else if mcpRequest.API.Version == "" {
+			logger.Error("API version is required")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "API version is required"})
+			return
+		} else if mcpRequest.API.Path == "" {
+			logger.Error("Resource path is required")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Resource path is required"})
+			return
+		} else if mcpRequest.API.Verb == "" {
+			logger.Error("HTTP verb is required")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "HTTP verb is required"})
+			return
+		}
+	} else {
+		if mcpRequest.Backend.Endpoint == "" {
+			logger.Error("Backend endpoint is required")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Backend endpoint is required"})
+			return
+		} else if mcpRequest.Backend.Target == "" {
+			logger.Error("Backend target is required")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Backend target is required"})
+			return
+		} else if mcpRequest.Backend.Verb == "" {
+			logger.Error("Backend verb is required")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Backend verb is required"})
+			return
+		}
 	}
 
 	// Set logging context
@@ -79,18 +96,28 @@ func serveRequest(c *gin.Context) {
 		ctx = context.WithValue(ctx, service.ApiNameKey, mcpRequest.API.APIName)
 	}
 
-	if mcpRequest.API.Auth == "" {
+	if mcpRequest.IsProxy && mcpRequest.API.Auth == "" {
 		logger.WarnContext(ctx, "Authentication is not provided for the underlying API. Assuming no authentication is required.")
 	}
 
 	// Call the underlying API
+	logger.Info("Calling underlying API/Service", "toolName", mcpRequest.ToolName)
 	resp, code, err := mcp.CallUnderlyingAPI(ctx, &mcpRequest)
 	if err != nil {
 		logger.ErrorContext(ctx, "Failed to call underlying API", "error", err)
-		c.JSON(code, gin.H{"error": "Failed to call underlying API", "details": err.Error()})
+		result := mcp.Result{
+			Code:     code,
+			Response: err.Error(),
+		}
+		c.SecureJSON(code, result)
 		return
 	}
-	c.SecureJSON(code, resp)
+	// Wrap the actual response in a result object and return 200 OK
+	result := mcp.Result{
+		Code:     code,
+		Response: resp,
+	}
+	c.SecureJSON(200, result)
 }
 
 func main() {
