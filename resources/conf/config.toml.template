@@ -525,6 +525,11 @@ enabled = true
     amqpOverWebsocketsEnabled = false
     reconnectInterval = 5000
     reconnectRetryCount = 60
+    brokerType = "AzureServiceBus"
+    activeMqUsername = "admin"
+    activeMqPassword = "password"
+    maximumAllowedUnacknowledgedMessages = 10
+    activeMqIdleTimeoutDurationInSeconds = 120
   # Configurations to specify the ASB topics for the control plane
   [[controlPlane.asbDataplaneTopics]]
     type = "notification"
