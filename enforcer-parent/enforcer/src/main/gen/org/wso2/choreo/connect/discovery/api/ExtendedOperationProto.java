@@ -24,6 +24,11 @@ public final class ExtendedOperationProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_api_ProxyMapping_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_wso2_discovery_api_BackendMapping_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_wso2_discovery_api_BackendMapping_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -34,17 +39,20 @@ public final class ExtendedOperationProto {
   static {
     java.lang.String[] descriptorData = {
       "\n*wso2/discovery/api/ExtendedOperation.p" +
-      "roto\022\022wso2.discovery.api\"\232\001\n\021ExtendedOpe" +
+      "roto\022\022wso2.discovery.api\"\326\001\n\021ExtendedOpe" +
       "ration\022\014\n\004name\030\001 \001(\t\022\014\n\004verb\030\002 \001(\t\022\023\n\013de" +
       "scription\030\003 \001(\t\022\016\n\006schema\030\004 \001(\t\022\014\n\004mode\030" +
       "\005 \001(\t\0226\n\014proxyMapping\030\006 \001(\0132 .wso2.disco" +
-      "very.api.ProxyMapping\"\\\n\014ProxyMapping\022\014\n" +
-      "\004name\030\001 \001(\t\022\017\n\007context\030\002 \001(\t\022\017\n\007version\030" +
-      "\003 \001(\t\022\016\n\006target\030\004 \001(\t\022\014\n\004verb\030\005 \001(\tB\200\001\n%" +
-      "org.wso2.choreo.connect.discovery.apiB\026E" +
-      "xtendedOperationProtoP\001Z=github.com/envo" +
-      "yproxy/go-control-plane/wso2/discovery/a" +
-      "pi;apib\006proto3"
+      "very.api.ProxyMapping\022:\n\016backendMapping\030" +
+      "\007 \001(\0132\".wso2.discovery.api.BackendMappin" +
+      "g\"\\\n\014ProxyMapping\022\014\n\004name\030\001 \001(\t\022\017\n\007conte" +
+      "xt\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\022\016\n\006target\030\004 \001(" +
+      "\t\022\014\n\004verb\030\005 \001(\t\"@\n\016BackendMapping\022\020\n\010end" +
+      "point\030\001 \001(\t\022\016\n\006target\030\002 \001(\t\022\014\n\004verb\030\003 \001(" +
+      "\tB\200\001\n%org.wso2.choreo.connect.discovery." +
+      "apiB\026ExtendedOperationProtoP\001Z=github.co" +
+      "m/envoyproxy/go-control-plane/wso2/disco" +
+      "very/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -55,13 +63,19 @@ public final class ExtendedOperationProto {
     internal_static_wso2_discovery_api_ExtendedOperation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_ExtendedOperation_descriptor,
-        new java.lang.String[] { "Name", "Verb", "Description", "Schema", "Mode", "ProxyMapping", });
+        new java.lang.String[] { "Name", "Verb", "Description", "Schema", "Mode", "ProxyMapping", "BackendMapping", });
     internal_static_wso2_discovery_api_ProxyMapping_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_wso2_discovery_api_ProxyMapping_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_ProxyMapping_descriptor,
         new java.lang.String[] { "Name", "Context", "Version", "Target", "Verb", });
+    internal_static_wso2_discovery_api_BackendMapping_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_wso2_discovery_api_BackendMapping_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_wso2_discovery_api_BackendMapping_descriptor,
+        new java.lang.String[] { "Endpoint", "Target", "Verb", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

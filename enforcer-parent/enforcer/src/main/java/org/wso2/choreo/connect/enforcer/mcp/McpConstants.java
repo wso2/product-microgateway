@@ -48,6 +48,23 @@ public class McpConstants {
     public static final String PROPERTIES_KEY = "properties";
     public static final String ARGUMENTS_KEY = "arguments";
     public static final String RESULT_KEY = "result";
+    public static final String TOOLS_KEY = "tools";
+    public static final String REQUEST_BODY_KEY = "requestBody";
+    public static final String LIST_CHANGED_KEY = "listChanged";
+    public static final String RESOURCES_KEY = "resources";
+    public static final String PROMPTS_KEY = "prompts";
+    public static final String LOGGING_KEY = "logging";
+    public static final String CAPABILITIES_KEY = "capabilities";
+    public static final String SERVER_NAME = "name";
+    public static final String INPUT_SCHEMA_KEY = "inputSchema";
+    public static final String SERVER_VERSION = "version";
+    public static final String SERVER_DESC = "description";
+    public static final String SERVER_INFO = "serverInfo";
+    public static final String IS_ERROR = "isError";
+    public static final String TYPE = "type";
+    public static final String TYPE_TEXT = "text";
+    public static final String TYPE_OBJECT = "object";
+    public static final String CONTENT = "content";
     public static final String VHOST_HEADER = "x-wso2-mcp-vhost";
     public static final String BASEPATH_HEADER = "x-wso2-mcp-basepath";
     public static final String VERSION_HEADER = "x-wso2-mcp-version";
@@ -61,6 +78,10 @@ public class McpConstants {
     public static final String PAYLOAD_VERB = "verb";
     public static final String PAYLOAD_AUTH = "auth";
     public static final String PAYLOAD_ENDPOINT = "endpoint";
+    public static final String PAYLOAD_IS_PROXY = "is_proxy";
+    public static final String PAYLOAD_TARGET = "target";
+    public static final String PAYLOAD_API = "api";
+    public static final String PAYLOAD_BACKEND = "backend";
     public static final String ASGARDEO_WK_PLACEHOLDER
             = "https://api.asgardeo.io/t/{organization}/oauth2/token/.well-known/openid-configuration";
     public static final String MCP_PROTOCOL_VERSION_HEADER = "MCP-Protocol-Version";

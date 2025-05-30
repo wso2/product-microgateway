@@ -207,6 +207,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 	extendedOperations := []*api.ExtendedOperation{}
 	for _, extOp := range mgwSwagger.GetExtendedOperations() {
 		proxyMapping := &api.ProxyMapping{}
+		backednMapping := &api.BackendMapping{}
 		if extOp.ProxyMapping != nil {
 			proxyMapping.Name = extOp.ProxyMapping.Name
 			proxyMapping.Context = extOp.ProxyMapping.Context
@@ -214,12 +215,19 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 			proxyMapping.Target = extOp.ProxyMapping.Target
 			proxyMapping.Verb = extOp.ProxyMapping.Verb
 		}
+		if extOp.BackendMapping != nil {
+			backednMapping.Endpoint = extOp.BackendMapping.Endpoint
+			backednMapping.Target = extOp.BackendMapping.Target
+			backednMapping.Verb = extOp.BackendMapping.Verb
+		}
 		extOpObj := &api.ExtendedOperation{
-			Name:         extOp.Name,
-			Verb:         extOp.Verb,
-			Description:  extOp.Description,
-			Schema:       extOp.Schema,
-			ProxyMapping: proxyMapping,
+			Name:           extOp.Name,
+			Verb:           extOp.Verb,
+			Description:    extOp.Description,
+			Schema:         extOp.Schema,
+			Mode:           extOp.Mode,
+			ProxyMapping:   proxyMapping,
+			BackendMapping: backednMapping,
 		}
 		extendedOperations = append(extendedOperations, extOpObj)
 	}

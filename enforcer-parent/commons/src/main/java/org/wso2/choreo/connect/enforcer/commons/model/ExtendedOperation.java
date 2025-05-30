@@ -33,6 +33,9 @@ public class ExtendedOperation {
     private String apiContext;
     private String apiTarget;
     private String apiVerb;
+    private String backendEndpoint;
+    private String backendTarget;
+    private String backendVerb;
 
     public String getName() {
         return name;
@@ -114,5 +117,27 @@ public class ExtendedOperation {
         this.apiVerb = apiVerb;
     }
 
+    public String getBackendEndpoint() {
+        return backendEndpoint;
+    }
 
+    public void setBackendEndpoint(String backendEndpoint) {
+        this.backendEndpoint = backendEndpoint;
+    }
+
+    public String getBackendTarget() {
+        return backendTarget;
+    }
+
+    public void setBackendTarget(String backendTarget) {
+        this.backendTarget = backendTarget;
+    }
+
+    public String getBackendVerb() {
+        return backendVerb;
+    }
+
+    public void setBackendVerb(String backendVerb) {
+        this.backendVerb = backendVerb;
+    }
 }

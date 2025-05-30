@@ -96,6 +96,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 58: {
+            org.wso2.choreo.connect.discovery.api.BackendMapping.Builder subBuilder = null;
+            if (backendMapping_ != null) {
+              subBuilder = backendMapping_.toBuilder();
+            }
+            backendMapping_ = input.readMessage(org.wso2.choreo.connect.discovery.api.BackendMapping.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(backendMapping_);
+              backendMapping_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -344,6 +357,32 @@ private static final long serialVersionUID = 0L;
     return getProxyMapping();
   }
 
+  public static final int BACKENDMAPPING_FIELD_NUMBER = 7;
+  private org.wso2.choreo.connect.discovery.api.BackendMapping backendMapping_;
+  /**
+   * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+   * @return Whether the backendMapping field is set.
+   */
+  @java.lang.Override
+  public boolean hasBackendMapping() {
+    return backendMapping_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+   * @return The backendMapping.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.BackendMapping getBackendMapping() {
+    return backendMapping_ == null ? org.wso2.choreo.connect.discovery.api.BackendMapping.getDefaultInstance() : backendMapping_;
+  }
+  /**
+   * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.BackendMappingOrBuilder getBackendMappingOrBuilder() {
+    return getBackendMapping();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -376,6 +415,9 @@ private static final long serialVersionUID = 0L;
     if (proxyMapping_ != null) {
       output.writeMessage(6, getProxyMapping());
     }
+    if (backendMapping_ != null) {
+      output.writeMessage(7, getBackendMapping());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -403,6 +445,10 @@ private static final long serialVersionUID = 0L;
     if (proxyMapping_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(6, getProxyMapping());
+    }
+    if (backendMapping_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(7, getBackendMapping());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -434,6 +480,11 @@ private static final long serialVersionUID = 0L;
       if (!getProxyMapping()
           .equals(other.getProxyMapping())) return false;
     }
+    if (hasBackendMapping() != other.hasBackendMapping()) return false;
+    if (hasBackendMapping()) {
+      if (!getBackendMapping()
+          .equals(other.getBackendMapping())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -458,6 +509,10 @@ private static final long serialVersionUID = 0L;
     if (hasProxyMapping()) {
       hash = (37 * hash) + PROXYMAPPING_FIELD_NUMBER;
       hash = (53 * hash) + getProxyMapping().hashCode();
+    }
+    if (hasBackendMapping()) {
+      hash = (37 * hash) + BACKENDMAPPING_FIELD_NUMBER;
+      hash = (53 * hash) + getBackendMapping().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -608,6 +663,12 @@ private static final long serialVersionUID = 0L;
         proxyMapping_ = null;
         proxyMappingBuilder_ = null;
       }
+      if (backendMappingBuilder_ == null) {
+        backendMapping_ = null;
+      } else {
+        backendMapping_ = null;
+        backendMappingBuilder_ = null;
+      }
       return this;
     }
 
@@ -643,6 +704,11 @@ private static final long serialVersionUID = 0L;
         result.proxyMapping_ = proxyMapping_;
       } else {
         result.proxyMapping_ = proxyMappingBuilder_.build();
+      }
+      if (backendMappingBuilder_ == null) {
+        result.backendMapping_ = backendMapping_;
+      } else {
+        result.backendMapping_ = backendMappingBuilder_.build();
       }
       onBuilt();
       return result;
@@ -714,6 +780,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasProxyMapping()) {
         mergeProxyMapping(other.getProxyMapping());
+      }
+      if (other.hasBackendMapping()) {
+        mergeBackendMapping(other.getBackendMapping());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1241,6 +1310,125 @@ private static final long serialVersionUID = 0L;
         proxyMapping_ = null;
       }
       return proxyMappingBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.api.BackendMapping backendMapping_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.BackendMapping, org.wso2.choreo.connect.discovery.api.BackendMapping.Builder, org.wso2.choreo.connect.discovery.api.BackendMappingOrBuilder> backendMappingBuilder_;
+    /**
+     * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+     * @return Whether the backendMapping field is set.
+     */
+    public boolean hasBackendMapping() {
+      return backendMappingBuilder_ != null || backendMapping_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+     * @return The backendMapping.
+     */
+    public org.wso2.choreo.connect.discovery.api.BackendMapping getBackendMapping() {
+      if (backendMappingBuilder_ == null) {
+        return backendMapping_ == null ? org.wso2.choreo.connect.discovery.api.BackendMapping.getDefaultInstance() : backendMapping_;
+      } else {
+        return backendMappingBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+     */
+    public Builder setBackendMapping(org.wso2.choreo.connect.discovery.api.BackendMapping value) {
+      if (backendMappingBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        backendMapping_ = value;
+        onChanged();
+      } else {
+        backendMappingBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+     */
+    public Builder setBackendMapping(
+        org.wso2.choreo.connect.discovery.api.BackendMapping.Builder builderForValue) {
+      if (backendMappingBuilder_ == null) {
+        backendMapping_ = builderForValue.build();
+        onChanged();
+      } else {
+        backendMappingBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+     */
+    public Builder mergeBackendMapping(org.wso2.choreo.connect.discovery.api.BackendMapping value) {
+      if (backendMappingBuilder_ == null) {
+        if (backendMapping_ != null) {
+          backendMapping_ =
+            org.wso2.choreo.connect.discovery.api.BackendMapping.newBuilder(backendMapping_).mergeFrom(value).buildPartial();
+        } else {
+          backendMapping_ = value;
+        }
+        onChanged();
+      } else {
+        backendMappingBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+     */
+    public Builder clearBackendMapping() {
+      if (backendMappingBuilder_ == null) {
+        backendMapping_ = null;
+        onChanged();
+      } else {
+        backendMapping_ = null;
+        backendMappingBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.BackendMapping.Builder getBackendMappingBuilder() {
+      
+      onChanged();
+      return getBackendMappingFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.BackendMappingOrBuilder getBackendMappingOrBuilder() {
+      if (backendMappingBuilder_ != null) {
+        return backendMappingBuilder_.getMessageOrBuilder();
+      } else {
+        return backendMapping_ == null ?
+            org.wso2.choreo.connect.discovery.api.BackendMapping.getDefaultInstance() : backendMapping_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.BackendMapping, org.wso2.choreo.connect.discovery.api.BackendMapping.Builder, org.wso2.choreo.connect.discovery.api.BackendMappingOrBuilder> 
+        getBackendMappingFieldBuilder() {
+      if (backendMappingBuilder_ == null) {
+        backendMappingBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.BackendMapping, org.wso2.choreo.connect.discovery.api.BackendMapping.Builder, org.wso2.choreo.connect.discovery.api.BackendMappingOrBuilder>(
+                getBackendMapping(),
+                getParentForChildren(),
+                isClean());
+        backendMapping_ = null;
+      }
+      return backendMappingBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

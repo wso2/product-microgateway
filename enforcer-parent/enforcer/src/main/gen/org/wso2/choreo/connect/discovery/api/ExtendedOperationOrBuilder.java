@@ -81,4 +81,19 @@ public interface ExtendedOperationOrBuilder extends
    * <code>.wso2.discovery.api.ProxyMapping proxyMapping = 6;</code>
    */
   org.wso2.choreo.connect.discovery.api.ProxyMappingOrBuilder getProxyMappingOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+   * @return Whether the backendMapping field is set.
+   */
+  boolean hasBackendMapping();
+  /**
+   * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+   * @return The backendMapping.
+   */
+  org.wso2.choreo.connect.discovery.api.BackendMapping getBackendMapping();
+  /**
+   * <code>.wso2.discovery.api.BackendMapping backendMapping = 7;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.BackendMappingOrBuilder getBackendMappingOrBuilder();
 }

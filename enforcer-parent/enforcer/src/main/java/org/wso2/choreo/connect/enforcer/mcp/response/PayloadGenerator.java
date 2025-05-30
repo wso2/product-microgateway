@@ -58,19 +58,19 @@ public class PayloadGenerator {
 
         JsonObject capabilities = new JsonObject();
         JsonObject toolCapabilities = new JsonObject();
-        toolCapabilities.addProperty("listChanged", toolListChangeNotified);
-        capabilities.add("tools", toolCapabilities);
+        toolCapabilities.addProperty(McpConstants.LIST_CHANGED_KEY, toolListChangeNotified);
+        capabilities.add(McpConstants.TOOLS_KEY, toolCapabilities);
         // Add empty objects for unsupported capabilities
-        capabilities.add("resources", new JsonObject());
-        capabilities.add("prompts", new JsonObject());
-        capabilities.add("logging", new JsonObject());
-        result.add("capabilities", capabilities);
+        capabilities.add(McpConstants.RESOURCES_KEY, new JsonObject());
+        capabilities.add(McpConstants.PROMPTS_KEY, new JsonObject());
+        capabilities.add(McpConstants.LOGGING_KEY, new JsonObject());
+        result.add(McpConstants.CAPABILITIES_KEY, capabilities);
 
         JsonObject serverInfo = new JsonObject();
-        serverInfo.addProperty("name", serverName);
-        serverInfo.addProperty("version", serverVersion);
-        serverInfo.addProperty("description", serverDescription);
-        result.add("serverInfo", serverInfo);
+        serverInfo.addProperty(McpConstants.SERVER_NAME, serverName);
+        serverInfo.addProperty(McpConstants.SERVER_VERSION, serverVersion);
+        serverInfo.addProperty(McpConstants.SERVER_DESC, serverDescription);
+        result.add(McpConstants.SERVER_INFO, serverInfo);
 
         responseObject.add(McpConstants.RESULT_KEY, result);
         return gson.toJson(responseObject);
@@ -88,11 +88,11 @@ public class PayloadGenerator {
             String schema = extendedOperation.getSchema();
             if (schema != null) {
                 JsonObject schemaObject = gson.fromJson(schema, JsonObject.class);
-                toolObject.add("inputSchema", sanitizeInputSchema(schemaObject));
+                toolObject.add(McpConstants.INPUT_SCHEMA_KEY, sanitizeInputSchema(schemaObject));
             }
             toolsArray.add(toolObject);
         }
-        result.add("tools", toolsArray);
+        result.add(McpConstants.TOOLS_KEY, toolsArray);
         responseObject.add(McpConstants.RESULT_KEY, result);
 
         return gson.toJson(responseObject);
@@ -101,8 +101,8 @@ public class PayloadGenerator {
     private static JsonObject sanitizeInputSchema(JsonObject inputObject) {
         if (inputObject == null || inputObject.isEmpty()) {
             JsonObject emptyObject = new JsonObject();
-            emptyObject.addProperty("type", "object");
-            emptyObject.add("properties", new JsonObject());
+            emptyObject.addProperty(McpConstants.TYPE, McpConstants.TYPE_OBJECT);
+            emptyObject.add(McpConstants.PROPERTIES_KEY, new JsonObject());
             return emptyObject;
         }
         inputObject.remove("contentType");
@@ -130,8 +130,8 @@ public class PayloadGenerator {
         JsonObject sanitizedPropertiesObject = new JsonObject();
         for (Map.Entry<String, JsonElement> entry : propertiesObject.entrySet()) {
             String key = entry.getKey();
-            if ("requestBody".equalsIgnoreCase(key)) {
-                sanitizedPropertiesObject.add("requestBody", entry.getValue());
+            if (McpConstants.REQUEST_BODY_KEY.equalsIgnoreCase(key)) {
+                sanitizedPropertiesObject.add(McpConstants.REQUEST_BODY_KEY, entry.getValue());
                 continue;
             }
             String sanitizedKey = key.split("_", 2)[1];
@@ -150,23 +150,35 @@ public class PayloadGenerator {
         payload.addProperty(McpConstants.PAYLOAD_SCHEMA, extendedOperation.getSchema());
 
         JsonObject apiInfo = new JsonObject();
-        String context = "/" + extendedOperation.getApiContext().split("/", 3)[2];
-        context = context.substring(0, context.lastIndexOf('/'));
-        apiInfo.addProperty(McpConstants.PAYLOAD_API_NAME, extendedOperation.getApiName());
-        apiInfo.addProperty(McpConstants.PAYLOAD_CONTEXT, context);
-        apiInfo.addProperty(McpConstants.PAYLOAD_VERSION, extendedOperation.getApiVersion());
-        apiInfo.addProperty(McpConstants.PAYLOAD_PATH, extendedOperation.getApiTarget());
-        apiInfo.addProperty(McpConstants.PAYLOAD_VERB, extendedOperation.getApiVerb());
-        if (!authParam.isEmpty()) {
-            apiInfo.addProperty(McpConstants.PAYLOAD_AUTH, authParam);
-        }
-        if ("localhost".equals(vHost)) {
-            sb.append("router").append(":").append("9095");
+        JsonObject backendInfo = new JsonObject();
+        if ("Served/Proxy".equalsIgnoreCase(extendedOperation.getMode())) {
+            // The context is sent in the format of /{orgId}/context/version.Therefore, we need to remove the orgId
+            // and version before passing it to the transformation service.
+            String context = "/" + extendedOperation.getApiContext().split("/", 3)[2];
+            context = context.substring(0, context.lastIndexOf('/'));
+            apiInfo.addProperty(McpConstants.PAYLOAD_API_NAME, extendedOperation.getApiName());
+            apiInfo.addProperty(McpConstants.PAYLOAD_CONTEXT, context);
+            apiInfo.addProperty(McpConstants.PAYLOAD_VERSION, extendedOperation.getApiVersion());
+            apiInfo.addProperty(McpConstants.PAYLOAD_PATH, extendedOperation.getApiTarget());
+            apiInfo.addProperty(McpConstants.PAYLOAD_VERB, extendedOperation.getApiVerb());
+            if (!authParam.isEmpty()) {
+                apiInfo.addProperty(McpConstants.PAYLOAD_AUTH, authParam);
+            }
+            payload.addProperty(McpConstants.PAYLOAD_IS_PROXY, true);
+            if ("localhost".equals(vHost)) {
+                sb.append("router").append(":").append("9095");
+            } else {
+                sb.append(vHost);
+            }
+            apiInfo.addProperty(McpConstants.PAYLOAD_ENDPOINT, sb.toString());
         } else {
-            sb.append(vHost);
+            payload.addProperty(McpConstants.PAYLOAD_IS_PROXY, false);
+            backendInfo.addProperty(McpConstants.PAYLOAD_ENDPOINT, extendedOperation.getBackendEndpoint());
+            backendInfo.addProperty(McpConstants.PAYLOAD_VERB, extendedOperation.getBackendVerb());
+            backendInfo.addProperty(McpConstants.PAYLOAD_TARGET, extendedOperation.getBackendTarget());
         }
-        apiInfo.addProperty(McpConstants.PAYLOAD_ENDPOINT, sb.toString());
-        payload.add("api", apiInfo);
+        payload.add(McpConstants.PAYLOAD_API, apiInfo);
+        payload.add(McpConstants.PAYLOAD_BACKEND, backendInfo);
 
         payload.addProperty(McpConstants.ARGUMENTS_KEY, args);
         return payload;
@@ -177,15 +189,15 @@ public class PayloadGenerator {
         JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
 
         JsonObject result = new JsonObject();
-        result.addProperty("isError", isError);
+        result.addProperty(McpConstants.IS_ERROR, isError);
 
         JsonArray content = new JsonArray();
         JsonObject contentObject = new JsonObject();
-        contentObject.addProperty("type", "text");
-        contentObject.addProperty("text", body);
+        contentObject.addProperty(McpConstants.TYPE, McpConstants.TYPE_TEXT);
+        contentObject.addProperty(McpConstants.TYPE_TEXT, body);
 
         content.add(contentObject);
-        result.add("content", content);
+        result.add(McpConstants.CONTENT, content);
         responseObject.add(McpConstants.RESULT_KEY, result);
 
         return gson.toJson(responseObject);
