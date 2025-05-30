@@ -38,7 +38,7 @@ func InitAwsActiveMqConnection(ctx context.Context, connectionString string, use
 		},
 	)
 	if err != nil {
-		logger.LoggerMgw.Infof("Failed to connect to AWS ActiveMQ broker: %s" + err.Error())
+		logger.LoggerMgw.Infof("Failed to connect to AWS ActiveMQ broker. error: %s", err.Error())
 		return nil, err
 	}
 	return con, nil
