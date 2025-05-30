@@ -46,7 +46,7 @@ func InitiateAndProcessAWSActiveMQEvents(conf *config.Config) {
 		logger.LoggerMgw.Debugf("AWS ActiveMQ connection established for topic: %s", topic)
 		maximumallowedUnacknowledgedMessages := conf.ControlPlane.BrokerConnectionParameters.MaximumAllowedUnacknowledgedMessages
 
-		receiver, receiverErr := msg.InitAwsActiveMqReceiverAndValidate(connectionString, topic, con, maximumallowedUnacknowledgedMessages)
+		receiver, receiverErr := msg.InitAwsActiveMqReceiverAndValidate(ctx, topic, con, maximumallowedUnacknowledgedMessages)
 		if receiverErr != nil {
 			defer con.Close()
 			logger.LoggerMgw.Errorf("Failed to a create receiver for topic: %s error:%s", topic, receiverErr.Error())

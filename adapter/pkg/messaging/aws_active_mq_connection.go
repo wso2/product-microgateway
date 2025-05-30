@@ -34,25 +34,25 @@ func InitAwsActiveMqConnection(ctx context.Context, connectionString string, use
 			SASLType: amqp.SASLTypePlain(
 				userName,
 				password),
-			IdleTimeout: idleTimeoutDuration,
+			IdleTimeout: idleTimeoutDuration * time.Second,
 		},
 	)
 	if err != nil {
-		logger.LoggerMgw.Infof("Failed to connect to AWS ActiveMQ broker: %s" + err.Error())
+		logger.LoggerMgw.Errorf("Failed to connect to AWS ActiveMQ broker: %s", err.Error())
 		return nil, err
 	}
 	return con, nil
 }
 
 // InitAwsActiveMqReceiverAndValidate initializes a receiver for the specified topic on the AWS ActiveMQ broker
-func InitAwsActiveMqReceiverAndValidate(connectionString string, topicName string, con *amqp.Conn, maximumallowedUnacknowledgedMessages int) (*amqp.Receiver, error) {
-	session, sessionErr := con.NewSession(context.Background(), nil)
+func InitAwsActiveMqReceiverAndValidate(ctx context.Context, topicName string, con *amqp.Conn, maximumallowedUnacknowledgedMessages int) (*amqp.Receiver, error) {
+	session, sessionErr := con.NewSession(ctx, nil)
 	if sessionErr != nil {
 		logger.LoggerMgw.Errorf("Failed to create session for topic: %s error:%s", topicName, sessionErr.Error())
 		return nil, sessionErr
 	}
 	receiver, receiverErr := session.NewReceiver(
-		context.Background(),
+		ctx,
 		"topic://"+topicName,
 		&amqp.ReceiverOptions{
 			Credit: int32(maximumallowedUnacknowledgedMessages),
@@ -60,6 +60,7 @@ func InitAwsActiveMqReceiverAndValidate(connectionString string, topicName strin
 	)
 	if receiverErr != nil {
 		logger.LoggerMgw.Errorf("Failed to create receiver for topic: %s error:%s", topicName, receiverErr.Error())
+		session.Close(ctx)
 		return nil, receiverErr
 	}
 	return receiver, nil
