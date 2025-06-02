@@ -39,11 +39,11 @@ func serveRequest(c *gin.Context) {
 	// Validate the request
 	if mcpRequest.ToolName == "" {
 		logger.Error("Tool name is required")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Tool name is required"})
+		c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("Tool name is required"))
 		return
 	} else if mcpRequest.Arguments == "" {
 		logger.Error("Arguments are required")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Arguments are required"})
+		c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("Arguments are required"))
 		return
 	} else if mcpRequest.Schema == "" {
 		logger.Warn("Input schema is not provided")
@@ -53,37 +53,37 @@ func serveRequest(c *gin.Context) {
 			logger.Warn("API name is not proided")
 		} else if mcpRequest.API.Endpoint == "" {
 			logger.Error("API endpoint is required")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "API endpoint is required"})
+			c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("API endpoint is required"))
 			return
 		} else if mcpRequest.API.Context == "" {
 			logger.Error("API context is required")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "API context is required"})
+			c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("API context is required"))
 			return
 		} else if mcpRequest.API.Version == "" {
 			logger.Error("API version is required")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "API version is required"})
+			c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("API version is required"))
 			return
 		} else if mcpRequest.API.Path == "" {
 			logger.Error("Resource path is required")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Resource path is required"})
+			c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("Resource path is required"))
 			return
 		} else if mcpRequest.API.Verb == "" {
 			logger.Error("HTTP verb is required")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "HTTP verb is required"})
+			c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("HTTP verb is required"))
 			return
 		}
 	} else {
 		if mcpRequest.Backend.Endpoint == "" {
 			logger.Error("Backend endpoint is required")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Backend endpoint is required"})
+			c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("Backend endpoint is required"))
 			return
 		} else if mcpRequest.Backend.Target == "" {
 			logger.Error("Backend target is required")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Backend target is required"})
+			c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("Backend target is required"))
 			return
 		} else if mcpRequest.Backend.Verb == "" {
 			logger.Error("Backend verb is required")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Backend verb is required"})
+			c.JSON(http.StatusBadRequest, mcp.HandleBadRequest("Backend verb is required"))
 			return
 		}
 	}
