@@ -100,3 +100,134 @@ func TestArrayValueAssignmentFromEnv(t *testing.T) {
 	assert.Equal(t, uint64(42949672959), testStruct.Test.UInt64Array[0])
 	assert.Equal(t, uint(3), testStruct.Test.UIntArray2[0])
 }
+func TestResolveEnvValue(t *testing.T) {
+	// Set up test environment variables
+	os.Setenv("mykey1", "value1")
+	os.Setenv("mykey2", "value2")
+	os.Setenv("TESTKEY", "testvalue")
+	os.Setenv("EMPTY_KEY", "")
+	defer func() {
+		os.Unsetenv("mykey1")
+		os.Unsetenv("mykey2")
+		os.Unsetenv("TESTKEY")
+		os.Unsetenv("EMPTY_KEY")
+	}()
+
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "Multiple placeholders in string",
+			input:    "hello-$env{mykey1}-bar-$env{mykey2}-baz",
+			expected: "hello-value1-bar-value2-baz",
+		},
+		{
+			name:     "Single placeholder",
+			input:    "$env{TESTKEY}",
+			expected: "testvalue",
+		},
+		{
+			name:     "Placeholder at beginning",
+			input:    "$env{mykey1}-suffix",
+			expected: "value1-suffix",
+		},
+		{
+			name:     "Placeholder at end",
+			input:    "prefix-$env{mykey2}",
+			expected: "prefix-value2",
+		},
+		{
+			name:     "Multiple same placeholders",
+			input:    "$env{mykey1}-middle-$env{mykey1}",
+			expected: "value1-middle-value1",
+		},
+		{
+			name:     "Non-existent environment variable",
+			input:    "hello-$env{NONEXISTENT}-world",
+			expected: "hello-$env{NONEXISTENT}-world",
+		},
+		{
+			name:     "Empty environment variable value",
+			input:    "hello-$env{EMPTY_KEY}-world",
+			expected: "hello--world",
+		},
+		{
+			name:     "No placeholders",
+			input:    "hello-world",
+			expected: "hello-world",
+		},
+		{
+			name:     "Empty string",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "Malformed placeholder - missing closing brace",
+			input:    "hello-$env{mykey1-world",
+			expected: "hello-$env{mykey1-world",
+		},
+		{
+			name:     "Malformed placeholder - missing opening brace",
+			input:    "hello-$envmykey1}-world",
+			expected: "hello-$envmykey1}-world",
+		},
+		{
+			name:     "Mixed valid and invalid placeholders",
+			input:    "$env{mykey1}-$env{INVALID-$env{mykey2}",
+			expected: "value1-$env{INVALID-value2",
+		},
+		{
+			name:     "Placeholder with special characters in key",
+			input:    "$env{my_key-1}",
+			expected: "$env{my_key-1}",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := pkgconf.ResolveEnvValue(tt.input)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestResolveEnvValueWithComplexValues(t *testing.T) {
+	// Test with environment values that contain special characters
+	os.Setenv("COMPLEX_VALUE", "value-with-$-and-{}-chars")
+	os.Setenv("JSON_VALUE", `{"key": "value", "nested": {"inner": "data"}}`)
+	defer func() {
+		os.Unsetenv("COMPLEX_VALUE")
+		os.Unsetenv("JSON_VALUE")
+	}()
+
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "Environment value with special characters",
+			input:    "config=$env{COMPLEX_VALUE}",
+			expected: "config=value-with-$-and-{}-chars",
+		},
+		{
+			name:     "Environment value with JSON",
+			input:    "json_config=$env{JSON_VALUE}",
+			expected: `json_config={"key": "value", "nested": {"inner": "data"}}`,
+		},
+		{
+			name:     "Multiple complex values",
+			input:    "$env{COMPLEX_VALUE}-separator-$env{JSON_VALUE}",
+			expected: `value-with-$-and-{}-chars-separator-{"key": "value", "nested": {"inner": "data"}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := pkgconf.ResolveEnvValue(tt.input)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
