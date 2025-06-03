@@ -1608,14 +1608,14 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 					Verb:        operation.Verb,
 					Description: operation.Description,
 				}
-				if operation.OperationProxyMapping.Target.Target == "" {
+				if operation.OperationProxyMapping == nil {
 					if operation.Schema == "" {
 						extOperation.Mode = "Passthrough"
 					} else {
 						extOperation.Mode = "Served/API"
 						extOperation.Schema = operation.Schema
 						backendMapping := &BackendMapping{
-							Endpoint: operation.BackendOperationMapping.Endpoint,
+							Endpoint: operation.BackendOperationMapping.BackendOperation.Endpoint,
 							Target:   operation.BackendOperationMapping.BackendOperation.Target,
 							Verb:     operation.BackendOperationMapping.BackendOperation.Verb,
 						}

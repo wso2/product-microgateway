@@ -185,7 +185,7 @@ type OperationYaml struct {
 	Target                  string                   `json:"target,omitempty"`
 	Verb                    string                   `json:"verb,omitempty"`
 	Description             string                   `json:"description,omitempty"`
-	Schema                  string                   `json:"schema,omitempty"`
+	Schema                  string                   `json:"schemaDefinition,omitempty"`
 	ThrottlingLimit         ThrottlingLimit          `json:"throttlingLimit,omitempty"`
 	BackendOperationMapping *BackendOperationMapping `json:"backendOperationMapping,omitempty"`
 	OperationProxyMapping   *OperationProxyMapping   `json:"operationProxyMapping,omitempty"`
@@ -199,14 +199,14 @@ type ThrottlingLimit struct {
 
 // BackendOperationMapping holds backend mapping details
 type BackendOperationMapping struct {
-	Endpoint         string            `json:"endpoint,omitempty"`
 	BackendOperation *BackendOperation `json:"backendOperation,omitempty"`
 }
 
 // BackendOperation holds backend operation details
 type BackendOperation struct {
-	Target string `json:"target,omitempty"`
-	Verb   string `json:"verb,omitempty"`
+	Endpoint string `json:"endpoint,omitempty"`
+	Target   string `json:"target,omitempty"`
+	Verb     string `json:"verb,omitempty"`
 }
 
 // OperationProxyMapping holds proxy mapping details
