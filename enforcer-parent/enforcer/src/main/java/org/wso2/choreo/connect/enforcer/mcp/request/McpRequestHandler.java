@@ -127,7 +127,10 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
         } else if (headers.get(testKeyName) != null) {
             tokenHeader.append(testKeyName).append(":").append(headers.get(testKeyName));
         } else {
-            logger.info("Authorization header is not available for the API: {}", apiName);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Authorization header is not available for the API: {}", apiName);
+            }
+
         }
 
         HttpContent requestContent = (HttpContent) msg;
@@ -144,7 +147,9 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
                 res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.ACCEPTED);
             }
         } else {
-            logger.info("Received empty request body for API: {}", apiName);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Received empty request body for API: {}", apiName);
+            }
             String jsonResponse = PayloadGenerator
                     .getErrorResponse(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
                             McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "Request body not found");
