@@ -53,7 +53,10 @@ func GetLogger() *slog.Logger {
 	syncOnceLogger.Do(func() {
 		if logger == nil {
 			attributes := []slog.Attr{}
-			baseHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{AddSource: false}).WithAttrs(attributes)
+			baseHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+				AddSource: false,
+				Level:     slog.LevelDebug,
+			}).WithAttrs(attributes)
 			customHandler := &LogHandler{Handler: baseHandler}
 			logger = slog.New(customHandler)
 		}

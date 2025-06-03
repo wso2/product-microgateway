@@ -101,7 +101,10 @@ func serveRequest(c *gin.Context) {
 	}
 
 	// Call the underlying API
-	logger.Info("Calling underlying API/Service", "toolName", mcpRequest.ToolName)
+	cfg := service.GetConfig()
+	if cfg.Log.Debug {
+		logger.Debug("Calling underlying API/Service", "toolName", mcpRequest.ToolName)
+	}
 	resp, code, err := mcp.CallUnderlyingAPI(ctx, &mcpRequest)
 	if err != nil {
 		logger.ErrorContext(ctx, "Failed to call underlying API", "error", err)
