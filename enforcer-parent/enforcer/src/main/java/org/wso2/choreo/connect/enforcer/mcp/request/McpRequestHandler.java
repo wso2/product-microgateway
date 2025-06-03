@@ -88,47 +88,52 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
 
     private void handleMcpRequest(ChannelHandlerContext ctx, Object msg) {
         FullHttpRequest req = (FullHttpRequest) msg;
+        FullHttpResponse res;
         HttpHeaders headers = req.headers();
+        if (!isHeaderValid(req, McpConstants.VHOST_HEADER) || !isHeaderValid(req, McpConstants.BASEPATH_HEADER)
+                || !isHeaderValid(req, McpConstants.VERSION_HEADER)) {
+            res = new DefaultFullHttpResponse(req.protocolVersion(),
+                    HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            ctx.writeAndFlush(res).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            return;
+        }
         String vhostHeader = headers.get(McpConstants.VHOST_HEADER);
-        if (vhostHeader == null) {
-            logger.error("Missing required header: " + McpConstants.VHOST_HEADER);
-            ctx.fireChannelRead(msg);
-            return;
-        }
         String basepathHeader = headers.get(McpConstants.BASEPATH_HEADER);
-        if (basepathHeader == null) {
-            logger.error("Missing required header: " + McpConstants.BASEPATH_HEADER);
-            ctx.fireChannelRead(msg);
-            return;
-        }
         String versionHeader = headers.get(McpConstants.VERSION_HEADER);
-        if (versionHeader == null) {
-            logger.error("Missing required header: " + McpConstants.VERSION_HEADER);
-            ctx.fireChannelRead(msg);
-            return;
-        }
         String apikey = APIFactory.getInstance().getApiKey(vhostHeader, basepathHeader, versionHeader);
         API matchedAPI = APIFactory.getInstance().getMatchedAPIByKey(apikey);
+        if (matchedAPI == null) {
+            logger.error("API not found for the given API key");
+            res = new DefaultFullHttpResponse(req.protocolVersion(),
+                    HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            ctx.writeAndFlush(res).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            return;
+        }
+        if (matchedAPI.getAPIConfig() == null) {
+            logger.error("API configuration not found for the API");
+            res = new DefaultFullHttpResponse(req.protocolVersion(),
+                    HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            ctx.writeAndFlush(res).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            return;
+        }
+        String apiName = matchedAPI.getAPIConfig().getName();
         String authHeaderName;
         String testKeyName = ConfigHolder.getInstance().getConfig().getAuthHeader()
                 .getTestConsoleHeaderName().toLowerCase();
-        if (matchedAPI != null) {
-            authHeaderName = matchedAPI.getAPIConfig().getAuthHeader();
-        } else {
-            authHeaderName = String.valueOf(HttpHeaderNames.AUTHORIZATION);
-        }
+        authHeaderName = matchedAPI.getAPIConfig().getAuthHeader();
         StringBuilder tokenHeader = new StringBuilder();
         if (headers.get(authHeaderName) != null) {
             tokenHeader.append(HttpHeaderNames.AUTHORIZATION).append(":").append(headers.get(authHeaderName));
         } else if (headers.get(testKeyName) != null) {
             tokenHeader.append(testKeyName).append(":").append(headers.get(testKeyName));
         } else {
-            logger.info("Authorization header is not available. Assuming no authorization needed for this request");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Authorization header is not available for the API: {}", apiName);
+            }
+
         }
 
         HttpContent requestContent = (HttpContent) msg;
-        FullHttpResponse res;
-        ChannelFuture cf;
         if (requestContent.content().isReadable()) {
             String body = requestContent.content().toString(StandardCharsets.UTF_8);
             String jsonResponse = McpRequestProcessor.processRequest(apikey, body, tokenHeader.toString());
@@ -142,7 +147,9 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
                 res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.ACCEPTED);
             }
         } else {
-            logger.info("Received empty request body");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Received empty request body for API: {}", apiName);
+            }
             String jsonResponse = PayloadGenerator
                     .getErrorResponse(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
                             McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "Request body not found");
@@ -152,8 +159,7 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
                     .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
                     .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
         }
-        cf = ctx.writeAndFlush(res);
-        cf.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        ctx.writeAndFlush(res).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
     private void handleWellKnownRequest(ChannelHandlerContext ctx, Object msg) {
@@ -162,5 +168,20 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
         FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.NOT_IMPLEMENTED);
         ChannelFuture cf = ctx.writeAndFlush(res);
         cf.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+    }
+
+    private boolean isHeaderValid(FullHttpRequest req, String headerName) {
+        HttpHeaders headers = req.headers();
+        if (headers.contains(headerName)) {
+            String headerValue = headers.get(headerName);
+            if (headerValue != null && !headerValue.isEmpty()) {
+                return true;
+            } else {
+                logger.error("Header {} is empty", headerName);
+            }
+        } else {
+            logger.error("Header {} is missing", headerName);
+        }
+        return false;
     }
 }

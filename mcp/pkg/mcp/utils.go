@@ -66,3 +66,10 @@ func mapToXMLElements(m map[string]any) []XMLElement {
 	}
 	return elements
 }
+
+func HandleBadRequest(message string) Result {
+	return Result{
+		Code:     400,
+		Response: message,
+	}
+}

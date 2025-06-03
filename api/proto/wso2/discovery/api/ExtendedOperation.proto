@@ -32,6 +32,7 @@ message ExtendedOperation {
     string schema = 4;
     string mode = 5;
     ProxyMapping proxyMapping = 6;
+    BackendMapping backendMapping = 7;
 }
 
 message ProxyMapping {
@@ -40,4 +41,10 @@ message ProxyMapping {
     string version = 3;
     string target = 4;
     string verb = 5;
+}
+
+message BackendMapping {
+    string endpoint = 1;
+    string target = 2;
+    string verb = 3;
 }

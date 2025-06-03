@@ -153,6 +153,11 @@ public class RestAPI implements API {
                 extendedOperationConfig.setApiTarget(extendedOperation.getProxyMapping().getTarget());
                 extendedOperationConfig.setApiVerb(extendedOperation.getProxyMapping().getVerb());
             }
+            if (extendedOperation.getBackendMapping() != null) {
+                extendedOperationConfig.setBackendEndpoint(extendedOperation.getBackendMapping().getEndpoint());
+                extendedOperationConfig.setBackendTarget(extendedOperation.getBackendMapping().getTarget());
+                extendedOperationConfig.setBackendVerb(extendedOperation.getBackendMapping().getVerb());
+            }
             extendedOperations.add(extendedOperationConfig);
         }
 

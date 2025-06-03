@@ -55,7 +55,7 @@ func InitHttpClient() *MCPHTTPClient {
 			}
 			httpClient = &MCPHTTPClient{
 				httpClient: &client,
-				UserAgent:  "Bijira-MCP-Client-Go/0.1",
+				UserAgent:  "Bijira-MCP-Client/0.1",
 			}
 		}
 	})

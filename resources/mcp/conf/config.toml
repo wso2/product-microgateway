@@ -9,3 +9,6 @@ secure = true
 insecure = true
 maxIdleConns = 20
 idleConnTimeout = 60
+
+[log]
+debug = false

@@ -31,7 +31,7 @@ func transformMCPRequest(mcpRequest *MCPRequest) (*TransformedRequest, error) {
 		Headers: make(map[string]string),
 	}
 
-	method, err := processHTTPMethod(mcpRequest.API.Verb)
+	method, err := processHTTPMethod(mcpRequest)
 	if err != nil {
 		logger.Error("Failed to process HTTP method", "error", err)
 		return nil, err
@@ -74,8 +74,13 @@ func transformMCPRequest(mcpRequest *MCPRequest) (*TransformedRequest, error) {
 	return httpRequest, nil
 }
 
-func processHTTPMethod(verb string) (string, error) {
-	method := strings.ToUpper(verb)
+func processHTTPMethod(mcpRequest *MCPRequest) (string, error) {
+	method := ""
+	if mcpRequest.IsProxy {
+		method = strings.ToUpper(mcpRequest.API.Verb)
+	} else {
+		method = strings.ToUpper(mcpRequest.Backend.Verb)
+	}
 	switch method {
 	case "GET":
 		return http.MethodGet, nil
@@ -90,7 +95,7 @@ func processHTTPMethod(verb string) (string, error) {
 	case "OPTIONS":
 		return http.MethodOptions, nil
 	default:
-		return "", fmt.Errorf("unsupported HTTP method: %s", verb)
+		return "", fmt.Errorf("unsupported HTTP method: %s", method)
 	}
 }
 
@@ -103,32 +108,42 @@ func processEndpoint(mcpRequest *MCPRequest, schemaMapping *SchemaMapping) (stri
 		logger.Error("Failed to parse arguments", "error", err)
 		return "", err
 	}
-
-	endpoint := mcpRequest.API.Endpoint
+	var endpoint string
+	if mcpRequest.IsProxy {
+		endpoint = mcpRequest.API.Endpoint
+	} else {
+		endpoint = mcpRequest.Backend.Endpoint
+	}
+	_, err = url.ParseRequestURI(endpoint)
+	if err != nil {
+		return "", fmt.Errorf("invalid endpoint: %s", endpoint)
+	}
 	transformedEp := ""
-	if strings.HasPrefix(endpoint, "http://") || strings.HasPrefix(endpoint, "https://") {
-		sanitizedEp := sanitizeStringSlashes(endpoint)
+	sanitizedEp := sanitizeStringSlashes(endpoint)
+	if mcpRequest.IsProxy {
 		sainitizedContext := sanitizeStringSlashes(mcpRequest.API.Context)
 		sanitizedVersion := sanitizeStringSlashes(mcpRequest.API.Version)
 		sanitizedPath := sanitizeStringSlashes(mcpRequest.API.Path)
 		transformedEp = fmt.Sprintf("%s/%s/%s/%s", sanitizedEp, sainitizedContext, sanitizedVersion, sanitizedPath)
-		// Process path parameters
-		transformedEp, err = processPathParameters(args, schemaMapping, transformedEp)
-		if err != nil {
-			logger.Error("Failed to process path parameters", "error", err)
-			return "", err
-		}
-		// Process query parameters
-		queryParams, err := processQueryParameters(args, schemaMapping)
-		if err != nil {
-			return "", err
-		}
-		if queryParams != "" {
-			transformedEp += queryParams
-		}
-		return transformedEp, nil
+	} else {
+		sanitizedTarget := sanitizeStringSlashes(mcpRequest.Backend.Target)
+		transformedEp = fmt.Sprintf("%s/%s", sanitizedEp, sanitizedTarget)
 	}
-	return "", fmt.Errorf("invalid endpoint: %s", endpoint)
+	// Process path parameters
+	transformedEp, err = processPathParameters(args, schemaMapping, transformedEp)
+	if err != nil {
+		logger.Error("Failed to process path parameters", "error", err)
+		return "", err
+	}
+	// Process query parameters
+	queryParams, err := processQueryParameters(args, schemaMapping)
+	if err != nil {
+		return "", err
+	}
+	if queryParams != "" {
+		transformedEp += queryParams
+	}
+	return transformedEp, nil
 }
 
 // processQueryParameters generates a query string from the provided arguments and schema mapping.

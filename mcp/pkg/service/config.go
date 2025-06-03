@@ -27,6 +27,7 @@ import (
 type Config struct {
 	Server Server `mapstructure:"server"`
 	Http   Http   `mapstructure:"http"`
+	Log    Log    `mapstructure:"log"`
 }
 
 type Server struct {
@@ -41,6 +42,10 @@ type Http struct {
 	Insecure        bool `mapstructure:"insecure"`
 	MaxIdleConns    int  `mapstructure:"maxIdleConns"`
 	IdleConnTimeout int  `mapstructure:"idleConnTimeout"`
+}
+
+type Log struct {
+	Debug bool `mapstructure:"debug"`
 }
 
 var (

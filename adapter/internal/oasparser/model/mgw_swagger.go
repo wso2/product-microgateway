@@ -102,12 +102,20 @@ type MgwSwagger struct {
 // ExtendedOperation represents the structure of an extended operation such as an MCP tool
 // or a GraphQL operation.
 type ExtendedOperation struct {
-	Name         string
-	Verb         string
-	Description  string
-	Schema       string
-	Mode         string
-	ProxyMapping *ProxyMapping
+	Name           string
+	Verb           string
+	Description    string
+	Schema         string
+	Mode           string
+	BackendMapping *BackendMapping
+	ProxyMapping   *ProxyMapping
+}
+
+// BackendMapping represents the structure of a backend mapping.
+type BackendMapping struct {
+	Endpoint string
+	Target   string
+	Verb     string
 }
 
 // ProxyMapping represents the structure of a proxy mapping. i.e. the details of the
@@ -1601,9 +1609,21 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 					Description: operation.Description,
 				}
 				if operation.OperationProxyMapping == nil {
-					extOperation.Mode = "Passthrough"
+					if operation.Schema == "" {
+						extOperation.Mode = "Passthrough"
+					} else {
+						extOperation.Mode = "Served/API"
+						extOperation.Schema = operation.Schema
+						backendMapping := &BackendMapping{
+							Endpoint: operation.BackendOperationMapping.BackendOperation.Endpoint,
+							Target:   operation.BackendOperationMapping.BackendOperation.Target,
+							Verb:     operation.BackendOperationMapping.BackendOperation.Verb,
+						}
+						extOperation.BackendMapping = backendMapping
+					}
 				} else {
-					extOperation.Mode = "Served"
+					extOperation.Mode = "Served/Proxy"
+					extOperation.Schema = operation.Schema
 					proxyMapping := &ProxyMapping{
 						Name:    operation.OperationProxyMapping.Target.Name,
 						Context: operation.OperationProxyMapping.Target.Context,
@@ -1612,7 +1632,6 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 						Verb:    operation.OperationProxyMapping.Target.Verb,
 					}
 					extOperation.ProxyMapping = proxyMapping
-					extOperation.Schema = operation.OperationProxyMapping.Schema
 				}
 				extendedOperations = append(extendedOperations, &extOperation)
 			}

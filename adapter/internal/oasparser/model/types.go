@@ -181,12 +181,14 @@ type endpointConfigStruct struct {
 
 // OperationYaml holds attributes of APIM operations
 type OperationYaml struct {
-	ID                    string                 `json:"id,omitempty"`
-	Target                string                 `json:"target,omitempty"`
-	Verb                  string                 `json:"verb,omitempty"`
-	Description           string                 `json:"description,omitempty"`
-	ThrottlingLimit       ThrottlingLimit        `json:"throttlingLimit,omitempty"`
-	OperationProxyMapping *OperationProxyMapping `json:"operationProxyMapping,omitempty"`
+	ID                      string                   `json:"id,omitempty"`
+	Target                  string                   `json:"target,omitempty"`
+	Verb                    string                   `json:"verb,omitempty"`
+	Description             string                   `json:"description,omitempty"`
+	Schema                  string                   `json:"schemaDefinition,omitempty"`
+	ThrottlingLimit         ThrottlingLimit          `json:"throttlingLimit,omitempty"`
+	BackendOperationMapping *BackendOperationMapping `json:"backendOperationMapping,omitempty"`
+	OperationProxyMapping   *OperationProxyMapping   `json:"operationProxyMapping,omitempty"`
 }
 
 // ThrottlingLimit details
@@ -195,9 +197,20 @@ type ThrottlingLimit struct {
 	Unit         string `json:"unit,omitempty"`
 }
 
+// BackendOperationMapping holds backend mapping details
+type BackendOperationMapping struct {
+	BackendOperation *BackendOperation `json:"backendOperation,omitempty"`
+}
+
+// BackendOperation holds backend operation details
+type BackendOperation struct {
+	Endpoint string `json:"endpoint,omitempty"`
+	Target   string `json:"target,omitempty"`
+	Verb     string `json:"verb,omitempty"`
+}
+
 // OperationProxyMapping holds proxy mapping details
 type OperationProxyMapping struct {
-	Schema string      `json:"schema,omitempty"`
 	Target ProxyTarget `json:"target,omitempty"`
 }
 
