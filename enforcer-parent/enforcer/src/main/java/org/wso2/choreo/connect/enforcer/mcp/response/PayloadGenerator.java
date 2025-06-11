@@ -35,7 +35,7 @@ import java.util.Map;
 public class PayloadGenerator {
     private static final Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 
-    public static String getErrorResponse(Integer id, int code, String message, String data) {
+    public static String getErrorResponse(Object id, int code, String message, String data) {
         McpError error = new McpError(code, message, data);
         McpErrorResponse errorResponse = new McpErrorResponse(id, error);
         return gson.toJson(errorResponse);
