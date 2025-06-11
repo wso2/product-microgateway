@@ -39,6 +39,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
 import org.wso2.choreo.connect.enforcer.mcp.McpException;
+import org.wso2.choreo.connect.enforcer.mcp.McpExceptionWithId;
 import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
@@ -70,7 +71,7 @@ public class McpRequestProcessor {
                         McpConstants.RpcConstants.INTERNAL_ERROR_MESSAGE, "MCP Proxy is not available");
             }
             if (McpConstants.METHOD_INITIALIZE.equals(method)) {
-                validateInitializeRequest(requestObject);
+                validateInitializeRequest(id, requestObject);
                 return handleMcpInitialize(id, matchedMcpApi);
             } else if (McpConstants.METHOD_TOOL_LIST.equals(method)) {
                 return handleMcpToolList(id, matchedMcpApi);
@@ -169,13 +170,13 @@ public class McpRequestProcessor {
         }
     }
 
-    public static void validateInitializeRequest(JsonObject requestObject) throws McpException {
+    public static void validateInitializeRequest(Object id, JsonObject requestObject) throws McpException {
         if (requestObject.has(McpConstants.PARAMS_KEY)) {
             JsonObject params = requestObject.getAsJsonObject(McpConstants.PARAMS_KEY);
             if (params.has(McpConstants.PROTOCOL_VERSION_KEY)) {
                 String protocolVersion = params.get(McpConstants.PROTOCOL_VERSION_KEY).getAsString();
                 if (!McpConstants.SUPPORTED_PROTOCOL_VERSIONS.contains(protocolVersion)) {
-                    throw new McpException(McpConstants.RpcConstants.INVALID_PARAMS_CODE,
+                    throw new McpExceptionWithId(id, McpConstants.RpcConstants.INVALID_PARAMS_CODE,
                             McpConstants.RpcConstants.INVALID_PARAMS_MESSAGE, "Supported protocol versions are: "
                             + McpConstants.SUPPORTED_PROTOCOL_VERSIONS);
                 }

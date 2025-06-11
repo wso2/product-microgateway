@@ -16,25 +16,23 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.mcp.response;
+package org.wso2.choreo.connect.enforcer.mcp;
 
-import com.google.gson.annotations.SerializedName;
+import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
 
 /**
- * This class is used to represent the error response for the MCP.
+ * This class is used to throw MCP related errors with an ID.
  */
-public class McpErrorResponse extends McpResponse {
-    @SerializedName("error")
-    McpError error;
+public class McpExceptionWithId extends McpException {
+    private Object id;
 
-    public McpErrorResponse(Object id, McpError error) {
-        super(id);
-        this.error = error;
+    public McpExceptionWithId(Object id, int errorCode, String errorMessage, String data) {
+        super(errorCode, errorMessage, data);
+        this.id = id;
     }
-    public void setError(McpError error) {
-        this.error = error;
-    }
-    public McpError getError() {
-        return error;
+
+    @Override
+    public String toJsonRpcErrorPayload() {
+        return PayloadGenerator.getErrorResponse(id, getErrorCode(), getErrorMessage(), getData());
     }
 }

@@ -144,7 +144,7 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
                         .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
                         .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
             } else {
-                res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.ACCEPTED);
+                res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.NO_CONTENT);
             }
         } else {
             if (logger.isDebugEnabled()) {
