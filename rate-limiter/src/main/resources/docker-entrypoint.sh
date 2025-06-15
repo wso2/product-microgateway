@@ -19,6 +19,8 @@ set -e
 
 export CONFIG_TYPE=GRPC_XDS_SOTW
 export CONFIG_GRPC_XDS_NODE_ID="${RATE_LIMITER_LABEL:-Default}"
+INSTANCE_IDENTIFIER="${HOST:-Undefined}"
+export CONFIG_GRPC_XDS_NODE_METADATA="instanceIdentifier=${INSTANCE_IDENTIFIER}"
 
 # Start the server
 ratelimit "$@" &
