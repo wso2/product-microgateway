@@ -53,7 +53,9 @@ const (
 	// RelativeLogConfigPath is the relative file path where the log configuration file is.
 	relativeLogConfigPath = "/conf/log_config.toml"
 	// EnvConfigPrefix is used when configs should be read from environment variables.
-	EnvConfigPrefix = "$env"
+	EnvConfigPrefix      = "$env"
+	envPlaceholderPrefix = "$env{"
+	envPlaceholderSuffix = "}"
 	// envVariableForCCPrefix is the prefix used for ChoreoConnect specific environmental variables.
 	envVariablePrefix = "CC_"
 	// envVariableEntrySeparator is used as the separator used to denote nested structured properties.
@@ -175,17 +177,43 @@ func resolveEnvForReflectValue(field reflect.Value, currentTag string, resolveEn
 	}
 }
 
-// ResolveEnvValue replace the respective config values from environment variable.
+// ResolveEnvValue finds all occurrences of $env{key} in the input string,
+// looks up the corresponding environment variables, and replaces the placeholders.
 func ResolveEnvValue(value string) string {
-	re := regexp.MustCompile(`(?s)\{(.*)}`) // regex to get everything in between curly brackets
-	m := re.FindStringSubmatch(value)
-	if len(m) > 1 {
-		envValue, exists := os.LookupEnv(m[1])
-		if exists {
-			return strings.ReplaceAll(re.ReplaceAllString(value, envValue), EnvConfigPrefix, "")
+	// Regex to find all occurrences of $env{key}.
+	// - `\$env\{` matches the literal "$env{" prefix.
+	// - `([^}]+)` captures one or more characters that are NOT a closing brace. This is the key.
+	// - `\}` matches the literal closing brace "}".
+	re := regexp.MustCompile(`\$env\{([^{}]+)\}`)
+
+	// ReplaceAllStringFunc finds all matches of the regex and calls the
+	// provided function for each match. The string returned by the function
+	// replaces the matched placeholder.
+	return re.ReplaceAllStringFunc(value, func(match string) string {
+		// Extract the key from the matched string.
+		// 'match' will be like "$env{mykey1}".
+		// We strip the prefix "$env{" and suffix "}".
+		if !strings.HasPrefix(match, envPlaceholderPrefix) || !strings.HasSuffix(match, envPlaceholderSuffix) {
+			// This case should ideally not be reached if the regex is correct and matches.
+			// However, as a safeguard:
+			return match // Return original match if it's not in the expected format
 		}
-	}
-	return value
+
+		key := match[len(envPlaceholderPrefix) : len(match)-len(envPlaceholderSuffix)]
+
+		// Lookup the environment variable.
+		envValue, exists := os.LookupEnv(key)
+		if exists {
+			// If the variable exists, return its value.
+			// This value will literally replace the placeholder.
+			// Any '$' characters in envValue will be preserved as is.
+			return envValue
+		}
+
+		// If the environment variable is not found, return the original placeholder string.
+		// This makes it clear that a substitution was expected but not found.
+		return match
+	})
 }
 
 func getKind(val reflect.Value) reflect.Kind {
