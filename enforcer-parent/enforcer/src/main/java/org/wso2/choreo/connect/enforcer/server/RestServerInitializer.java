@@ -42,6 +42,8 @@ import org.wso2.choreo.connect.enforcer.security.jwt.issuer.HttpTokenServerHandl
  */
 public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
     private static final Logger logger = LogManager.getLogger(RestServerInitializer.class);
+    private static final int MAX_CONTENT_LENGTH = 1048576; // 1 MB
+    private static final String NETTY_CONTENT_LENGTH = "NETTY_CONTENT_LENGTH";
     private final SslContext sslCtx;
     public RestServerInitializer(SslContext sslCtx) {
         this.sslCtx = sslCtx;
@@ -56,8 +58,12 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
             p.addLast(sslCtx.newHandler(ch.alloc()));
         }
         p.addLast(new HttpServerCodec());
-        // Maximum content length in bytes, set to 1mb
-        p.addLast(new HttpObjectAggregator(1048576));
+        if (System.getenv(NETTY_CONTENT_LENGTH) == null) {
+            p.addLast(new HttpObjectAggregator(MAX_CONTENT_LENGTH));
+        } else {
+            p.addLast(new HttpObjectAggregator(
+                    Integer.parseInt(System.getenv(NETTY_CONTENT_LENGTH))));
+        }
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
             p.addLast(new JWKSRequestHandler());
         }
