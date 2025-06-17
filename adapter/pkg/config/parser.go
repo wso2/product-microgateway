@@ -184,7 +184,7 @@ func ResolveEnvValue(value string) string {
 	// - `\$env\{` matches the literal "$env{" prefix.
 	// - `([^}]+)` captures one or more characters that are NOT a closing brace. This is the key.
 	// - `\}` matches the literal closing brace "}".
-	re := regexp.MustCompile(`\$env\{([^{}}]+)\}`)
+	re := regexp.MustCompile(`\$env\{([^{}]+)\}`)
 
 	// ReplaceAllStringFunc finds all matches of the regex and calls the
 	// provided function for each match. The string returned by the function
