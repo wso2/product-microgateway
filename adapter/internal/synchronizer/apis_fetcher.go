@@ -103,6 +103,8 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 				if gaProvidedAPIEnvMap != nil {
 					apiID := strings.Split(file.Name, "-")[0]
 					if gaProvidedAPIEnvMap[apiID] == nil || gaProvidedAPIEnvMap[apiID][env.Name] == nil {
+						logger.LoggerSync.Infof("Skip environment %s for API %s as it is not applicable for the API in the GA provided API map",
+							env.Name, apiID)
 						continue
 					}
 				}
@@ -112,7 +114,6 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 
 		// If VhostToEnvsMap is empty, then there is nothing to deploy.
 		if len(vhostToEnvsMap) == 0 {
-			logger.LoggerSync.Infof("Drop api from file (API_ID:REVISION_ID).zip : %v due to not applicable environments", file.Name)
 			continue
 		}
 
