@@ -47,6 +47,7 @@ import (
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 	"github.com/wso2/product-microgateway/adapter/pkg/utils"
+	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 
 	"context"
 	"flag"
@@ -285,7 +286,7 @@ func Run(conf *config.Config) {
 			// Load subscription data when GA is disabled.
 			eventhub.LoadSubscriptionData(conf, nil)
 			// Fetch APIs at start up when GA is disabled.
-			fetchAPIsOnStartUp(conf, nil)
+			fetchAPIsOnStartUp(conf, nil, nil)
 		}
 
 		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
@@ -338,7 +339,7 @@ OUTER:
 
 // fetchAPIsOnStartUp fetches APIs from control plane chunk by chunk during the server start up and push them
 // to the router and enforcer components.
-func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
+func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string, apiMap map[string]map[string]*ga_model.Api) {
 	if apiUUIDList == nil {
 		logger.LoggerMgw.Info("Fetching APIs at startup...")
 		fetchChunkedAPIsOnStartUp(conf, nil, common.XdsOptions{})
@@ -349,7 +350,11 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 		for i, chunkedAPIUuids := range chunkedAPIUuidsList {
 			logger.LoggerMgw.Infof("Fetching chunked APIs... [%d/%d]", i+1, len(chunkedAPIUuidsList))
 			isNotFinalChunk := i != len(chunkedAPIUuidsList)-1
-			fetchChunkedAPIsOnStartUp(conf, chunkedAPIUuids, common.XdsOptions{SkipUpdatingXdsCache: isNotFinalChunk})
+			options := common.XdsOptions{SkipUpdatingXdsCache: isNotFinalChunk}
+			if os.Getenv("FEATURE_ENV_BASED_FILTERING_IN_STARTUP") == "true" {
+				options.APIIDEnvMap = apiMap
+			}
+			fetchChunkedAPIsOnStartUp(conf, chunkedAPIUuids, options)
 		}
 	}
 
@@ -413,7 +418,7 @@ func fetchChunkedAPIsOnStartUp(conf *config.Config, apiUUIDList []string, xdsOpt
 // FetchAPIUUIDsFromGlobalAdapter get the UUIDs of the APIs at the LA startup from GA
 func FetchAPIUUIDsFromGlobalAdapter() {
 	logger.LoggerMgw.Info("Fetching APIs at Local Adapter startup...")
-	apiEventsAtStartup := ga.FetchAPIsFromGA()
+	apiEventsAtStartup, apiEnvDeploymentMapAtStartup := ga.FetchAPIsFromGA()
 	b, _ := json.Marshal(apiEventsAtStartup)
 	logger.LoggerMgw.Debugf("apiEventsAtStartup : %s", string(b))
 	conf, _ := config.ReadConfigs()
@@ -435,7 +440,7 @@ func FetchAPIUUIDsFromGlobalAdapter() {
 		health.SetControlPlaneRestAPIStatus(true)
 		xds.DeployReadinessAPI(envs)
 	} else {
-		fetchAPIsOnStartUp(conf, apiUUIDList)
+		fetchAPIsOnStartUp(conf, apiUUIDList, apiEnvDeploymentMapAtStartup)
 	}
 	ga.StartConsumeGAAPIChannel()
 }

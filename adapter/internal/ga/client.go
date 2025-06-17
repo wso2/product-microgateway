@@ -22,11 +22,12 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"os"
+	"sync"
 	"time"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
-	"github.com/golang/protobuf/ptypes"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -55,10 +56,14 @@ var (
 	lastAckedResponse *discovery.DiscoveryResponse
 	// initialAPIEventArray is the array where the api events
 	initialAPIEventArray []*APIEvent
+	// mutex to protect access to initialAPIEventArray
+	initialAPIEventMutex sync.Mutex
 	// isFirstResponse to keep track of the first discovery response received.
 	isFirstResponse bool
 	// gaAPIChannelStart is used to block the GAAPIChannel consuming until the startup is completed.
 	gaAPIChannelStart chan bool
+	// GAAPIChannelInitialMap is used to send the Initial API UUID Map to fetch APIs from controlplane as a bulk.
+	GAAPIChannelInitialMap chan map[string]map[string]*ga_model.Api
 	// Last Received Response from the global adapter
 	// Last Recieved Response is always is equal to the lastAckedResponse according to current implementation as there is no
 	// validation performed on successfully recieved response.
@@ -92,6 +97,7 @@ func init() {
 	connectionFaultChannel = make(chan bool)
 	GAAPIChannel = make(chan APIEvent, 10)
 	gaAPIChannelStart = make(chan bool)
+	GAAPIChannelInitialMap = make(chan map[string]map[string]*ga_model.Api)
 	isFirstResponse = true
 }
 
@@ -139,7 +145,6 @@ func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
 }
 
 func watchAPIs() {
-	conf, _ := config.ReadConfigs()
 	for {
 		discoveryResponse, err := xdsStream.Recv()
 		if err == io.EOF {
@@ -165,12 +170,7 @@ func watchAPIs() {
 			lastReceivedResponse = discoveryResponse
 			logger.LoggerGA.Debugf("Discovery response is received : %s, size: %d", discoveryResponse.VersionInfo,
 				len(discoveryResponse.Resources))
-			// ToDO: (VajiraPrabuddhaka) remove this check once the dynamic environment changes are fully rolled out
-			if conf.ControlPlane.DynamicEnvironments.Enabled {
-				addAPIWithEnvToChannel(discoveryResponse)
-			} else {
-				addAPIToChannel(discoveryResponse)
-			}
+			addAPIWithEnvToChannel(discoveryResponse)
 			ack()
 		}
 	}
@@ -250,77 +250,6 @@ func StartConsumeGAAPIChannel() {
 	gaAPIChannelStart <- true
 }
 
-func addAPIToChannel(resp *discovery.DiscoveryResponse) {
-	// To keep track of the APIs needs to be deleted.
-
-	removedAPIMap := make(map[string]*ga_model.Api)
-	if !isFirstResponse {
-		for k, v := range apiRevisionMap {
-			removedAPIMap[k] = v
-		}
-	}
-
-	var startupAPIEventArray []*APIEvent
-	// Even if there are no resources available within ga, an empty but non-nil array would be set
-	startupAPIEventArray = make([]*APIEvent, 0)
-	for _, res := range resp.Resources {
-		api := &ga_model.Api{}
-		err := ptypes.UnmarshalAny(res, api)
-
-		if err != nil {
-			logger.LoggerGA.Errorf("Error while unmarshalling: %s\n", err.Error())
-			continue
-		}
-
-		currentGAAPI, apiFound := apiRevisionMap[api.ApiUUID]
-		if apiFound {
-			if currentGAAPI.RevisionUUID == api.RevisionUUID {
-				logger.LoggerGA.Debugf("Current GA API revision ID and API event revision ID is equal: %v\n",
-					currentGAAPI.RevisionUUID)
-				delete(removedAPIMap, api.ApiUUID)
-				continue
-			}
-		}
-		event := APIEvent{
-			APIUUID:          api.ApiUUID,
-			RevisionUUID:     api.RevisionUUID,
-			IsDeployEvent:    true,
-			OrganizationUUID: api.OrganizationUUID,
-			DeployedEnv:      api.DeployedEnv,
-		}
-
-		// If it is the first response, the GA would not send it via the channel. Rather
-		// it appends to an array and let the apis_fetcher collect those data.
-		if isFirstResponse {
-			startupAPIEventArray = append(startupAPIEventArray, &event)
-		} else {
-			GAAPIChannel <- event
-		}
-		apiRevisionMap[api.ApiUUID] = api
-		logger.LoggerGA.Infof("API Deploy event is added to the channel. %s : %s", api.ApiUUID, api.RevisionUUID)
-	}
-
-	// If it is the first response, it does not contain any remove events.
-	if isFirstResponse {
-		initialAPIEventArray = startupAPIEventArray
-		isFirstResponse = false
-		return
-	}
-
-	for apiEntry, gaAPI := range removedAPIMap {
-		event := APIEvent{
-			APIUUID:          apiEntry,
-			IsDeployEvent:    false,
-			OrganizationUUID: gaAPI.OrganizationUUID,
-			RevisionUUID:     gaAPI.RevisionUUID,
-			DeployedEnv:      gaAPI.DeployedEnv,
-		}
-		GAAPIChannel <- event
-		delete(apiRevisionMap, apiEntry)
-		logger.LoggerGA.Infof("API Undeploy event is added to the channel. : %s", apiEntry)
-	}
-}
-
 func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
 
 	// removedAPIEnvMap is used To keep track of the APIs needs to be deleted.
@@ -341,7 +270,7 @@ func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
 	startupAPIEventArray = make([]*APIEvent, 0)
 	for _, res := range resp.Resources {
 		api := &ga_model.Api{}
-		err := ptypes.UnmarshalAny(res, api)
+		err := res.UnmarshalTo(api)
 
 		if err != nil {
 			logger.LoggerGA.Errorf("Error while unmarshalling: %s\n", err.Error())
@@ -384,8 +313,13 @@ func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
 
 	// If it is the first response, it does not contain any remove events.
 	if isFirstResponse {
+		initialAPIEventMutex.Lock()
 		initialAPIEventArray = startupAPIEventArray
+		initialAPIEventMutex.Unlock()
 		isFirstResponse = false
+		if os.Getenv("FEATURE_ENV_BASED_FILTERING_IN_STARTUP") == "true" {
+			GAAPIChannelInitialMap <- apiEnvRevisionMap
+		}
 		return
 	}
 
@@ -452,11 +386,18 @@ func getGRPCConnection() (*grpc.ClientConn, error) {
 }
 
 // FetchAPIsFromGA returns the initial state of GA APIs within Adapter
-func FetchAPIsFromGA() []*APIEvent {
+func FetchAPIsFromGA() ([]*APIEvent, map[string]map[string]*ga_model.Api) {
 	for {
+		initialAPIEventMutex.Lock()
 		if initialAPIEventArray != nil {
-			return initialAPIEventArray
+			events := initialAPIEventArray
+			initialAPIEventMutex.Unlock()
+			if os.Getenv("FEATURE_ENV_BASED_FILTERING_IN_STARTUP") == "true" {
+				return events, <-GAAPIChannelInitialMap
+			}
+			return events, nil
 		}
+		initialAPIEventMutex.Unlock()
 		time.Sleep(1 * time.Second)
 	}
 }

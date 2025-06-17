@@ -18,6 +18,7 @@
 package ga
 
 import (
+	"os"
 	"testing"
 
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
@@ -33,6 +34,7 @@ func TestAddAPIToChannel(t *testing.T) {
 		ApiUUID:          "60ed6d12fd11bc53e9a582dd",
 		RevisionUUID:     "60efe4fc7cf8af77c987882a",
 		OrganizationUUID: "choreoTest",
+		DeployedEnv:      "development-us-east-azure",
 	}
 	var pbArray []*anypb.Any
 	pb, _ := anypb.New(api)
@@ -41,7 +43,7 @@ func TestAddAPIToChannel(t *testing.T) {
 		Resources: pbArray,
 	}
 	isFirstResponse = false
-	addAPIToChannel(testDiscoveryResponse)
+	addAPIWithEnvToChannel(testDiscoveryResponse)
 	// Consume API events from channel.
 	gaAPIEvent := <-GAAPIChannel
 	// Check API UUID of the API event
@@ -62,16 +64,19 @@ func TestFetchAPIsFromGA(t *testing.T) {
 		ApiUUID:          "60ed6d12fd11bc53e9a582dd",
 		RevisionUUID:     "60efe4fc7cf8af77c987882a",
 		OrganizationUUID: "choreoTest1",
+		DeployedEnv:      "development-us-east-azure",
 	}
 	api2 := &ga_model.Api{
 		ApiUUID:          "60ed6d12fd11bc53e9a582de",
 		RevisionUUID:     "60efe4fc7cf8af77c987882b",
 		OrganizationUUID: "choreoTest2",
+		DeployedEnv:      "production-us-east-azure",
 	}
 	api3 := &ga_model.Api{
 		ApiUUID:          "60ed6d12fd11bc53e9a582df",
 		RevisionUUID:     "60efe4fc7cf8af77c987882c",
 		OrganizationUUID: "choreoTest3",
+		DeployedEnv:      "development-us-east-azure",
 	}
 	// Create a API List Map containing API struct
 	apiListMap := make(map[string]*ga_model.Api)
@@ -91,23 +96,39 @@ func TestFetchAPIsFromGA(t *testing.T) {
 		Resources: pbArrayStartup,
 	}
 	isFirstResponse = true
-	addAPIToChannel(testDiscoveryResponseStartup)
-	// Test FetchAPIsFromGA() function
-	startupAPIEventsArray := FetchAPIsFromGA()
+	os.Setenv("FEATURE_ENV_BASED_FILTERING_IN_STARTUP", "true")
 
-	// Check Startup API event array
-	for _, startupAPIEvent := range startupAPIEventsArray {
-		if _, ok := apiListMap[startupAPIEvent.APIUUID]; ok {
-			// Check API UUID of the API event
-			assert.Equal(t, startupAPIEvent.APIUUID, apiListMap[startupAPIEvent.APIUUID].ApiUUID,
-				"API UUID should be the same")
-			// Check Revision UUID of the API event
-			assert.Equal(t, startupAPIEvent.RevisionUUID, apiListMap[startupAPIEvent.APIUUID].RevisionUUID,
-				"Revision UUID should be the same")
-			// Check Organization UUID of the API event
-			assert.Equal(t, startupAPIEvent.OrganizationUUID, apiListMap[startupAPIEvent.APIUUID].OrganizationUUID,
-				"Organization UUID should be the same")
+	// Create a channel to receive results from goroutine
+	resultChan := make(chan bool)
+
+	// Process API events in a goroutine
+	go func() {
+		startupAPIEventsArray, startupAPIEnvMap := FetchAPIsFromGA()
+		assert.NotNil(t, startupAPIEnvMap)
+		// Check Startup API event array
+		for _, startupAPIEvent := range startupAPIEventsArray {
+			if _, ok := apiListMap[startupAPIEvent.APIUUID]; ok {
+				// Check API UUID of the API event
+				assert.Equal(t, startupAPIEvent.APIUUID, apiListMap[startupAPIEvent.APIUUID].ApiUUID,
+					"API UUID should be the same")
+				// Check Revision UUID of the API event
+				assert.Equal(t, startupAPIEvent.RevisionUUID, apiListMap[startupAPIEvent.APIUUID].RevisionUUID,
+					"Revision UUID should be the same")
+				// Check Organization UUID of the API event
+				assert.Equal(t, startupAPIEvent.OrganizationUUID, apiListMap[startupAPIEvent.APIUUID].OrganizationUUID,
+					"Organization UUID should be the same")
+				envMap, found := startupAPIEnvMap[startupAPIEvent.APIUUID]
+				assert.True(t, found, "API Entry is not found")
+				apiDeployment, deploymentFound := envMap[startupAPIEvent.DeployedEnv]
+				assert.True(t, deploymentFound, "API Deployment is not found")
+				assert.NotNil(t, apiDeployment)
+			}
 		}
-	}
+		resultChan <- true
+	}()
+	addAPIWithEnvToChannel(testDiscoveryResponseStartup)
 
+	// Wait for goroutine to complete
+	<-resultChan
+	os.Setenv("FEATURE_ENV_BASED_FILTERING_IN_STARTUP", "false")
 }
