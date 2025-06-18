@@ -23,7 +23,7 @@ import (
 )
 
 func processJsonResponse(inputString string) (string, error) {
-	var data map[string]any
+	var data any
 
 	err := json.Unmarshal([]byte(inputString), &data)
 	if err != nil {

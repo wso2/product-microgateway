@@ -24,6 +24,7 @@ import io.grpc.netty.shaded.io.netty.channel.ChannelFuture;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFutureListener;
 import io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext;
 import io.grpc.netty.shaded.io.netty.channel.ChannelInboundHandlerAdapter;
+import io.grpc.netty.shaded.io.netty.handler.codec.TooLongFrameException;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpResponse;
@@ -47,6 +48,18 @@ public class JWKSRequestHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        if (cause instanceof TooLongFrameException) {
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1,
+                    HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE);
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        } else {
+            super.exceptionCaught(ctx, cause);
+        }
     }
 
     @Override
