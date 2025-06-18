@@ -26,4 +26,44 @@ public interface McpOrBuilder extends
    */
   com.google.protobuf.ByteString
       getServiceUrlBytes();
+
+  /**
+   * <pre>
+   * MCP HTTP client pool size
+   * </pre>
+   *
+   * <code>int32 poolSize = 2;</code>
+   * @return The poolSize.
+   */
+  int getPoolSize();
+
+  /**
+   * <pre>
+   * MCP HTTP client connection timeout
+   * </pre>
+   *
+   * <code>int32 connectionTimeout = 3;</code>
+   * @return The connectionTimeout.
+   */
+  int getConnectionTimeout();
+
+  /**
+   * <pre>
+   * MCP HTTP client waiting for a connection timeout
+   * </pre>
+   *
+   * <code>int32 connectionRequestTimeout = 4;</code>
+   * @return The connectionRequestTimeout.
+   */
+  int getConnectionRequestTimeout();
+
+  /**
+   * <pre>
+   * // MCP HTTP client socket timeout
+   * </pre>
+   *
+   * <code>int32 socketTimeout = 5;</code>
+   * @return The socketTimeout.
+   */
+  int getSocketTimeout();
 }

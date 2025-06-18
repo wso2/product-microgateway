@@ -387,6 +387,10 @@ public class ConfigHolder {
     private void populateMcpConfiguration(Mcp mcpConfig) {
         McpConfigDTO mcpConfigDto = new McpConfigDTO();
         mcpConfigDto.setServerUrl(mcpConfig.getServiceUrl());
+        mcpConfigDto.setPoolSize(mcpConfig.getPoolSize());
+        mcpConfigDto.setConnectionTimeout(mcpConfig.getConnectionTimeout());
+        mcpConfigDto.setConnectionRequestTimeout(mcpConfig.getConnectionRequestTimeout());
+        mcpConfigDto.setSocketTimeout(mcpConfig.getSocketTimeout());
         config.setMcpConfig(mcpConfigDto);
     }
 

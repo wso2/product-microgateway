@@ -482,7 +482,11 @@ type metrics struct {
 }
 
 type mcp struct {
-	ServiceURL string `toml:"serviceUrl"`
+	ServiceURL               string `toml:"serviceUrl"`
+	PoolSize                 int32  `toml:"poolSize"`
+	ConnectionTimeout        int32  `toml:"connectionTimeout"`
+	ConnectionRequestTimeout int32  `toml:"connectionRequestTimeout"`
+	SocketTimeout            int32  `toml:"socketTimeout"`
 }
 
 type analyticsAdapter struct {

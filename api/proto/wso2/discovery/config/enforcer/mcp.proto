@@ -28,4 +28,12 @@ option java_multiple_files = true;
 message Mcp {
     // MCP transform service URL
     string serviceUrl = 1;
+    // MCP HTTP client pool size
+    int32 poolSize = 2;
+    // MCP HTTP client connection timeout
+    int32 connectionTimeout = 3;
+    // MCP HTTP client waiting for a connection timeout
+    int32 connectionRequestTimeout = 4;
+    // // MCP HTTP client socket timeout
+    int32 socketTimeout = 5;
 }

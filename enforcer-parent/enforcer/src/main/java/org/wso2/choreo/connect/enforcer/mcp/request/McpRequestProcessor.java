@@ -27,6 +27,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -262,54 +263,58 @@ public class McpRequestProcessor {
             EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
             String endpoint = enforcerConfig.getMcpConfig().getServerUrl() + "/mcp";
             URL url = new URL(endpoint);
-            try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol())) {
-                HttpPost httpPost = new HttpPost(endpoint);
-                httpPost.setHeader("Content-Type", "application/json");
-                httpPost.setEntity(new StringEntity(payload.toString(), ContentType.APPLICATION_JSON));
-                try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                    HttpEntity entity = response.getEntity();
-                    String resString;
-                    int code;
-                    try (InputStream inputStream = entity.getContent()) {
-                        String output = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-                        JsonElement element = JsonParser.parseString(output);
-                        if (element.isJsonObject()) {
-                            JsonObject result = element.getAsJsonObject();
-                            code = result.get("code").getAsInt();
-                            String resp = result.get("response").getAsString();
-                            try {
-                                JsonElement respElement = JsonParser.parseString(resp);
-                                if (respElement.isJsonObject()) {
-                                    JsonObject obj = respElement.getAsJsonObject();
-                                    resString = obj.toString();
-                                } else if (respElement.isJsonPrimitive()
-                                        && respElement.getAsJsonPrimitive().isString()) {
-                                    String unescaped = respElement.getAsString();
-                                    JsonObject obj = JsonParser.parseString(unescaped).getAsJsonObject();
-                                    resString = obj.toString();
-                                } else {
-                                    resString = respElement.toString();
-                                }
-                            } catch (JsonSyntaxException e) {
-                                resString = resp;
+            CloseableHttpClient httpClient = McpHttpClient.getInstance();
+            HttpPost httpPost = new HttpPost(endpoint);
+            httpPost.setHeader("Content-Type", "application/json");
+            httpPost.setEntity(new StringEntity(payload.toString(), ContentType.APPLICATION_JSON));
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                HttpEntity entity = response.getEntity();
+                String resString;
+                int code;
+                try (InputStream inputStream = entity.getContent()) {
+                    String output = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                    JsonElement element = JsonParser.parseString(output);
+                    if (element.isJsonObject()) {
+                        JsonObject result = element.getAsJsonObject();
+                        code = result.get("code").getAsInt();
+                        String resp = result.get("response").getAsString();
+                        try {
+                            JsonElement respElement = JsonParser.parseString(resp);
+                            if (respElement.isJsonObject()) {
+                                JsonObject obj = respElement.getAsJsonObject();
+                                resString = obj.toString();
+                            } else if (respElement.isJsonPrimitive()
+                                    && respElement.getAsJsonPrimitive().isString()) {
+                                String unescaped = respElement.getAsString();
+                                JsonObject obj = JsonParser.parseString(unescaped).getAsJsonObject();
+                                resString = obj.toString();
+                            } else {
+                                resString = respElement.toString();
                             }
-                        } else {
-                            return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                    "Error while processing the results");
+                        } catch (JsonSyntaxException e) {
+                            resString = resp;
                         }
-                    }
-                    if (response.getStatusLine().getStatusCode() == 200) {
-                        return PayloadGenerator.generateMcpResponsePayload(id, false, resString);
                     } else {
-                        if (resString.contains("connection refused")) {
-                            return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                    "Underlying service is unreachable");
-                        } else {
-                            return PayloadGenerator.generateMcpResponsePayload(id, true, resString);
-                        }
+                        return PayloadGenerator.generateMcpResponsePayload(id, true,
+                                "Error while processing the results");
+                    }
+                }
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    return PayloadGenerator.generateMcpResponsePayload(id, false, resString);
+                } else {
+                    if (resString.contains("connection refused")) {
+                        return PayloadGenerator.generateMcpResponsePayload(id, true,
+                                "Underlying service is unreachable");
+                    } else {
+                        return PayloadGenerator.generateMcpResponsePayload(id, true, resString);
                     }
                 }
             }
+        } catch (ConnectionPoolTimeoutException e) {
+            logger.error("Error while borrowing a connection", e);
+            throw new McpException(McpConstants.RpcConstants.INTERNAL_ERROR_CODE,
+                    McpConstants.RpcConstants.INTERNAL_ERROR_MESSAGE,
+                    "Too many requests. Server is unable to handle this request at the moment");
         } catch (Exception e) {
             logger.error("Error while processing the service call", e);
             throw new McpException(McpConstants.RpcConstants.INTERNAL_ERROR_CODE,
