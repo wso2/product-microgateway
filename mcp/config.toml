@@ -4,6 +4,10 @@ host = "0.0.0.0"
 keyPath = "resources/security/private.key"
 certPath = "resources/security/server.pem"
 secure = false
+readTimeout = 10
+writeTimeout = 20
+idleTimeout = 60
+maxHeaderBytes = 102400
 
 [http]
 insecure = false

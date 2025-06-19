@@ -273,7 +273,11 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		RestServer: restServer,
 		Filters:    filters,
 		Mcp: &enforcer.Mcp{
-			ServiceUrl: config.Enforcer.Mcp.ServiceURL,
+			ServiceUrl:               config.Enforcer.Mcp.ServiceURL,
+			PoolSize:                 config.Enforcer.Mcp.PoolSize,
+			ConnectionTimeout:        config.Enforcer.Mcp.ConnectionTimeout,
+			ConnectionRequestTimeout: config.Enforcer.Mcp.ConnectionRequestTimeout,
+			SocketTimeout:            config.Enforcer.Mcp.SocketTimeout,
 		},
 	}
 }

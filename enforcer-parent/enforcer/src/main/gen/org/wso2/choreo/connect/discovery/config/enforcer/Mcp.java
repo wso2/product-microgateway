@@ -55,6 +55,26 @@ private static final long serialVersionUID = 0L;
             serviceUrl_ = s;
             break;
           }
+          case 16: {
+
+            poolSize_ = input.readInt32();
+            break;
+          }
+          case 24: {
+
+            connectionTimeout_ = input.readInt32();
+            break;
+          }
+          case 32: {
+
+            connectionRequestTimeout_ = input.readInt32();
+            break;
+          }
+          case 40: {
+
+            socketTimeout_ = input.readInt32();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -133,6 +153,66 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int POOLSIZE_FIELD_NUMBER = 2;
+  private int poolSize_;
+  /**
+   * <pre>
+   * MCP HTTP client pool size
+   * </pre>
+   *
+   * <code>int32 poolSize = 2;</code>
+   * @return The poolSize.
+   */
+  @java.lang.Override
+  public int getPoolSize() {
+    return poolSize_;
+  }
+
+  public static final int CONNECTIONTIMEOUT_FIELD_NUMBER = 3;
+  private int connectionTimeout_;
+  /**
+   * <pre>
+   * MCP HTTP client connection timeout
+   * </pre>
+   *
+   * <code>int32 connectionTimeout = 3;</code>
+   * @return The connectionTimeout.
+   */
+  @java.lang.Override
+  public int getConnectionTimeout() {
+    return connectionTimeout_;
+  }
+
+  public static final int CONNECTIONREQUESTTIMEOUT_FIELD_NUMBER = 4;
+  private int connectionRequestTimeout_;
+  /**
+   * <pre>
+   * MCP HTTP client waiting for a connection timeout
+   * </pre>
+   *
+   * <code>int32 connectionRequestTimeout = 4;</code>
+   * @return The connectionRequestTimeout.
+   */
+  @java.lang.Override
+  public int getConnectionRequestTimeout() {
+    return connectionRequestTimeout_;
+  }
+
+  public static final int SOCKETTIMEOUT_FIELD_NUMBER = 5;
+  private int socketTimeout_;
+  /**
+   * <pre>
+   * // MCP HTTP client socket timeout
+   * </pre>
+   *
+   * <code>int32 socketTimeout = 5;</code>
+   * @return The socketTimeout.
+   */
+  @java.lang.Override
+  public int getSocketTimeout() {
+    return socketTimeout_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -150,6 +230,18 @@ private static final long serialVersionUID = 0L;
     if (!getServiceUrlBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, serviceUrl_);
     }
+    if (poolSize_ != 0) {
+      output.writeInt32(2, poolSize_);
+    }
+    if (connectionTimeout_ != 0) {
+      output.writeInt32(3, connectionTimeout_);
+    }
+    if (connectionRequestTimeout_ != 0) {
+      output.writeInt32(4, connectionRequestTimeout_);
+    }
+    if (socketTimeout_ != 0) {
+      output.writeInt32(5, socketTimeout_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -161,6 +253,22 @@ private static final long serialVersionUID = 0L;
     size = 0;
     if (!getServiceUrlBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, serviceUrl_);
+    }
+    if (poolSize_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(2, poolSize_);
+    }
+    if (connectionTimeout_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(3, connectionTimeout_);
+    }
+    if (connectionRequestTimeout_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(4, connectionRequestTimeout_);
+    }
+    if (socketTimeout_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(5, socketTimeout_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -179,6 +287,14 @@ private static final long serialVersionUID = 0L;
 
     if (!getServiceUrl()
         .equals(other.getServiceUrl())) return false;
+    if (getPoolSize()
+        != other.getPoolSize()) return false;
+    if (getConnectionTimeout()
+        != other.getConnectionTimeout()) return false;
+    if (getConnectionRequestTimeout()
+        != other.getConnectionRequestTimeout()) return false;
+    if (getSocketTimeout()
+        != other.getSocketTimeout()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -192,6 +308,14 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + SERVICEURL_FIELD_NUMBER;
     hash = (53 * hash) + getServiceUrl().hashCode();
+    hash = (37 * hash) + POOLSIZE_FIELD_NUMBER;
+    hash = (53 * hash) + getPoolSize();
+    hash = (37 * hash) + CONNECTIONTIMEOUT_FIELD_NUMBER;
+    hash = (53 * hash) + getConnectionTimeout();
+    hash = (37 * hash) + CONNECTIONREQUESTTIMEOUT_FIELD_NUMBER;
+    hash = (53 * hash) + getConnectionRequestTimeout();
+    hash = (37 * hash) + SOCKETTIMEOUT_FIELD_NUMBER;
+    hash = (53 * hash) + getSocketTimeout();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -327,6 +451,14 @@ private static final long serialVersionUID = 0L;
       super.clear();
       serviceUrl_ = "";
 
+      poolSize_ = 0;
+
+      connectionTimeout_ = 0;
+
+      connectionRequestTimeout_ = 0;
+
+      socketTimeout_ = 0;
+
       return this;
     }
 
@@ -354,6 +486,10 @@ private static final long serialVersionUID = 0L;
     public org.wso2.choreo.connect.discovery.config.enforcer.Mcp buildPartial() {
       org.wso2.choreo.connect.discovery.config.enforcer.Mcp result = new org.wso2.choreo.connect.discovery.config.enforcer.Mcp(this);
       result.serviceUrl_ = serviceUrl_;
+      result.poolSize_ = poolSize_;
+      result.connectionTimeout_ = connectionTimeout_;
+      result.connectionRequestTimeout_ = connectionRequestTimeout_;
+      result.socketTimeout_ = socketTimeout_;
       onBuilt();
       return result;
     }
@@ -405,6 +541,18 @@ private static final long serialVersionUID = 0L;
       if (!other.getServiceUrl().isEmpty()) {
         serviceUrl_ = other.serviceUrl_;
         onChanged();
+      }
+      if (other.getPoolSize() != 0) {
+        setPoolSize(other.getPoolSize());
+      }
+      if (other.getConnectionTimeout() != 0) {
+        setConnectionTimeout(other.getConnectionTimeout());
+      }
+      if (other.getConnectionRequestTimeout() != 0) {
+        setConnectionRequestTimeout(other.getConnectionRequestTimeout());
+      }
+      if (other.getSocketTimeout() != 0) {
+        setSocketTimeout(other.getSocketTimeout());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -527,6 +675,178 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       serviceUrl_ = value;
+      onChanged();
+      return this;
+    }
+
+    private int poolSize_ ;
+    /**
+     * <pre>
+     * MCP HTTP client pool size
+     * </pre>
+     *
+     * <code>int32 poolSize = 2;</code>
+     * @return The poolSize.
+     */
+    @java.lang.Override
+    public int getPoolSize() {
+      return poolSize_;
+    }
+    /**
+     * <pre>
+     * MCP HTTP client pool size
+     * </pre>
+     *
+     * <code>int32 poolSize = 2;</code>
+     * @param value The poolSize to set.
+     * @return This builder for chaining.
+     */
+    public Builder setPoolSize(int value) {
+      
+      poolSize_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * MCP HTTP client pool size
+     * </pre>
+     *
+     * <code>int32 poolSize = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearPoolSize() {
+      
+      poolSize_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int connectionTimeout_ ;
+    /**
+     * <pre>
+     * MCP HTTP client connection timeout
+     * </pre>
+     *
+     * <code>int32 connectionTimeout = 3;</code>
+     * @return The connectionTimeout.
+     */
+    @java.lang.Override
+    public int getConnectionTimeout() {
+      return connectionTimeout_;
+    }
+    /**
+     * <pre>
+     * MCP HTTP client connection timeout
+     * </pre>
+     *
+     * <code>int32 connectionTimeout = 3;</code>
+     * @param value The connectionTimeout to set.
+     * @return This builder for chaining.
+     */
+    public Builder setConnectionTimeout(int value) {
+      
+      connectionTimeout_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * MCP HTTP client connection timeout
+     * </pre>
+     *
+     * <code>int32 connectionTimeout = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearConnectionTimeout() {
+      
+      connectionTimeout_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int connectionRequestTimeout_ ;
+    /**
+     * <pre>
+     * MCP HTTP client waiting for a connection timeout
+     * </pre>
+     *
+     * <code>int32 connectionRequestTimeout = 4;</code>
+     * @return The connectionRequestTimeout.
+     */
+    @java.lang.Override
+    public int getConnectionRequestTimeout() {
+      return connectionRequestTimeout_;
+    }
+    /**
+     * <pre>
+     * MCP HTTP client waiting for a connection timeout
+     * </pre>
+     *
+     * <code>int32 connectionRequestTimeout = 4;</code>
+     * @param value The connectionRequestTimeout to set.
+     * @return This builder for chaining.
+     */
+    public Builder setConnectionRequestTimeout(int value) {
+      
+      connectionRequestTimeout_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * MCP HTTP client waiting for a connection timeout
+     * </pre>
+     *
+     * <code>int32 connectionRequestTimeout = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearConnectionRequestTimeout() {
+      
+      connectionRequestTimeout_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int socketTimeout_ ;
+    /**
+     * <pre>
+     * // MCP HTTP client socket timeout
+     * </pre>
+     *
+     * <code>int32 socketTimeout = 5;</code>
+     * @return The socketTimeout.
+     */
+    @java.lang.Override
+    public int getSocketTimeout() {
+      return socketTimeout_;
+    }
+    /**
+     * <pre>
+     * // MCP HTTP client socket timeout
+     * </pre>
+     *
+     * <code>int32 socketTimeout = 5;</code>
+     * @param value The socketTimeout to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSocketTimeout(int value) {
+      
+      socketTimeout_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * // MCP HTTP client socket timeout
+     * </pre>
+     *
+     * <code>int32 socketTimeout = 5;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSocketTimeout() {
+      
+      socketTimeout_ = 0;
       onChanged();
       return this;
     }

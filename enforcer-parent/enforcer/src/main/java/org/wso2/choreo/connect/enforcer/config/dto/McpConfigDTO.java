@@ -23,6 +23,10 @@ package org.wso2.choreo.connect.enforcer.config.dto;
  */
 public class McpConfigDTO {
     private String serverUrl;
+    private int poolSize;
+    private int connectionTimeout;
+    private int connectionRequestTimeout;
+    private int socketTimeout;
 
     public String getServerUrl() {
         return serverUrl;
@@ -30,5 +34,37 @@ public class McpConfigDTO {
 
     public void setServerUrl(String serverUrl) {
         this.serverUrl = serverUrl;
+    }
+
+    public int getPoolSize() {
+        return poolSize;
+    }
+
+    public void setPoolSize(int poolSize) {
+        this.poolSize = poolSize;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public int getConnectionRequestTimeout() {
+        return connectionRequestTimeout;
+    }
+
+    public void setConnectionRequestTimeout(int connectionRequestTimeout) {
+        this.connectionRequestTimeout = connectionRequestTimeout;
+    }
+
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
+
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
     }
 }

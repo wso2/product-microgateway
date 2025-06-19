@@ -139,7 +139,7 @@ public class FilterUtils {
         return poolManager;
     }
 
-    private static SSLConnectionSocketFactory createSocketFactory() throws EnforcerException {
+    public static SSLConnectionSocketFactory createSocketFactory() throws EnforcerException {
         SSLContext sslContext;
         try {
             sslContext = createSSLContext();

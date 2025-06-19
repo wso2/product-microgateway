@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -133,11 +134,19 @@ func main() {
 	}
 	address := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	logger.Info(fmt.Sprintf("Starting server on %s...", address))
+	srv := &http.Server{
+		Addr:           address,
+		Handler:        router,
+		ReadTimeout:    time.Duration(cfg.Server.ReadTimeout) * time.Second,
+		WriteTimeout:   time.Duration(cfg.Server.WriteTimeout) * time.Second,
+		IdleTimeout:    time.Duration(cfg.Server.IdleTimeout) * time.Second,
+		MaxHeaderBytes: cfg.Server.MaxHeaderBytes,
+	}
 	if cfg.Server.Secure {
-		err = router.RunTLS(address, cfg.Server.CertPath, cfg.Server.KeyPath)
+		err = srv.ListenAndServeTLS(cfg.Server.CertPath, cfg.Server.KeyPath)
 	} else {
 		logger.Warn("Starting server in insecure mode.")
-		err = router.Run(address)
+		err = srv.ListenAndServe()
 	}
 	if err != nil {
 		logger.Error("Failed to start the service", "error", err)

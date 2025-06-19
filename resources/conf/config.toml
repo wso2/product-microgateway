@@ -80,4 +80,8 @@
 
 [enforcer.mcp]
   serviceUrl = "https://mcp:8080"
+  poolSize = 25
+  connectionTimeout = 10000
+  connectionRequestTimeout = 5000
+  socketTimeout = 25000
 

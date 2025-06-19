@@ -31,11 +31,15 @@ type Config struct {
 }
 
 type Server struct {
-	Port     int    `mapstructure:"port"`
-	Host     string `mapstructure:"host"`
-	KeyPath  string `mapstructure:"keyPath"`
-	CertPath string `mapstructure:"certPath"`
-	Secure   bool   `mapstructure:"secure"`
+	Port           int    `mapstructure:"port"`
+	Host           string `mapstructure:"host"`
+	KeyPath        string `mapstructure:"keyPath"`
+	CertPath       string `mapstructure:"certPath"`
+	Secure         bool   `mapstructure:"secure"`
+	ReadTimeout    int    `mapstructure:"readTimeout"`
+	WriteTimeout   int    `mapstructure:"writeTimeout"`
+	IdleTimeout    int    `mapstructure:"idleTimeout"`
+	MaxHeaderBytes int    `mapstructure:"maxHeaderBytes"`
 }
 
 type Http struct {
@@ -97,6 +101,18 @@ func validateConfig() error {
 	}
 	if config.Server.CertPath == "" {
 		return fmt.Errorf("server cert is not set")
+	}
+	if config.Server.ReadTimeout == 0 {
+		config.Server.ReadTimeout = 10
+	}
+	if config.Server.WriteTimeout == 0 {
+		config.Server.WriteTimeout = 20
+	}
+	if config.Server.IdleTimeout == 0 {
+		config.Server.IdleTimeout = 60
+	}
+	if config.Server.MaxHeaderBytes == 0 {
+		config.Server.MaxHeaderBytes = 102400 // 100KB
 	}
 	return nil
 }

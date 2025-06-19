@@ -281,7 +281,11 @@ var defaultConfig = &Config{
 			Type:    "azure",
 		},
 		Mcp: mcp{
-			ServiceURL: "https://mcp-service:8080",
+			ServiceURL:               "https://mcp-service:8080",
+			PoolSize:                 25,
+			ConnectionTimeout:        10000,
+			ConnectionRequestTimeout: 5000,
+			SocketTimeout:            25000,
 		},
 		Throttling: throttlingConfig{
 			EnableGlobalEventPublishing:        false,

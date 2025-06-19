@@ -31,11 +31,14 @@ public final class McpConfigProto {
       "\n(wso2/discovery/config/enforcer/mcp.pro" +
       "to\022\036wso2.discovery.config.enforcer\032,wso2" +
       "/discovery/config/enforcer/service.proto" +
-      "\"\031\n\003Mcp\022\022\n\nserviceUrl\030\001 \001(\tB\225\001\n1org.wso2" +
-      ".choreo.connect.discovery.config.enforce" +
-      "rB\016McpConfigProtoP\001ZNgithub.com/envoypro" +
-      "xy/go-control-plane/wso2/discovery/confi" +
-      "g/enforcer;enforcerb\006proto3"
+      "\"\177\n\003Mcp\022\022\n\nserviceUrl\030\001 \001(\t\022\020\n\010poolSize\030" +
+      "\002 \001(\005\022\031\n\021connectionTimeout\030\003 \001(\005\022 \n\030conn" +
+      "ectionRequestTimeout\030\004 \001(\005\022\025\n\rsocketTime" +
+      "out\030\005 \001(\005B\225\001\n1org.wso2.choreo.connect.di" +
+      "scovery.config.enforcerB\016McpConfigProtoP" +
+      "\001ZNgithub.com/envoyproxy/go-control-plan" +
+      "e/wso2/discovery/config/enforcer;enforce" +
+      "rb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -47,7 +50,7 @@ public final class McpConfigProto {
     internal_static_wso2_discovery_config_enforcer_Mcp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Mcp_descriptor,
-        new java.lang.String[] { "ServiceUrl", });
+        new java.lang.String[] { "ServiceUrl", "PoolSize", "ConnectionTimeout", "ConnectionRequestTimeout", "SocketTimeout", });
     org.wso2.choreo.connect.discovery.config.enforcer.ServiceProto.getDescriptor();
   }
 

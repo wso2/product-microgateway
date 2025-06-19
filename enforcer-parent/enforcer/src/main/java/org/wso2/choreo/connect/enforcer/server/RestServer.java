@@ -66,7 +66,8 @@ public class RestServer implements Runnable {
             tokenServer.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new RestServerInitializer(sslCtx));
+                    .childHandler(new RestServerInitializer(sslCtx))
+                    .childOption(ChannelOption.SO_KEEPALIVE, true);
             tokenChannel = tokenServer.bind(SERVER_PORT).sync().channel();
             logger.info("Utility REST server started on port: " + SERVER_PORT);
             // Wait until server socket is closed
