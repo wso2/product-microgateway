@@ -32,13 +32,10 @@ var awsActiveMqtopicNames = []string{tokenRevocation, notification, stepQuotaThr
 func InitiateAndProcessAWSActiveMQEvents(conf *config.Config) {
 	for _, topic := range awsActiveMqtopicNames {
 		logger.LoggerMgw.Debugf("Initiating AWS ActiveMQ connection for topic: %s", topic)
-		connectionString := conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints[0]
-		username := conf.ControlPlane.BrokerConnectionParameters.ActiveMqUsername
-		password := conf.ControlPlane.BrokerConnectionParameters.ActiveMqPassword
-		idleTimeoutDuration := conf.ControlPlane.BrokerConnectionParameters.ActiveMqIdleTimeoutDurationInSeconds
+		brokerConnectionParameters := conf.ControlPlane.BrokerConnectionParameters
 		ctx := context.Background()
 
-		con, err := msg.InitAwsActiveMqConnection(ctx, connectionString, username, password, idleTimeoutDuration)
+		con, err := msg.InitAwsActiveMqConnection(ctx, brokerConnectionParameters, topic)
 		if err != nil {
 			logger.LoggerMgw.Errorf("Failed to connect to AWS ActiveMQ broker for topic: %s error:%s", topic, err.Error())
 			return
@@ -52,7 +49,7 @@ func InitiateAndProcessAWSActiveMQEvents(conf *config.Config) {
 			logger.LoggerMgw.Errorf("Failed to a create receiver for topic: %s error:%s", topic, receiverErr.Error())
 		}
 		logger.LoggerMgw.Infof("Listening for messages on topic '%s'...\n", topic)
-		startActiveMQTopicConsumer(topic, receiver)
+		startActiveMQTopicConsumer(ctx, topic, receiver)
 	}
 	health.SetControlPlaneBrokerStatus(true)
 }

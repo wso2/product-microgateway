@@ -371,7 +371,7 @@ var defaultConfig = &Config{
 		},
 		RetryInterval:       5,
 		SkipSSLVerification: false,
-		BrokerConnectionParameters: brokerConnectionParameters{
+		BrokerConnectionParameters: BrokerConnectionParameters{
 			BrokerType:                           "AzureServiceBus",
 			EventListeningEndpoints:              []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
 			AmqpOverWebsocketsEnabled:            false,

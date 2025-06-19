@@ -26,21 +26,22 @@ import (
 	"github.com/Azure/go-amqp"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
-	adapter "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
-func handleAwsActiveMqNotification(receiver *amqp.Receiver, topicName string) {
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+func handleAwsActiveTopic(parentContext context.Context, receiver *amqp.Receiver, topicName string, messageHandler MessageHandlerFunc) {
+	ctx, stop := signal.NotifyContext(parentContext, syscall.SIGINT, syscall.SIGTERM)
 	conf, _ := config.ReadConfigs()
 	defer stop()
-	defer receiver.Close(context.Background())
+	defer receiver.Close(ctx)
 	for {
 		select {
 		case <-ctx.Done():
 			logger.LoggerMsg.Info("Shutting down AWS ActiveMQ receiver for topic: " + topicName)
 			return
 		default:
-			msg, err := receiver.Receive(ctx, nil)
+			receiveContext, cancel := context.WithCancel(ctx)
+			msg, err := receiver.Receive(receiveContext, nil)
+			cancel()
 			if err != nil {
 				logger.LoggerMsg.Errorf("Failed to receive message from AWS ActiveMQ for topic '%s': %v", topicName, err)
 				time.Sleep(conf.ControlPlane.BrokerConnectionParameters.ReconnectInterval)
@@ -48,29 +49,31 @@ func handleAwsActiveMqNotification(receiver *amqp.Receiver, topicName string) {
 			}
 
 			// Process the message
-			logger.LoggerMsg.Infof("Received message from AWS ActiveMQ topic '%s': %s", topicName, msg.Value)
+			logger.LoggerMsg.Debugf("Received message from AWS ActiveMQ topic '%s': %s", topicName, msg.Value)
 			var body string
-			// Acknowledge the message (remove from queue)
-			err = receiver.AcceptMessage(ctx, msg)
 			if err != nil {
 				logger.LoggerMsg.Errorf("Failed to acknowledge message from AWS ActiveMQ topic '%s': %v", topicName, err)
 			}
 			body, ok := msg.Value.(string)
 			if !ok {
-				logger.LoggerMsg.Errorf("Received message value is not a string for topic '%s'", topicName)
+				rejectMsgContext, cancel := context.WithCancel(ctx)
+				receiver.RejectMessage(rejectMsgContext, msg, nil)
+				logger.LoggerMsg.Errorf("Received message cannot be processed considering the topic '%s'", topicName)
+				cancel()
 				continue
 			}
 			logger.LoggerMsg.Debugf("Handling AWS ActiveMQ notification for topic '%s': %s", topicName, body)
-			var notification adapter.EventNotification
-			error := parseNotificationJSONEvent([]byte(body), &notification)
-			if error != nil {
-				logger.LoggerMsg.Errorf("Failed to parse notification message for topic '%s': %v", topicName, error)
+			err = messageHandler(body)
+			if err != nil {
+				logger.LoggerMsg.Errorf("Failed to handle message for topic '%s': %v", topicName, err)
 				continue
 			}
-			notificationProcessError := processNotificationEvent(conf, &notification)
-			if notificationProcessError != nil {
-				logger.LoggerMsg.Errorf("Failed to process notification event for topic '%s': %v", topicName, notificationProcessError)
-				continue
+			// Acknowledge the message (remove from queue)
+			acceptMsgContext, cancel := context.WithTimeout(ctx, 10*time.Second)
+			err = receiver.AcceptMessage(acceptMsgContext, msg)
+			cancel()
+			if err != nil {
+				logger.LoggerMsg.Errorf("Failed to acknowledge message on topic '%s': %v", topicName, err)
 			}
 		}
 	}
