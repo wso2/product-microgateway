@@ -24,6 +24,7 @@ import (
 	adapter "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
+// MessageHandlerFunc defines the function signature for message handlers
 type MessageHandlerFunc func(body string) error
 
 func notificationHandler(body string) error {

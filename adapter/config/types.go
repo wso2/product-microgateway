@@ -598,6 +598,7 @@ type globalAdapter struct {
 	RetryInterval     time.Duration
 }
 
+// BrokerConnectionParameters contains the parameters required to connect to the message broker
 type BrokerConnectionParameters struct {
 	BrokerType                           string
 	EventListeningEndpoints              []string
