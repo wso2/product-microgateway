@@ -19,7 +19,9 @@
 package org.wso2.choreo.connect.enforcer.util;
 
 import io.grpc.ConnectivityState;
+import io.grpc.LoadBalancerRegistry;
 import io.grpc.ManagedChannel;
+import io.grpc.internal.PickFirstLoadBalancerProvider;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
@@ -27,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 
 import java.io.File;
+import java.net.InetSocketAddress;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +39,10 @@ import javax.net.ssl.SSLException;
  * Utility functions required for gRPC Xds Clients.
  */
 public class GRPCUtils {
+
+    static {
+        LoadBalancerRegistry.getDefaultRegistry().register(new PickFirstLoadBalancerProvider());
+    }
 
     public static ManagedChannel createSecuredChannel(Logger logger, String host, int port)  {
         File certFile = Paths.get(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerPublicKeyPath()).toFile();
@@ -50,8 +57,7 @@ public class GRPCUtils {
         } catch (SSLException e) {
             logger.error("Error while generating SSL Context.", e);
         }
-
-        NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(host, port)
+        NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(new InetSocketAddress(host, port))
                 .useTransportSecurity()
                 .sslContext(sslContext)
                 .overrideAuthority(ConfigHolder.getInstance().getEnvVarConfig().getAdapterHostName());
