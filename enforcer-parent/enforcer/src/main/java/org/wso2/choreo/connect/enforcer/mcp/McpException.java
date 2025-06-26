@@ -26,9 +26,9 @@ import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
 public class McpException extends Exception {
     private final int errorCode;
     private final String errorMessage;
-    private final String data;
+    private final Object data;
 
-    public McpException(int errorCode, String errorMessage, String data) {
+    public McpException(int errorCode, String errorMessage, Object data) {
         super(errorMessage);
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
@@ -43,7 +43,7 @@ public class McpException extends Exception {
         return errorMessage;
     }
 
-    public String getData() {
+    public Object getData() {
         return data;
     }
 

@@ -24,9 +24,9 @@ package org.wso2.choreo.connect.enforcer.mcp.response;
 public class McpError {
     private int code;
     private String message;
-    private String data;
+    private Object data;
 
-    public McpError(int code, String message, String data) {
+    public McpError(int code, String message, Object data) {
         this.code = code;
         this.message = message;
         this.data = data;
@@ -48,11 +48,11 @@ public class McpError {
         this.message = message;
     }
 
-    public String getData() {
+    public Object getData() {
         return data;
     }
 
-    public void setData(String data) {
+    public void setData(Object data) {
         this.data = data;
     }
 }

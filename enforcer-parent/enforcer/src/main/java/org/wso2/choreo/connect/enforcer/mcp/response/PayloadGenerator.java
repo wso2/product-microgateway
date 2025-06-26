@@ -35,13 +35,13 @@ import java.util.Map;
 public class PayloadGenerator {
     private static final Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 
-    public static String getErrorResponse(Object id, int code, String message, String data) {
+    public static String getErrorResponse(Object id, int code, String message, Object data) {
         McpError error = new McpError(code, message, data);
         McpErrorResponse errorResponse = new McpErrorResponse(id, error);
         return gson.toJson(errorResponse);
     }
 
-    public static String getErrorResponse(int code, String message, String data) {
+    public static String getErrorResponse(int code, String message, Object data) {
         McpError error = new McpError(code, message, data);
         McpErrorResponse errorResponse = new McpErrorResponse(null, error);
         return gson.toJson(errorResponse);
@@ -74,6 +74,23 @@ public class PayloadGenerator {
 
         responseObject.add(McpConstants.RESULT_KEY, result);
         return gson.toJson(responseObject);
+    }
+
+    /**
+     * Generates the error body for the initialize method when the requested protocol version is not supported.
+     *
+     * @param requestedVersion The requested protocol version
+     * @return The error body as a JSON string
+     */
+    public static JsonObject getInitializeErrorBody(String requestedVersion) {
+        JsonObject data = new JsonObject();
+        data.addProperty(McpConstants.PROTOCOL_VERSION_REQUESTED, requestedVersion);
+        JsonArray supportedVersions = new JsonArray();
+        for (String version : McpConstants.SUPPORTED_PROTOCOL_VERSIONS) {
+            supportedVersions.add(version);
+        }
+        data.add(McpConstants.PROTOCOL_VERSION_SUPPORTED, supportedVersions);
+        return data;
     }
 
     public static String generateToolListPayload(Object id, List<ExtendedOperation> extendedOperations) {

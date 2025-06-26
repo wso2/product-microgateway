@@ -26,7 +26,7 @@ import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
 public class McpExceptionWithId extends McpException {
     private Object id;
 
-    public McpExceptionWithId(Object id, int errorCode, String errorMessage, String data) {
+    public McpExceptionWithId(Object id, int errorCode, String errorMessage, Object data) {
         super(errorCode, errorMessage, data);
         this.id = id;
     }
