@@ -1,0 +1,39 @@
+name: Log PR Reviewer
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  call-ai-log-agent-endpoint:
+    runs-on: ubuntu-latest
+    env:
+      REVIEW_ENDPOINT: ${{ vars.REVIEW_ENDPOINT }}
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      TOKEN_URL: ${{ vars.TOKEN_URL }}
+
+    steps:
+      - name: Get OAuth2 Access Token
+        id: get_token
+        run: |
+          response=$(curl --silent --request POST "$TOKEN_URL" \
+            --header "Content-Type: application/x-www-form-urlencoded" \
+            --data "grant_type=client_credentials&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET")
+          
+          # Extract token using jq
+          access_token=$(echo "$response" | jq -r '.access_token')
+
+          if [ "$access_token" == "null" ] || [ -z "$access_token" ]; then
+            echo "Failed to retrieve access token"
+            exit 1
+          fi
+          echo "access_token=$access_token" >> $GITHUB_OUTPUT
+
+      - name: Call Review Endpoint with Bearer Token
+        run: |
+          set -e
+          curl --fail --silent --show-error --location "$REVIEW_ENDPOINT" \
+            --header "Content-Type: application/json" \
+            --header "Authorization: Bearer ${{ steps.get_token.outputs.access_token }}" \
+            --data "{\"prUrl\": \"${{ github.event.pull_request.html_url }}\"}"
