@@ -178,8 +178,8 @@ public class McpRequestProcessor {
                 String protocolVersion = params.get(McpConstants.PROTOCOL_VERSION_KEY).getAsString();
                 if (!McpConstants.SUPPORTED_PROTOCOL_VERSIONS.contains(protocolVersion)) {
                     throw new McpExceptionWithId(id, McpConstants.RpcConstants.INVALID_PARAMS_CODE,
-                            McpConstants.RpcConstants.INVALID_PARAMS_MESSAGE, "Supported protocol versions are: "
-                            + McpConstants.SUPPORTED_PROTOCOL_VERSIONS);
+                            McpConstants.PROTOCOL_MISMATCH_ERROR,
+                            PayloadGenerator.getInitializeErrorBody(protocolVersion));
                 }
             } else {
                 throw new McpException(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
@@ -269,34 +269,44 @@ public class McpRequestProcessor {
             httpPost.setEntity(new StringEntity(payload.toString(), ContentType.APPLICATION_JSON));
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 HttpEntity entity = response.getEntity();
+                if (entity == null) {
+                    return PayloadGenerator.generateMcpResponsePayload(id, true,
+                            "Empty response received from the service.");
+                }
                 String resString;
                 int code;
                 try (InputStream inputStream = entity.getContent()) {
                     String output = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-                    JsonElement element = JsonParser.parseString(output);
-                    if (element.isJsonObject()) {
-                        JsonObject result = element.getAsJsonObject();
-                        code = result.get("code").getAsInt();
-                        String resp = result.get("response").getAsString();
-                        try {
-                            JsonElement respElement = JsonParser.parseString(resp);
-                            if (respElement.isJsonObject()) {
-                                JsonObject obj = respElement.getAsJsonObject();
-                                resString = obj.toString();
-                            } else if (respElement.isJsonPrimitive()
-                                    && respElement.getAsJsonPrimitive().isString()) {
-                                String unescaped = respElement.getAsString();
-                                JsonObject obj = JsonParser.parseString(unescaped).getAsJsonObject();
-                                resString = obj.toString();
-                            } else {
-                                resString = respElement.toString();
+                    try {
+                        JsonElement element = JsonParser.parseString(output);
+                        if (element.isJsonObject()) {
+                            JsonObject result = element.getAsJsonObject();
+                            code = result.get("code").getAsInt();
+                            String resp = result.get("response").getAsString();
+                            try {
+                                JsonElement respElement = JsonParser.parseString(resp);
+                                if (respElement.isJsonObject()) {
+                                    JsonObject obj = respElement.getAsJsonObject();
+                                    resString = obj.toString();
+                                } else if (respElement.isJsonPrimitive()
+                                        && respElement.getAsJsonPrimitive().isString()) {
+                                    String unescaped = respElement.getAsString();
+                                    JsonObject obj = JsonParser.parseString(unescaped).getAsJsonObject();
+                                    resString = obj.toString();
+                                } else {
+                                    resString = respElement.toString();
+                                }
+                            } catch (JsonSyntaxException e) {
+                                resString = resp;
                             }
-                        } catch (JsonSyntaxException e) {
-                            resString = resp;
+                        } else {
+                            return PayloadGenerator.generateMcpResponsePayload(id, true,
+                                    "Error while processing the results");
                         }
-                    } else {
+                    } catch (JsonSyntaxException e) {
+                        logger.error("Unexpected response when processing the service call", e);
                         return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                "Error while processing the results");
+                                "Unexpected response when processing the service call");
                     }
                 }
                 if (response.getStatusLine().getStatusCode() == 200) {

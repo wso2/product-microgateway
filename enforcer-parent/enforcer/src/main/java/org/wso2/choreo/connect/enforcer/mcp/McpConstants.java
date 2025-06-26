@@ -41,6 +41,9 @@ public class McpConstants {
     public static final String PROTOCOL_VERSION_2024_NOVEMBER = "2024-11-05";
     public static final String PROTOCOL_VERSION_2025_MARCH = "2025-03-26";
     public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = Arrays.asList(PROTOCOL_VERSION_2025_MARCH);
+    public static final String PROTOCOL_VERSION_REQUESTED = "requested";
+    public static final String PROTOCOL_VERSION_SUPPORTED = "supported";
+    public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
     public static final String PARAMS_KEY = "params";
     public static final String TOOL_NAME_KEY = "name";
     public static final String TOOL_DESC_KEY = "description";
