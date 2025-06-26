@@ -8,10 +8,10 @@ jobs:
   call-ai-log-agent-endpoint:
     runs-on: ubuntu-latest
     env:
-      REVIEW_ENDPOINT: ${{ vars.REVIEW_ENDPOINT }}
-      CLIENT_ID: ${{ secrets.CLIENT_ID }}
-      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-      TOKEN_URL: ${{ vars.TOKEN_URL }}
+      REVIEW_ENDPOINT: ${{ vars.AI_LOG_AGENT_REVIEW_ENDPOINT }}
+      CLIENT_ID: ${{ secrets.AI_LOG_AGENT_CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.AI_LOG_AGENT_CLIENT_SECRET }}
+      TOKEN_URL: ${{ vars.AI_LOG_AGENT_TOKEN_URL }}
 
     steps:
       - name: Get OAuth2 Access Token
