@@ -131,7 +131,7 @@ public class AuthServer {
 
             // Start the server
             server.start();
-            logger.info("gRPC Sever started Listening in port : " + 8081);
+            logger.info("gRPC Server started Listening in port : " + 8081);
 
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
