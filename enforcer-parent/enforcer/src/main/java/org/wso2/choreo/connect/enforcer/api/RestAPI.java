@@ -61,6 +61,23 @@ public class RestAPI implements API {
     private APIConfig apiConfig;
     private String apiLifeCycleState;
 
+    private static final Map<String, Filter> FILTER_IMPL_CACHE = new HashMap<>();
+    private static volatile boolean filterCacheInitialized = false;
+
+    private static void initializeFilterCache() {
+        if (!filterCacheInitialized) {
+            synchronized (RestAPI.class) {
+                if (!filterCacheInitialized) {
+                    ServiceLoader<Filter> loader = ServiceLoader.load(Filter.class);
+                    for (Filter filter : loader) {
+                        FILTER_IMPL_CACHE.put(filter.getClass().getName(), filter);
+                    }
+                    filterCacheInitialized = true;
+                }
+            }
+        }
+    }
+
     @Override
     public List<Filter> getFilters() {
         return filters;
@@ -73,13 +90,13 @@ public class RestAPI implements API {
         String name = api.getTitle();
         String version = api.getVersion();
         String apiType = api.getApiType();
-        Map<String, EndpointCluster> endpoints = new HashMap<>();
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
-        Map<String, List<String>> securityScopesMap = new HashMap<>();
-        List<ResourceConfig> resources = new ArrayList<>();
+        Map<String, EndpointCluster> endpoints = new HashMap<>(4);
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>(api.getSecuritySchemeCount());
+        Map<String, List<String>> securityScopesMap = new HashMap<>(api.getSecurityCount());
+        List<ResourceConfig> resources = new ArrayList<>(api.getResourcesCount());
         EndpointSecurity endpointSecurity = new EndpointSecurity();
         BackendJWTConfiguration backendJWTConfiguration = new BackendJWTConfiguration();
-        List<ExtendedOperation> extendedOperations = new ArrayList<>();
+        List<ExtendedOperation> extendedOperations = new ArrayList<>(api.getExtendedOperationsCount());
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -121,7 +138,7 @@ public class RestAPI implements API {
         }
 
         for (Resource res : api.getResourcesList()) {
-            Map<String, EndpointCluster> endpointClusterMap = new HashMap();
+            Map<String, EndpointCluster> endpointClusterMap = new HashMap<>(4);
             EndpointCluster prodEndpointCluster = Utils.processEndpoints(res.getProductionEndpoints());
             EndpointCluster sandEndpointCluster = Utils.processEndpoints(res.getSandboxEndpoints());
             if (prodEndpointCluster != null) {
@@ -289,21 +306,17 @@ public class RestAPI implements API {
         FilterDTO[] customFilters = ConfigHolder.getInstance().getConfig().getCustomFilters();
         // Needs to sort the filter in ascending order to position the filter in the given position.
         Arrays.sort(customFilters, Comparator.comparing(FilterDTO::getPosition));
-        Map<String, Filter> filterImplMap = new HashMap<>(customFilters.length);
-        ServiceLoader<Filter> loader = ServiceLoader.load(Filter.class);
-        for (Filter filter : loader) {
-            filterImplMap.put(filter.getClass().getName(), filter);
-        }
-
+        
+        initializeFilterCache();
         for (FilterDTO filterDTO : customFilters) {
-            if (filterImplMap.containsKey(filterDTO.getClassName())) {
+            if (FILTER_IMPL_CACHE.containsKey(filterDTO.getClassName())) {
                 if (filterDTO.getPosition() <= 0 || filterDTO.getPosition() - 1 > filters.size()) {
                     logger.error("Position provided for the filter is invalid. "
                             + filterDTO.getClassName() + " : " + filterDTO.getPosition() + "(Filters list size is "
                             + filters.size() + ")");
                     continue;
                 }
-                Filter filter = filterImplMap.get(filterDTO.getClassName());
+                Filter filter = FILTER_IMPL_CACHE.get(filterDTO.getClassName());
                 filter.init(apiConfig, filterDTO.getConfigProperties());
                 // Since the position starts from 1
                 this.filters.add(filterDTO.getPosition() - 1, filter);
