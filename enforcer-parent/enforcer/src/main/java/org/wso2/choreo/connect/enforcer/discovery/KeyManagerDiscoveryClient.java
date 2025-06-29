@@ -181,6 +181,7 @@ public class KeyManagerDiscoveryClient implements Runnable, DiscoveryClient {
      * This is part of the xDS communication protocol.
      */
     private void ack() {
+        logger.debug("Applied Discovery Response for type url: " + Constants.KEY_MANAGER_TYPE_URL);
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
                 .setNode(node)
                 .setVersionInfo(latestReceived.getVersionInfo())

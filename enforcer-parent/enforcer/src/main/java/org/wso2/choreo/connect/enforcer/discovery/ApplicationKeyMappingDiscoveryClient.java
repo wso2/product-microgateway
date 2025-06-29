@@ -187,6 +187,7 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable, Discovery
      * communication protocol.
      */
     private void ack() {
+        logger.debug("Applied Discovery Response for type url: " + Constants.APPLICATION_KEY_MAPPING_LIST_TYPE_URL);
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
                 .setNode(node)
                 .setVersionInfo(latestReceived.getVersionInfo())

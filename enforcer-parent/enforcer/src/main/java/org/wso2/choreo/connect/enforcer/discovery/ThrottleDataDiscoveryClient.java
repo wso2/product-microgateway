@@ -176,6 +176,7 @@ public class ThrottleDataDiscoveryClient implements Runnable, DiscoveryClient {
      * This is part of the xDS communication protocol.
      */
     private void ack() {
+        logger.debug("Applied Discovery Response for type url: " + Constants.THROTTLE_DATA_TYPE_URL);
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
                 .setNode(this.node)
                 .setVersionInfo(latestReceived.getVersionInfo())

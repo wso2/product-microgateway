@@ -186,6 +186,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable, DiscoveryClie
      * communication protocol.
      */
     private void ack() {
+        logger.debug("Applied Discovery Response for type url: " + Constants.APPLICATION_POLICY_LIST_TYPE_URL);
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
                 .setNode(node)
                 .setVersionInfo(latestReceived.getVersionInfo())
