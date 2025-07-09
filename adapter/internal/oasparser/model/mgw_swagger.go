@@ -1600,44 +1600,70 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	// Set MCP tools as extended operations to MGWSwagger
 	if apiType == MCP {
 		logger.LoggerXds.Info("Setting extended operations for MCP tools")
+		var extendedOperations []*ExtendedOperation
+
 		if data.Operations != nil {
-			var extendedOperations []*ExtendedOperation
+			subType := ""
+			if data.SubTypeConfiguration != nil {
+				subType = data.SubTypeConfiguration.SubType
+			}
+
 			for _, operation := range data.Operations {
 				extOperation := ExtendedOperation{
 					Name:        operation.Target,
 					Verb:        operation.Verb,
 					Description: operation.Description,
 				}
-				if operation.OperationProxyMapping == nil {
-					if operation.Schema == "" {
-						extOperation.Mode = "Passthrough"
-					} else {
-						extOperation.Mode = "Served/API"
-						extOperation.Schema = operation.Schema
-						backendMapping := &BackendMapping{
-							Endpoint: operation.BackendOperationMapping.BackendOperation.Endpoint,
-							Target:   operation.BackendOperationMapping.BackendOperation.Target,
-							Verb:     operation.BackendOperationMapping.BackendOperation.Verb,
-						}
-						extOperation.BackendMapping = backendMapping
+
+				switch subType {
+				case ThirdPartyServer:
+					extOperation.Mode = ThirdPartyServer
+				case RestAPIBackend:
+					extOperation.Mode = RestAPIBackend
+					extOperation.BackendMapping = &BackendMapping{
+						Endpoint: operation.BackendOperationMapping.BackendOperation.Endpoint,
+						Target:   operation.BackendOperationMapping.BackendOperation.Target,
+						Verb:     operation.BackendOperationMapping.BackendOperation.Verb,
 					}
-				} else {
-					extOperation.Mode = "Served/Proxy"
-					extOperation.Schema = operation.Schema
-					proxyMapping := &ProxyMapping{
+				case ProxyExistingRestAPI:
+					extOperation.Mode = ProxyExistingRestAPI
+					extOperation.ProxyMapping = &ProxyMapping{
 						Name:    operation.OperationProxyMapping.Target.Name,
 						Context: operation.OperationProxyMapping.Target.Context,
 						Version: operation.OperationProxyMapping.Target.Version,
 						Target:  operation.OperationProxyMapping.Target.Target,
 						Verb:    operation.OperationProxyMapping.Target.Verb,
 					}
-					extOperation.ProxyMapping = proxyMapping
+				default:
+					// Handle the case where SubTypeConfiguration is nil or subType is empty
+					if operation.OperationProxyMapping == nil {
+						if operation.Schema == "" {
+							extOperation.Mode = ThirdPartyServer
+						} else {
+							extOperation.Mode = RestAPIBackend
+							extOperation.Schema = operation.Schema
+							extOperation.BackendMapping = &BackendMapping{
+								Endpoint: operation.BackendOperationMapping.BackendOperation.Endpoint,
+								Target:   operation.BackendOperationMapping.BackendOperation.Target,
+								Verb:     operation.BackendOperationMapping.BackendOperation.Verb,
+							}
+						}
+					} else {
+						extOperation.Mode = ProxyExistingRestAPI
+						extOperation.Schema = operation.Schema
+						extOperation.ProxyMapping = &ProxyMapping{
+							Name:    operation.OperationProxyMapping.Target.Name,
+							Context: operation.OperationProxyMapping.Target.Context,
+							Version: operation.OperationProxyMapping.Target.Version,
+							Target:  operation.OperationProxyMapping.Target.Target,
+							Verb:    operation.OperationProxyMapping.Target.Verb,
+						}
+					}
 				}
 				extendedOperations = append(extendedOperations, &extOperation)
 			}
-			swagger.ExtendedOperations = extendedOperations
 		}
+		swagger.ExtendedOperations = extendedOperations
 	}
-
 	return nil
 }

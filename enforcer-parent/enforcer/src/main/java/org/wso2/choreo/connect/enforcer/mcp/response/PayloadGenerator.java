@@ -168,7 +168,7 @@ public class PayloadGenerator {
 
         JsonObject apiInfo = new JsonObject();
         JsonObject backendInfo = new JsonObject();
-        if ("Served/Proxy".equalsIgnoreCase(extendedOperation.getMode())) {
+        if (McpConstants.SubTypeConstants.PROXY_EXISTING_REST_API.equalsIgnoreCase(extendedOperation.getMode())) {
             // The context is sent in the format of /{orgId}/context/version.Therefore, we need to remove the orgId
             // and version before passing it to the transformation service.
             String context = "/" + extendedOperation.getApiContext().split("/", 3)[2];
@@ -190,7 +190,7 @@ public class PayloadGenerator {
                 sb.append(vHost);
             }
             apiInfo.addProperty(McpConstants.PAYLOAD_ENDPOINT, sb.toString());
-        } else {
+        } else if (McpConstants.SubTypeConstants.REST_API_BACKEND.equalsIgnoreCase(extendedOperation.getMode())) {
             payload.addProperty(McpConstants.PAYLOAD_IS_PROXY, false);
             backendInfo.addProperty(McpConstants.PAYLOAD_ENDPOINT, extendedOperation.getBackendEndpoint());
             backendInfo.addProperty(McpConstants.PAYLOAD_VERB, extendedOperation.getBackendVerb());

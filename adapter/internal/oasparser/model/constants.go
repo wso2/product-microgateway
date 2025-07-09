@@ -92,3 +92,10 @@ const (
 	AlreadyExists string = "ALREADY_EXISTS"
 	NotFound      string = "NOT_FOUND"
 )
+
+// Constants for MCP SubTypes
+const (
+	ThirdPartyServer     string = "THIRD_PARTY_SERVER"
+	ProxyExistingRestAPI string = "PROXY_EXISTING_REST_API"
+	RestAPIBackend       string = "REST_API_BACKEND"
+)

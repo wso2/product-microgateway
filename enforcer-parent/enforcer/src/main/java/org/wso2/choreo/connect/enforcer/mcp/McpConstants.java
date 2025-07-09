@@ -109,4 +109,14 @@ public class McpConstants {
         public static final String INVALID_PARAMS_MESSAGE = "Invalid params";
         public static final String INTERNAL_ERROR_MESSAGE = "Internal error";
     }
+
+    /**
+     * This class contains constants used for MCP subtypes
+     */
+    public static class SubTypeConstants {
+        public static final String PROXY_EXISTING_REST_API = "PROXY_EXISTING_REST_API";
+        public static final String REST_API_BACKEND = "REST_API_BACKEND";
+        public static final String THIRD_PARTY_SERVER = "THIRD_PARTY_SERVER";
+
+    }
 }
