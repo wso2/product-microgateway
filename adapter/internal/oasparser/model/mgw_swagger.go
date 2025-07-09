@@ -31,6 +31,7 @@ import (
 	"github.com/go-openapi/spec"
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/pb33f/libopenapi"
+	"github.com/pb33f/libopenapi/datamodel"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -1406,16 +1407,35 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 
 	} else if definitionVersion == constants.OpenAPIV31 {
 		document, err := libopenapi.NewDocument(apiJsn)
+		config := &datamodel.DocumentConfiguration{
+			AllowFileReferences:        false,
+			AllowRemoteReferences:      false,
+			ExcludeExtensionRefs:       false,
+			ExtractRefsSequentially:    false,
+			SkipCircularReferenceCheck: true,
+			BasePath:                   "",
+			BaseURL:                    nil,
+		}
+		document.SetConfiguration(config)
 		if err != nil {
 			logger.LoggerOasparser.Error("Error while unmarshalling the openAPI V3.1", err)
 		} else {
-			v31Model, _ := document.BuildV3Model()
+			v31Model, errs := document.BuildV3Model()
+			if len(errs) > 0 {
+				for _, err := range errs {
+					logger.LoggerOasparser.Error("Error building OpenAPI 3.1 model: ", err)
+				}
+				combined := make([]string, len(errs))
+				for i, e := range errs {
+					combined[i] = e.Error()
+				}
+				return errors.New("OpenAPI 3.1 model build errors: " + strings.Join(combined, "; "))
+			}
 			infoOpenAPIErr := swagger.SetInfoOpenAPIV31(v31Model.Model)
 			if infoOpenAPIErr != nil {
 				return infoOpenAPIErr
 			}
 		}
-
 	} else if definitionVersion == "asyncapi_2" {
 		var asyncAPISpec AsyncAPI
 		err = json.Unmarshal(apiJsn, &asyncAPISpec)

@@ -24,14 +24,14 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/lestrrat-go/jwx v1.2.29
 	github.com/mitchellh/mapstructure v1.3.3
-	github.com/pb33f/libopenapi v0.21.8
-	github.com/pb33f/libopenapi-validator v0.3.1
+	github.com/pb33f/libopenapi v0.23.0
+	github.com/pb33f/libopenapi-validator v0.4.7
 	github.com/pelletier/go-toml v1.8.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/net v0.33.0
-	golang.org/x/text v0.24.0
+	golang.org/x/text v0.25.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98
 	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.34.1
@@ -54,7 +54,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/dprotaso/go-yit v0.0.0-20240618133044-5a0af90af097 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.0.2 // indirect
 	github.com/go-openapi/analysis v0.19.10 // indirect
 	github.com/go-openapi/jsonpointer v0.19.3 // indirect
@@ -74,8 +73,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1 // indirect
-	github.com/speakeasy-api/jsonpath v0.6.1 // indirect
-	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
+	github.com/speakeasy-api/jsonpath v0.6.2 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.9-0.20240815153524-6ea36470d1bd // indirect
 	go.mongodb.org/mongo-driver v1.7.5 // indirect
 	golang.org/x/crypto v0.35.0 // indirect
