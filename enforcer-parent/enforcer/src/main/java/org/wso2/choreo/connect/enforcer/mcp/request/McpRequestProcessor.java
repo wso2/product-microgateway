@@ -47,6 +47,7 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 
 /**
@@ -55,7 +56,7 @@ import java.nio.charset.StandardCharsets;
 public class McpRequestProcessor {
     private static final Logger logger = LogManager.getLogger(McpRequestProcessor.class);
 
-    public static String processRequest(String apikey, String requestBody, String authParam) {
+    public static String processRequest(String apikey, String requestBody, Map<String, String> additionalHeaders) {
         try {
             validateRequest(requestBody);
             JsonObject requestObject = JsonParser.parseString(requestBody).getAsJsonObject();
@@ -78,7 +79,7 @@ public class McpRequestProcessor {
                 return handleMcpToolList(id, matchedMcpApi);
             } else if (McpConstants.METHOD_TOOL_CALL.equals(method)) {
                 validateToolsCallRequest(requestObject, matchedMcpApi);
-                return handleMcpToolsCall(id, matchedMcpApi, requestObject, authParam);
+                return handleMcpToolsCall(id, matchedMcpApi, requestObject, additionalHeaders);
             } else if (McpConstants.METHOD_PING.equals(method)) {
                 return PayloadGenerator.generatePingResponse(id);
             } else if (McpConstants.METHOD_RESOURCES_LIST.equals(method)) {
@@ -239,7 +240,8 @@ public class McpRequestProcessor {
                 .generateToolListPayload(id, matchedApi.getAPIConfig().getExtendedOperations());
     }
 
-    private static String handleMcpToolsCall(Object id, API matchedApi, JsonObject jsonObject, String authParam)
+    private static String handleMcpToolsCall(Object id, API matchedApi, JsonObject jsonObject,
+                                             Map<String, String> additionalHeaders)
             throws McpException {
         String toolName = jsonObject.getAsJsonObject(McpConstants.PARAMS_KEY)
                 .get("name").getAsString();
@@ -257,7 +259,7 @@ public class McpRequestProcessor {
             args = "{}";
         }
         JsonObject payload = PayloadGenerator
-                .generateTransformationRequestPayload(toolName, vHost, args, extendedOperation, authParam);
+                .generateTransformationRequestPayload(toolName, vHost, args, extendedOperation, additionalHeaders);
 
         try {
             EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -312,7 +314,10 @@ public class McpRequestProcessor {
                 if (response.getStatusLine().getStatusCode() == 200) {
                     return PayloadGenerator.generateMcpResponsePayload(id, false, resString);
                 } else {
-                    if (resString.contains("connection refused")) {
+                    if (response.getStatusLine().getStatusCode() == 400) {
+                        return PayloadGenerator.generateMcpResponsePayload(id, true,
+                                "Error while processing the request");
+                    } else if (resString.contains("connection refused")) {
                         return PayloadGenerator.generateMcpResponsePayload(id, true,
                                 "Underlying service is unreachable");
                     } else {

@@ -160,7 +160,7 @@ public class PayloadGenerator {
 
     public static JsonObject generateTransformationRequestPayload(String toolName, String vHost, String args,
                                                                   ExtendedOperation extendedOperation,
-                                                                  String authParam) {
+                                                                  Map<String, String> additionalHeaders) {
         StringBuilder sb = new StringBuilder("https://");
         JsonObject payload = new JsonObject();
         payload.addProperty(McpConstants.PAYLOAD_TOOL_NAME, toolName);
@@ -178,9 +178,11 @@ public class PayloadGenerator {
             apiInfo.addProperty(McpConstants.PAYLOAD_VERSION, extendedOperation.getApiVersion());
             apiInfo.addProperty(McpConstants.PAYLOAD_PATH, extendedOperation.getApiTarget());
             apiInfo.addProperty(McpConstants.PAYLOAD_VERB, extendedOperation.getApiVerb());
-            if (!authParam.isEmpty()) {
-                apiInfo.addProperty(McpConstants.PAYLOAD_AUTH, authParam);
+            if (additionalHeaders.get(McpConstants.PAYLOAD_AUTH) != null &&
+                    !additionalHeaders.get(McpConstants.PAYLOAD_AUTH).isEmpty()) {
+                apiInfo.addProperty(McpConstants.PAYLOAD_AUTH, additionalHeaders.get(McpConstants.PAYLOAD_AUTH));
             }
+            additionalHeaders.remove(McpConstants.PAYLOAD_AUTH);
             payload.addProperty(McpConstants.PAYLOAD_IS_PROXY, true);
             if ("localhost".equals(vHost)) {
                 sb.append("router").append(":").append("9095");
@@ -196,8 +198,12 @@ public class PayloadGenerator {
         }
         payload.add(McpConstants.PAYLOAD_API, apiInfo);
         payload.add(McpConstants.PAYLOAD_BACKEND, backendInfo);
-
         payload.addProperty(McpConstants.ARGUMENTS_KEY, args);
+        // Send backend JWT
+        if (additionalHeaders.get(McpConstants.PAYLOAD_BACKEND_JWT) != null) {
+            payload.addProperty(McpConstants.PAYLOAD_BACKEND_JWT,
+                    additionalHeaders.get(McpConstants.PAYLOAD_BACKEND_JWT));
+        }
         return payload;
     }
 

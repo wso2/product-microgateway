@@ -228,6 +228,16 @@ func processHeaderParameters(mcpRequest *MCPRequest, schemaMapping *SchemaMappin
 			headers[k] = strings.TrimSpace(v)
 		}
 	}
+	// Add backend JWT header if provided
+	if mcpRequest.BackendJWT != "" {
+		k, v, found := strings.Cut(mcpRequest.BackendJWT, ":")
+		if found {
+			logger.Info("Adding backend JWT to headers", "key", k, "value", v)
+			headers[k] = strings.TrimSpace(v)
+		} else {
+			logger.Warn("Backend JWT is not in the expected format 'key:value'")
+		}
+	}
 	// Add content type header
 	if schemaMapping.ContentType != "" {
 		headers[ContentType] = schemaMapping.ContentType

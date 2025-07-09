@@ -80,6 +80,7 @@ public class McpConstants {
     public static final String PAYLOAD_PATH = "path";
     public static final String PAYLOAD_VERB = "verb";
     public static final String PAYLOAD_AUTH = "auth";
+    public static final String PAYLOAD_BACKEND_JWT = "backend_jwt";
     public static final String PAYLOAD_ENDPOINT = "endpoint";
     public static final String PAYLOAD_IS_PROXY = "is_proxy";
     public static final String PAYLOAD_TARGET = "target";

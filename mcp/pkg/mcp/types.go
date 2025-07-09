@@ -22,12 +22,13 @@ import (
 )
 
 type MCPRequest struct {
-	ToolName  string      `json:"tool_name"`
-	Arguments string      `json:"arguments,omitempty"`
-	Schema    string      `json:"schema,omitempty"`
-	API       APIInfo     `json:"api"`
-	Backend   BackendInfo `json:"backend,omitempty"`
-	IsProxy   bool        `json:"is_proxy,omitempty"`
+	ToolName   string      `json:"tool_name"`
+	Arguments  string      `json:"arguments,omitempty"`
+	Schema     string      `json:"schema,omitempty"`
+	API        APIInfo     `json:"api"`
+	Backend    BackendInfo `json:"backend,omitempty"`
+	IsProxy    bool        `json:"is_proxy,omitempty"`
+	BackendJWT string      `json:"backend_jwt,omitempty"`
 }
 
 type APIInfo struct {
