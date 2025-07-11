@@ -93,7 +93,8 @@ public class PayloadGenerator {
         return data;
     }
 
-    public static String generateToolListPayload(Object id, List<ExtendedOperation> extendedOperations) {
+    public static String generateToolListPayload(Object id, List<ExtendedOperation> extendedOperations,
+                                                 boolean isThirdParty) {
         McpResponse response = new McpResponse(id);
         JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
         JsonObject result = new JsonObject();
@@ -105,7 +106,13 @@ public class PayloadGenerator {
             String schema = extendedOperation.getSchema();
             if (schema != null) {
                 JsonObject schemaObject = gson.fromJson(schema, JsonObject.class);
-                toolObject.add(McpConstants.INPUT_SCHEMA_KEY, sanitizeInputSchema(schemaObject));
+                // Avoid processing the schema in the third party server scenario
+                if (isThirdParty) {
+                    toolObject.add(McpConstants.INPUT_SCHEMA_KEY, schemaObject);
+                } else {
+                    toolObject.add(McpConstants.INPUT_SCHEMA_KEY, sanitizeInputSchema(schemaObject));
+                }
+
             }
             toolsArray.add(toolObject);
         }
@@ -204,6 +211,20 @@ public class PayloadGenerator {
             payload.addProperty(McpConstants.PAYLOAD_BACKEND_JWT,
                     additionalHeaders.get(McpConstants.PAYLOAD_BACKEND_JWT));
         }
+        return payload;
+    }
+
+    public static JsonObject generateThirdPartyRequestPayload(String endpoint, JsonObject requestObject,
+                                                              Map<String, String> additionalHeaders) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("endpoint", endpoint);
+        payload.add("body", requestObject);
+
+        JsonObject headers = new JsonObject();
+        for (Map.Entry<String, String> entry : additionalHeaders.entrySet()) {
+            headers.addProperty(entry.getKey(), entry.getValue());
+        }
+        payload.add("headers", headers);
         return payload;
     }
 

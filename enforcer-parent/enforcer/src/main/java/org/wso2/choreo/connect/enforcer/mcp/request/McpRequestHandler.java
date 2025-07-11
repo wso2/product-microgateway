@@ -40,6 +40,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
+import org.wso2.choreo.connect.enforcer.commons.model.ExtendedOperation;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
@@ -160,16 +161,37 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
                     backendJWTHeader + ":" + headers.get(backendJWTHeader));
         }
 
+        // Handle mcp-session-id header
+        String sessionId = null;
+        if (headers.contains(McpConstants.MCP_SESSION_ID_HEADER)) {
+            sessionId = headers.get(McpConstants.MCP_SESSION_ID_HEADER);
+            if (sessionId == null || sessionId.isEmpty()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("mcp-session-id header is empty for API: {}", apiName);
+                }
+            }
+        }
+
+        // Get the MCP subtype through operations
+        String mcpSubType = "";
+        for (ExtendedOperation exOps: matchedAPI.getAPIConfig().getExtendedOperations()) {
+            mcpSubType = exOps.getMode();
+            break;
+        }
+
         HttpContent requestContent = (HttpContent) msg;
         if (requestContent.content().isReadable()) {
             String body = requestContent.content().toString(StandardCharsets.UTF_8);
-            String jsonResponse = McpRequestProcessor.processRequest(apikey, body, additionalHeaders);
+            String jsonResponse = McpRequestProcessor.processRequest(matchedAPI, body, additionalHeaders);
             if (jsonResponse != null) {
                 res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.OK,
                         Unpooled.wrappedBuffer(jsonResponse.getBytes(StandardCharsets.UTF_8)));
                 res.headers()
                         .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
                         .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
+                if (sessionId != null && !sessionId.isEmpty()) {
+                    res.headers().set(McpConstants.MCP_SESSION_ID_HEADER, sessionId);
+                }
             } else {
                 res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.NO_CONTENT);
             }
