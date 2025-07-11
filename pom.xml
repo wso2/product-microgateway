@@ -614,7 +614,7 @@
     </build>
 
     <properties>
-        <ballerina.platform.version>1.2.58</ballerina.platform.version>
+        <ballerina.platform.version>1.2.59</ballerina.platform.version>
         <broker.version>0.970.5</broker.version>
         <assembly.plugin.version>3.1.1</assembly.plugin.version>
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
@@ -701,7 +701,7 @@
         <json.schema.validator.all.version>2.2.7.wso2v2</json.schema.validator.all.version>
         <joda.time.version>2.13.1</joda.time.version>
         <javax.mail.version>1.6.2</javax.mail.version>
-        <libphonenumber.version>7.4.5</libphonenumber.version>
+        <libphonenumber.version>7.7.5</libphonenumber.version>
         <guava.failureaccess.version>1.0.1</guava.failureaccess.version>
         <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
     </properties>
