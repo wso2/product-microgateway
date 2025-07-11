@@ -24,6 +24,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"mcp-server/pkg/client"
 	mcp "mcp-server/pkg/mcp"
 	"mcp-server/pkg/service"
 )
@@ -127,6 +128,7 @@ func serveRequest(c *gin.Context) {
 func main() {
 	router := service.GetRouter()
 	router.POST("/mcp", serveRequest)
+	router.POST("/client", client.ServeThirdPartyRequest)
 	cfg, err := service.InitConfig()
 	if err != nil {
 		logger.Error("Failed to get configurations", "error", err)
@@ -152,5 +154,4 @@ func main() {
 		logger.Error("Failed to start the service", "error", err)
 		return
 	}
-
 }
