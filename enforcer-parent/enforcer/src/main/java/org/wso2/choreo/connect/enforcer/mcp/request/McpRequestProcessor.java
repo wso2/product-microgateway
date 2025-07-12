@@ -117,11 +117,13 @@ public class McpRequestProcessor {
             } else if (McpConstants.METHOD_NOTIFICATION_INITIALIZED.equals(method)) {
                 // We don't need to send a reply when it's a notification
                 return null;
+            } else {
+                throw new McpException(McpConstants.RpcConstants.METHOD_NOT_FOUND_CODE,
+                        McpConstants.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not found");
             }
         } catch (McpException e) {
             return new McpResponseDto(e.toJsonRpcErrorPayload(), 200, null);
         }
-        return null;
     }
 
     /**
@@ -205,10 +207,6 @@ public class McpRequestProcessor {
                 method = methodElement.getAsString();
                 if (method.isEmpty()) {
                     throwMissingMethodError();
-                }
-                if (!McpConstants.ALLOWED_METHODS.contains(method)) {
-                    throw new McpException(McpConstants.RpcConstants.METHOD_NOT_FOUND_CODE,
-                            McpConstants.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not found");
                 }
             } else {
                 throwMissingMethodError();
