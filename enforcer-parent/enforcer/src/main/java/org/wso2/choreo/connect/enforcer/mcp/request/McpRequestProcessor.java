@@ -40,6 +40,7 @@ import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
 import org.wso2.choreo.connect.enforcer.mcp.McpException;
 import org.wso2.choreo.connect.enforcer.mcp.McpExceptionWithId;
+import org.wso2.choreo.connect.enforcer.mcp.response.McpResponseDto;
 import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
@@ -55,24 +56,27 @@ import java.util.Map;
 public class McpRequestProcessor {
     private static final Logger logger = LogManager.getLogger(McpRequestProcessor.class);
 
-    public static String processRequest(API matchedMcpApi, String requestBody, Map<String, String> additionalHeaders) {
+    public static McpResponseDto processRequest(API matchedMcpApi, String requestBody,
+                                                Map<String, String> additionalHeaders) {
         try {
             validateRequest(requestBody);
             JsonObject requestObject = JsonParser.parseString(requestBody).getAsJsonObject();
             String method = requestObject.get(McpConstants.RpcConstants.METHOD).getAsString();
             // Get the MCP subtype through operations
             String mcpSubType = "";
+            String mcpServerUrl = "";
             for (ExtendedOperation exOps : matchedMcpApi.getAPIConfig().getExtendedOperations()) {
                 mcpSubType = exOps.getMode();
+                mcpServerUrl = exOps.getBackendEndpoint();
                 break;
             }
             if (McpConstants.SubTypeConstants.THIRD_PARTY_SERVER.equals(mcpSubType)) {
-                return processThirdPartyRequest(matchedMcpApi, requestObject, method, additionalHeaders);
+                return processThirdPartyRequest(matchedMcpApi, mcpServerUrl, requestObject, method, additionalHeaders);
             } else {
                 return processInternalRequest(matchedMcpApi, requestObject, method, additionalHeaders);
             }
         } catch (McpException e) {
-            return e.toJsonRpcErrorPayload();
+            return new McpResponseDto(e.toJsonRpcErrorPayload(), 200, null);
         }
     }
 
@@ -85,8 +89,8 @@ public class McpRequestProcessor {
      * @param additionalHeaders additional headers to send
      * @return the response payload as a String
      */
-    public static String processInternalRequest(API matchedMcpApi, JsonObject requestObject, String method,
-                                                Map<String, String> additionalHeaders) {
+    public static McpResponseDto processInternalRequest(API matchedMcpApi, JsonObject requestObject, String method,
+                                                        Map<String, String> additionalHeaders) {
         try {
             Object id = -1;
             if (!method.contains("notifications/")) {
@@ -101,19 +105,21 @@ public class McpRequestProcessor {
                 validateToolsCallRequest(requestObject, matchedMcpApi);
                 return handleMcpToolsCall(id, matchedMcpApi, requestObject, additionalHeaders);
             } else if (McpConstants.METHOD_PING.equals(method)) {
-                return PayloadGenerator.generatePingResponse(id);
+                return new McpResponseDto(
+                        PayloadGenerator.generatePingResponse(id), 200, null);
             } else if (McpConstants.METHOD_RESOURCES_LIST.equals(method)) {
-                return PayloadGenerator.generateResourceListResponse(id);
+                return new McpResponseDto(PayloadGenerator.generateResourceListResponse(id), 200, null);
             } else if (McpConstants.METHOD_RESOURCE_TEMPLATE_LIST.equals(method)) {
-                return PayloadGenerator.generateResourceTemplateListResponse(id);
+                return new McpResponseDto(
+                        PayloadGenerator.generateResourceTemplateListResponse(id), 200, null);
             } else if (McpConstants.METHOD_PROMPTS_LIST.equals(method)) {
-                return PayloadGenerator.generatePromptListResponse(id);
+                return new McpResponseDto(PayloadGenerator.generatePromptListResponse(id), 200, null);
             } else if (McpConstants.METHOD_NOTIFICATION_INITIALIZED.equals(method)) {
                 // We don't need to send a reply when it's a notification
                 return null;
             }
         } catch (McpException e) {
-            return e.toJsonRpcErrorPayload();
+            return new McpResponseDto(e.toJsonRpcErrorPayload(), 200, null);
         }
         return null;
     }
@@ -127,8 +133,9 @@ public class McpRequestProcessor {
      * @param additionalHeaders additional headers to send
      * @return the response payload as a String
      */
-    private static String processThirdPartyRequest(API matchedMcpApi, JsonObject requestObject, String method,
-                                                   Map<String, String> additionalHeaders) {
+    private static McpResponseDto processThirdPartyRequest(API matchedMcpApi, String mcpServerUrl,
+                                                           JsonObject requestObject, String method,
+                                                           Map<String, String> additionalHeaders) {
         try {
             Object id = -1;
             if (!method.contains("notifications/")) {
@@ -139,12 +146,10 @@ public class McpRequestProcessor {
             } else if (McpConstants.METHOD_TOOL_CALL.equals(method)) {
                 // The validation is done to make sure the called tool is actually exposed through the gateway
                 validateToolsCallRequest(requestObject, matchedMcpApi);
-                return handleThirdPartyMethodCall(id, matchedMcpApi, requestObject, additionalHeaders);
-            } else {
-                return handleThirdPartyMethodCall(id, matchedMcpApi, requestObject, additionalHeaders);
             }
+            return handleThirdPartyMethodCall(id, mcpServerUrl, requestObject, additionalHeaders);
         } catch (McpException e) {
-            return e.toJsonRpcErrorPayload();
+            return new McpResponseDto(e.toJsonRpcErrorPayload(), 400, null);
         }
     }
 
@@ -277,21 +282,24 @@ public class McpRequestProcessor {
                 .anyMatch(operation -> toolName.equals(operation.getName()));
     }
 
-    private static String handleMcpInitialize(Object id, API matchedApi) {
+    private static McpResponseDto handleMcpInitialize(Object id, API matchedApi) {
         String name = matchedApi.getAPIConfig().getName();
         String version = matchedApi.getAPIConfig().getVersion();
         String description = "This is an MCP Server";
-        return PayloadGenerator
-                .getInitializeResponse(id, name, version, description, false);
+        return new McpResponseDto(PayloadGenerator
+                .getInitializeResponse(id, name, version, description, false),
+                200, null);
+
     }
 
-    private static String handleMcpToolList(Object id, API matchedApi, boolean isThirdParty) {
-        return PayloadGenerator
-                .generateToolListPayload(id, matchedApi.getAPIConfig().getExtendedOperations(), isThirdParty);
+    private static McpResponseDto handleMcpToolList(Object id, API matchedApi, boolean isThirdParty) {
+        return new McpResponseDto(
+                PayloadGenerator.generateToolListPayload(id, matchedApi.getAPIConfig().getExtendedOperations(),
+                        isThirdParty), 200, null);
     }
 
-    private static String handleMcpToolsCall(Object id, API matchedApi, JsonObject jsonObject,
-                                             Map<String, String> additionalHeaders)
+    private static McpResponseDto handleMcpToolsCall(Object id, API matchedApi, JsonObject jsonObject,
+                                                     Map<String, String> additionalHeaders)
             throws McpException {
         String toolName = jsonObject.getAsJsonObject(McpConstants.PARAMS_KEY)
                 .get("name").getAsString();
@@ -322,8 +330,9 @@ public class McpRequestProcessor {
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 HttpEntity entity = response.getEntity();
                 if (entity == null) {
-                    return PayloadGenerator.generateMcpResponsePayload(id, true,
-                            "Empty response received from the service.");
+                    return new McpResponseDto(
+                            PayloadGenerator.generateMcpResponsePayload(id, true,
+                                    "Empty response received from the service."), 200, null);
                 }
                 String resString;
                 int code;
@@ -352,26 +361,31 @@ public class McpRequestProcessor {
                                 resString = resp;
                             }
                         } else {
-                            return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                    "Error while processing the results");
+                            return new McpResponseDto(
+                                    PayloadGenerator.generateMcpResponsePayload(id, true,
+                                            "Error while processing the results"), 200, null);
                         }
                     } catch (JsonSyntaxException e) {
                         logger.error("Unexpected response when processing the service call", e);
-                        return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                "Unexpected response when processing the service call");
+                        return new McpResponseDto(
+                                PayloadGenerator.generateMcpResponsePayload(id, true,
+                                        "Unexpected response when processing the service call"),
+                                200, null);
                     }
                 }
                 if (response.getStatusLine().getStatusCode() == 200) {
-                    return PayloadGenerator.generateMcpResponsePayload(id, false, resString);
+                    return new McpResponseDto(PayloadGenerator.generateMcpResponsePayload(id, false, resString),
+                            200, null);
                 } else {
                     if (response.getStatusLine().getStatusCode() == 400) {
-                        return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                "Error while processing the request");
+                        return new McpResponseDto(PayloadGenerator.generateMcpResponsePayload(id, true,
+                                "Error while processing the request in gateway"), 200, null);
                     } else if (resString.contains("connection refused")) {
-                        return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                "Underlying service is unreachable");
+                        return new McpResponseDto(PayloadGenerator.generateMcpResponsePayload(id, true,
+                                "Underlying service is unreachable"), 200, null);
                     } else {
-                        return PayloadGenerator.generateMcpResponsePayload(id, true, resString);
+                        return new McpResponseDto(PayloadGenerator
+                                .generateMcpResponsePayload(id, true, resString), 200, null);
                     }
                 }
             }
@@ -387,16 +401,9 @@ public class McpRequestProcessor {
         }
     }
 
-    private static String handleThirdPartyMethodCall(Object id, API matchedApi, JsonObject requestObject,
-                                                     Map<String, String> additionalHeaders) throws McpException {
-        String toolName = requestObject.getAsJsonObject(McpConstants.PARAMS_KEY)
-                .get("name").getAsString();
-        ExtendedOperation extendedOperation = matchedApi.getAPIConfig().getExtendedOperations()
-                .stream()
-                .filter(operation -> operation.getName().equals(toolName))
-                .findFirst()
-                .orElse(null);
-        String mcpServerUrl = extendedOperation.getBackendEndpoint();
+    private static McpResponseDto handleThirdPartyMethodCall(Object id, String mcpServerUrl, JsonObject requestObject,
+                                                             Map<String, String> additionalHeaders)
+            throws McpException {
         JsonObject payload = PayloadGenerator.generateThirdPartyRequestPayload(mcpServerUrl, requestObject,
                 additionalHeaders);
         try {
@@ -414,8 +421,8 @@ public class McpRequestProcessor {
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 HttpEntity entity = response.getEntity();
                 if (entity == null) {
-                    return PayloadGenerator.generateMcpResponsePayload(id, true,
-                            "Empty response received from the service.");
+                    return new McpResponseDto(PayloadGenerator.generateMcpResponsePayload(id, true,
+                            "Empty response received from the service."), 500, null);
                 }
                 String resString;
                 String sessionId;
@@ -430,41 +437,38 @@ public class McpRequestProcessor {
                             sessionId = result.get("sessionId").getAsString();
                             boolean error = result.get("error").getAsBoolean();
                             if (error) {
-                                return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                        "Error while processing the results in gateway");
+                                return new McpResponseDto(
+                                        PayloadGenerator.generateMcpResponsePayload(id, true,
+                                                "Error while processing the request in gateway"),
+                                        code, sessionId);
                             }
-                            String mcpResponse = result.get("response").getAsString();
-                            try {
-                                JsonElement respElement = JsonParser.parseString(mcpResponse);
-                                if (respElement.isJsonObject()) {
-                                    JsonObject obj = respElement.getAsJsonObject();
-                                    resString = obj.toString();
-                                } else if (respElement.isJsonPrimitive()
-                                        && respElement.getAsJsonPrimitive().isString()) {
-                                    String unescaped = respElement.getAsString();
-                                    JsonObject obj = JsonParser.parseString(unescaped).getAsJsonObject();
-                                    resString = obj.toString();
-                                } else {
-                                    resString = respElement.toString();
-                                }
-                            } catch (JsonSyntaxException e) {
-                                resString = mcpResponse;
+                            JsonElement mcpResponse = result.get("response");
+                            if (mcpResponse.isJsonObject()) {
+                                JsonObject obj = mcpResponse.getAsJsonObject();
+                                resString = obj.toString();
+                            } else if (mcpResponse.isJsonPrimitive()
+                                    && mcpResponse.getAsJsonPrimitive().isString()) {
+                                String unescaped = mcpResponse.getAsString();
+                                JsonObject obj = JsonParser.parseString(unescaped).getAsJsonObject();
+                                resString = obj.toString();
+                            } else {
+                                resString = mcpResponse.toString();
                             }
                         } else {
-                            return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                    "Error while processing the results in gateway");
+                            return new McpResponseDto(PayloadGenerator.generateMcpResponsePayload(id, true,
+                                    "Error while processing the results"), 500, null);
                         }
                     } catch (JsonSyntaxException e) {
                         logger.error("Unexpected response when processing the service call", e);
-                        return PayloadGenerator.generateMcpResponsePayload(id, true,
-                                "Unexpected response when processing the service call");
+                        return new McpResponseDto(PayloadGenerator.generateMcpResponsePayload(id, true,
+                                "Unexpected response when processing the service call"), 500, null);
                     }
                 }
                 if (response.getStatusLine().getStatusCode() == 200) {
-                    //todo
+                    return new McpResponseDto(resString, code, sessionId);
                 } else {
-                    PayloadGenerator.generateMcpResponsePayload(id, true,
-                            "Error while proxying the request through gateway");
+                    return new McpResponseDto(PayloadGenerator.generateMcpResponsePayload(id, true,
+                            "Error while proxying the request through gateway"), 500, sessionId);
                 }
             }
         } catch (ConnectionPoolTimeoutException e) {
@@ -477,7 +481,6 @@ public class McpRequestProcessor {
             throw new McpException(McpConstants.RpcConstants.INTERNAL_ERROR_CODE,
                     McpConstants.RpcConstants.INTERNAL_ERROR_MESSAGE, "Error while processing the service call");
         }
-        return null;
     }
 
     private static void throwMissingJsonRpcError() throws McpException {
