@@ -84,3 +84,16 @@ type XMLElement struct {
 	Content  string       `xml:",chardata"`
 	Children []XMLElement `xml:",any"`
 }
+
+type MCPResult struct {
+	Code      int    `json:"code"`
+	Response  any    `json:"response"`
+	SessionID string `json:"sessionId"`
+	Error     bool   `json:"error"`
+}
+
+type ThirdPartyRequest struct {
+	Endpoint string            `json:"endpoint"`
+	Body     map[string]any    `json:"body"`
+	Headers  map[string]string `json:"headers"`
+}

@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"strings"
 )
 
 func processJsonResponse(inputString string) (string, error) {
@@ -65,6 +66,49 @@ func mapToXMLElements(m map[string]any) []XMLElement {
 		elements = append(elements, elem)
 	}
 	return elements
+}
+
+// processResponseJson processes the input string as JSON, handling both standard JSON and event stream responses.
+func processResponseJson(inputString string) (string, error) {
+	var data any
+
+	if inputString == "" {
+		logger.Warn("Received an empty response")
+		return "{}", nil
+	}
+	err := json.Unmarshal([]byte(inputString), &data)
+	if err != nil {
+		logger.Warn("Failed to unmarshal JSON", "cause", err)
+		logger.Info("Attempting to process as an event stream response...")
+		if strings.Contains(inputString, "data:") {
+			lines := strings.Split(inputString, "\n")
+			for _, line := range lines {
+				if strings.HasPrefix(line, "data:") {
+					jsonLine := strings.TrimPrefix(line, "data:")
+					jsonLine = strings.TrimSpace(jsonLine)
+					if jsonLine != "" {
+						err = json.Unmarshal([]byte(jsonLine), &data)
+						if err != nil {
+							logger.Error("Failed to unmarshal JSON from event stream", "line", jsonLine, "error", err)
+							return "", err
+						}
+						break
+					}
+				}
+			}
+		} else {
+			logger.Error("Failed to process response as JSON", "error", err)
+			return "", err
+		}
+	}
+
+	compactJSONBytes, err := json.Marshal(data)
+	if err != nil {
+		logger.Error("Error marshalling data back to JSON", "error", err)
+		return "", err
+	}
+
+	return string(compactJSONBytes), nil
 }
 
 func HandleBadRequest(message string) Result {

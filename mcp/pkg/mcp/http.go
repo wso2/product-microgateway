@@ -17,6 +17,7 @@
 package mcp
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"mcp-server/pkg/service"
@@ -70,6 +71,8 @@ func (client *MCPHTTPClient) DoRequest(request *http.Request) (*http.Response, e
 	return resp, nil
 }
 
+// GenerateRequest creates a new HTTP request based on the transformed MCP request
+// This function is used to when calling existing APIs or direct backends
 func (client *MCPHTTPClient) GenerateRequest(httpRequest *TransformedRequest) (*http.Request, error) {
 	var req *http.Request
 	var err error
@@ -87,4 +90,23 @@ func (client *MCPHTTPClient) GenerateRequest(httpRequest *TransformedRequest) (*
 	req.Header.Set("User-Agent", client.UserAgent)
 
 	return req, nil
+}
+
+// GenerateThirdPartyRequest creates a new HTTP request to call third-party MCP Servers
+func (client *MCPHTTPClient) GenerateThirdPartyRequest(endpoint string, body *bytes.Reader, additionalHeaders map[string]string) (*http.Request, error) {
+	var request *http.Request
+	request, err := http.NewRequest(http.MethodPost, endpoint, body)
+	if err != nil {
+		logger.Error("Failed to create new HTTP request", "error", err)
+		return nil, err
+	}
+	// Default headers to imitate an MCP client
+	request.Header.Set(ContentType, ContentTypeJSON)
+	request.Header.Set(Accept, "application/json, text/event-stream")
+
+	for k, v := range additionalHeaders {
+		request.Header.Set(k, v)
+	}
+
+	return request, nil
 }
