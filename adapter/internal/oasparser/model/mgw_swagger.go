@@ -1613,11 +1613,17 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 					Name:        operation.Target,
 					Verb:        operation.Verb,
 					Description: operation.Description,
+					Schema:      operation.Schema,
 				}
 
 				switch subType {
 				case ThirdPartyServer:
 					extOperation.Mode = ThirdPartyServer
+					extOperation.BackendMapping = &BackendMapping{
+						Endpoint: operation.BackendOperationMapping.BackendOperation.Endpoint,
+						Target:   operation.BackendOperationMapping.BackendOperation.Target,
+						Verb:     operation.BackendOperationMapping.BackendOperation.Verb,
+					}
 				case RestAPIBackend:
 					extOperation.Mode = RestAPIBackend
 					extOperation.BackendMapping = &BackendMapping{
@@ -1635,13 +1641,17 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 						Verb:    operation.OperationProxyMapping.Target.Verb,
 					}
 				default:
-					// Handle the case where SubTypeConfiguration is nil or subType is empty
+					// Handle the case where SubTypeConfiguration is nil or subType is default
 					if operation.OperationProxyMapping == nil {
-						if operation.Schema == "" {
+						if operation.BackendOperationMapping.BackendOperation.Verb == "TOOL" {
 							extOperation.Mode = ThirdPartyServer
+							extOperation.BackendMapping = &BackendMapping{
+								Endpoint: operation.BackendOperationMapping.BackendOperation.Endpoint,
+								Target:   operation.BackendOperationMapping.BackendOperation.Target,
+								Verb:     operation.BackendOperationMapping.BackendOperation.Verb,
+							}
 						} else {
 							extOperation.Mode = RestAPIBackend
-							extOperation.Schema = operation.Schema
 							extOperation.BackendMapping = &BackendMapping{
 								Endpoint: operation.BackendOperationMapping.BackendOperation.Endpoint,
 								Target:   operation.BackendOperationMapping.BackendOperation.Target,
@@ -1650,7 +1660,6 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 						}
 					} else {
 						extOperation.Mode = ProxyExistingRestAPI
-						extOperation.Schema = operation.Schema
 						extOperation.ProxyMapping = &ProxyMapping{
 							Name:    operation.OperationProxyMapping.Target.Name,
 							Context: operation.OperationProxyMapping.Target.Context,
