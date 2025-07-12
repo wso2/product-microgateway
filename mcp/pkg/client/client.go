@@ -36,9 +36,9 @@ type MCPResult struct {
 }
 
 type ThirdPartyRequest struct {
-	Endpoint          string `json:"endpoint"`
-	Body              string `json:"body"`
-	AdditionalHeaders string `json:"additionalHeaders"`
+	Endpoint string            `json:"endpoint"`
+	Body     map[string]any    `json:"body"`
+	Headers  map[string]string `json:"headers"`
 }
 
 func ServeThirdPartyRequest(c *gin.Context) {
@@ -48,21 +48,13 @@ func ServeThirdPartyRequest(c *gin.Context) {
 		c.SecureJSON(400, getResult(400, gin.H{"error": "Invalid request payload"}, "", true))
 		return
 	}
-	body := payload.Body
-	additionalHeaders := payload.AdditionalHeaders
-	if body == "" {
+	if payload.Body == nil {
 		logger.Error("Request body is required")
 		c.SecureJSON(400, getResult(400, gin.H{"error": "Missing request body"}, "", true))
 		return
 	}
-	var bodyMap map[string]any
-	if err := json.Unmarshal([]byte(body), &bodyMap); err != nil {
-		logger.Error("Failed to unmarshal request body", "error", err)
-		c.SecureJSON(400, getResult(400, gin.H{"error": "Invalid request body format"}, "", true))
-		return
-	}
 
-	reqBody, err := json.Marshal(bodyMap)
+	reqBody, err := json.Marshal(payload.Body)
 	if err != nil {
 		logger.Error("Failed to marshal request body", "error", err)
 		c.SecureJSON(500, getResult(500, gin.H{"error": "Failed to marshal request body"}, "", true))
@@ -71,7 +63,7 @@ func ServeThirdPartyRequest(c *gin.Context) {
 
 	bodyReader := bytes.NewReader(reqBody)
 
-	req, err := generateThirdPartyRequest(payload.Endpoint, bodyReader, additionalHeaders)
+	req, err := generateThirdPartyRequest(payload.Endpoint, bodyReader, payload.Headers)
 	if err != nil {
 		c.SecureJSON(500, getResult(500, gin.H{"error": "Failed to generate request"}, "", true))
 		return
@@ -107,7 +99,7 @@ func ServeThirdPartyRequest(c *gin.Context) {
 
 }
 
-func generateThirdPartyRequest(endpoint string, body *bytes.Reader, additionalHeaders string) (*http.Request, error) {
+func generateThirdPartyRequest(endpoint string, body *bytes.Reader, additionalHeaders map[string]string) (*http.Request, error) {
 	var request *http.Request
 	request, err := http.NewRequest(http.MethodPost, endpoint, body)
 	if err != nil {
@@ -116,17 +108,11 @@ func generateThirdPartyRequest(endpoint string, body *bytes.Reader, additionalHe
 	}
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json, text/event-stream")
-	var headers map[string]string
-	if additionalHeaders != "" {
-		err = json.Unmarshal([]byte(additionalHeaders), &headers)
-		if err != nil {
-			logger.Error("Failed to unmarshal additional headers", "error", err)
-			return nil, err
-		}
-	}
-	for k, v := range headers {
+
+	for k, v := range additionalHeaders {
 		request.Header.Set(k, v)
 	}
+
 	return request, nil
 }
 
@@ -143,6 +129,10 @@ func callMCPServer(req *http.Request) (*http.Response, error) {
 func processResponseJson(inputString string) (string, error) {
 	var data any
 
+	if inputString == "" {
+		logger.Warn("Received an empty response")
+		return "{}", nil
+	}
 	err := json.Unmarshal([]byte(inputString), &data)
 	if err != nil {
 		logger.Warn("Failed to unmarshal JSON", "cause", err)
