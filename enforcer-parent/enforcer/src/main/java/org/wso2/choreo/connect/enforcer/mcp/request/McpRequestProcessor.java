@@ -148,6 +148,8 @@ public class McpRequestProcessor {
             } else if (McpConstants.METHOD_TOOL_CALL.equals(method)) {
                 // The validation is done to make sure the called tool is actually exposed through the gateway
                 validateToolsCallRequest(requestObject, matchedMcpApi);
+                // Process the tool call payload to  replace the tool name with actual tool name
+                processAndSwitchToolNames(requestObject, matchedMcpApi);
             }
             return handleThirdPartyMethodCall(id, mcpServerUrl, requestObject, additionalHeaders);
         } catch (McpException e) {
@@ -278,6 +280,31 @@ public class McpRequestProcessor {
         return matchedApi.getAPIConfig().getExtendedOperations()
                 .stream()
                 .anyMatch(operation -> toolName.equals(operation.getName()));
+    }
+
+    /**
+     * This method will be used to match the tool name in the gateway to the actual tool name in the MCP Server
+     *
+     * @param jsonObject the JSON object containing the MCP tool call
+     * @param matchedApi the matched API in the gateway
+     * @throws McpException if the tool name does not match any of the extended operations
+     */
+    private static void processAndSwitchToolNames(JsonObject jsonObject, API matchedApi) throws McpException {
+        JsonObject params = jsonObject.getAsJsonObject(McpConstants.PARAMS_KEY);
+        String toolName = params.get(McpConstants.TOOL_NAME_KEY).getAsString();
+        ExtendedOperation extendedOperation = matchedApi.getAPIConfig().getExtendedOperations()
+                .stream()
+                .filter(operation -> toolName.equals(operation.getName()))
+                .findFirst()
+                .orElse(null);
+        if (extendedOperation != null) {
+            // Replace the tool name with the actual tool name
+            params.addProperty(McpConstants.TOOL_NAME_KEY, extendedOperation.getBackendTarget());
+        } else {
+            throw new McpException(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
+                    McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "The requested tool does not exist");
+        }
+        jsonObject.add(McpConstants.PARAMS_KEY, params);
     }
 
     private static McpResponseDto handleMcpInitialize(Object id, API matchedApi) {

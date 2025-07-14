@@ -62,7 +62,7 @@ public class McpConstants {
     public static final String SERVER_NAME = "name";
     public static final String INPUT_SCHEMA_KEY = "inputSchema";
     public static final String SERVER_VERSION = "version";
-    public static final String SERVER_DESC = "description";
+    public static final String SERVER_INSTRUCTIONS = "instructions";
     public static final String SERVER_INFO = "serverInfo";
     public static final String IS_ERROR = "isError";
     public static final String TYPE = "type";
