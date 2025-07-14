@@ -69,8 +69,8 @@ public class PayloadGenerator {
         JsonObject serverInfo = new JsonObject();
         serverInfo.addProperty(McpConstants.SERVER_NAME, serverName);
         serverInfo.addProperty(McpConstants.SERVER_VERSION, serverVersion);
-        serverInfo.addProperty(McpConstants.SERVER_DESC, serverDescription);
         result.add(McpConstants.SERVER_INFO, serverInfo);
+        result.addProperty(McpConstants.SERVER_INSTRUCTIONS, serverDescription);
 
         responseObject.add(McpConstants.RESULT_KEY, result);
         return gson.toJson(responseObject);
