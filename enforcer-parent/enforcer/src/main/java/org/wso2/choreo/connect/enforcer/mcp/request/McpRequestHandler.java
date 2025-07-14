@@ -41,10 +41,14 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.mcp.McpConstants;
+import org.wso2.choreo.connect.enforcer.mcp.response.McpResponseDto;
 import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * MCP Request Handler for MCP Proxies
@@ -130,6 +134,7 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
             ctx.writeAndFlush(res).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             return;
         }
+        Map<String, String> additionalHeaders = new HashMap<>();
         String apiName = matchedAPI.getAPIConfig().getName();
         String authHeaderName;
         String testKeyName = ConfigHolder.getInstance().getConfig().getAuthHeader()
@@ -138,25 +143,54 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
         StringBuilder tokenHeader = new StringBuilder();
         if (headers.get(authHeaderName) != null) {
             tokenHeader.append(HttpHeaderNames.AUTHORIZATION).append(":").append(headers.get(authHeaderName));
+            additionalHeaders.put(McpConstants.PAYLOAD_AUTH, tokenHeader.toString());
         } else if (headers.get(testKeyName) != null) {
             tokenHeader.append(testKeyName).append(":").append(headers.get(testKeyName));
+            additionalHeaders.put(McpConstants.PAYLOAD_AUTH, tokenHeader.toString());
         } else {
             if (logger.isDebugEnabled()) {
                 logger.debug("Authorization header is not available for the API: {}", apiName);
             }
 
         }
+        // Forward the backendJWT
+        EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
+        String backendJWTHeader = enforcerConfig.getJwtConfigurationDto().getJwtHeader();
+        if (headers.get(backendJWTHeader) != null) {
+            additionalHeaders.put(McpConstants.PAYLOAD_BACKEND_JWT,
+                    backendJWTHeader + ":" + headers.get(backendJWTHeader));
+        }
+
+        // Handle mcp-session-id header
+        String sessionId = null;
+        if (headers.contains(McpConstants.MCP_SESSION_ID_HEADER)) {
+            sessionId = headers.get(McpConstants.MCP_SESSION_ID_HEADER);
+            if (sessionId == null || sessionId.isEmpty()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("mcp-session-id header is empty for API: {}", apiName);
+                }
+            } else {
+                additionalHeaders.put(McpConstants.MCP_SESSION_ID_HEADER, sessionId);
+            }
+        }
 
         HttpContent requestContent = (HttpContent) msg;
         if (requestContent.content().isReadable()) {
             String body = requestContent.content().toString(StandardCharsets.UTF_8);
-            String jsonResponse = McpRequestProcessor.processRequest(apikey, body, tokenHeader.toString());
-            if (jsonResponse != null) {
-                res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.OK,
-                        Unpooled.wrappedBuffer(jsonResponse.getBytes(StandardCharsets.UTF_8)));
+            McpResponseDto mcpResponse = McpRequestProcessor.processRequest(matchedAPI, body, additionalHeaders);
+            if (mcpResponse != null) {
+                res = new DefaultFullHttpResponse(req.protocolVersion(),
+                        HttpResponseStatus.valueOf(mcpResponse.getStatusCode()),
+                        Unpooled.wrappedBuffer(mcpResponse.getResponse().getBytes(StandardCharsets.UTF_8)));
                 res.headers()
                         .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
                         .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
+                if (sessionId != null && !sessionId.isEmpty()) {
+                    res.headers().set(McpConstants.MCP_SESSION_ID_HEADER, sessionId);
+                }
+                if (mcpResponse.getSessionId() != null && !mcpResponse.getSessionId().isEmpty()) {
+                    res.headers().set(McpConstants.MCP_SESSION_ID_HEADER, mcpResponse.getSessionId());
+                }
             } else {
                 res = new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.NO_CONTENT);
             }
@@ -172,6 +206,9 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
             res.headers()
                     .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
                     .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
+            if (sessionId != null && !sessionId.isEmpty()) {
+                res.headers().set(McpConstants.MCP_SESSION_ID_HEADER, sessionId);
+            }
         }
         ctx.writeAndFlush(res).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }

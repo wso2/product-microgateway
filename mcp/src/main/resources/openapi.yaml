@@ -27,6 +27,22 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/MCPRequest"
+  /client:
+    post:
+      summary: Forward the request to third-party MCP Server
+      operationId: ProxyMCP
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid request body
+        "500":
+          description: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThirdPartyRequest"
   /health:
     summary: Healthcheck endpoint
     get:
@@ -43,18 +59,42 @@ components:
       properties:
         tool_name:
           type: string
-        api:
-          $ref: '#/components/schemas/APIInfo'
         arguments:
           type: string
           nullable: true
         schema:
           type: string
           nullable: true
+        api:
+          $ref: '#/components/schemas/APIInfo'
+        backend:
+          $ref: '#/components/schemas/BackendInfo'
+          nullable: true
+        is_proxy:
+          type: boolean
+          nullable: true
+        backend_jwt:
+          type: string
+          nullable: true
       required:
         - tool_name
         - api
-
+    ThirdPartyRequest:
+      type: object
+      properties:
+        endpoint:
+          type: string
+        body:
+          type: object
+          additionalProperties: true
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - endpoint
+        - body
+        - headers
     APIInfo:
       type: object
       properties:
@@ -79,4 +119,17 @@ components:
         - context
         - version
         - path
+        - verb
+    BackendInfo:
+      type: object
+      properties:
+        endpoint:
+          type: string
+        target:
+          type: string
+        verb:
+          type: string
+      required:
+        - endpoint
+        - target
         - verb

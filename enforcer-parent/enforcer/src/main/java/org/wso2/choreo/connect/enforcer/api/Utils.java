@@ -22,6 +22,7 @@ import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
+import org.wso2.choreo.connect.enforcer.commons.model.ExtendedOperation;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
@@ -94,8 +95,6 @@ public class Utils {
             return;
         }
 
-        String apiType = requestContext.getMatchedAPI().getApiType();
-
         // Choreo-API-Key is considered as a protected header, hence header value should be treated
         // same as other security headers.
         if (ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeaders() != null) {
@@ -109,7 +108,7 @@ public class Utils {
         if (ConfigHolder.getInstance().getConfig().getAuthHeader().isDropConsoleTestHeaders()) {
             String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
                     .getTestConsoleHeaderName().toLowerCase();
-            if (!APIConstants.ApiType.MCP.equals(apiType)) {
+            if (!keepHeaderForMCP(requestContext)) {
                 requestContext.getRemoveHeaders().add(internalKeyHeader);
             }
             // Avoid internal key being published to the Traffic Manager
@@ -132,7 +131,7 @@ public class Utils {
         AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
         String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
         // We need to keep the Authorization header in case of MCP APIs as we need to pass it to the underlying API.
-        if (!authHeader.isEnableOutboundAuthHeader() && !APIConstants.ApiType.MCP.equals(apiType)) {
+        if (!authHeader.isEnableOutboundAuthHeader() && !keepHeaderForMCP(requestContext)) {
             requestContext.getRemoveHeaders().add(authHeaderName);
         }
         // Authorization Header should not be included in the throttle publishing event.
@@ -167,5 +166,22 @@ public class Utils {
             resource.setSecuritySchemas(apiLevelSecurityList);
         }
         return resource;
+    }
+
+    /**
+     * Check whether the auth headers should be kept for an MCP API.
+     *
+     * @param requestContext request context
+     * @return true if the auth headers should be kept, false otherwise
+     */
+    private static boolean keepHeaderForMCP(RequestContext requestContext) {
+        String apiType = requestContext.getMatchedAPI().getApiType();
+        List<ExtendedOperation> operations = requestContext.getMatchedAPI().getExtendedOperations();
+        String subType = "";
+        if (operations != null && !operations.isEmpty()) {
+            subType = operations.get(0).getMode();
+        }
+
+        return APIConstants.ApiType.MCP.equals(apiType) && "PROXY_EXISTING_REST_API".equalsIgnoreCase(subType);
     }
 }

@@ -22,12 +22,13 @@ import (
 )
 
 type MCPRequest struct {
-	ToolName  string      `json:"tool_name"`
-	Arguments string      `json:"arguments,omitempty"`
-	Schema    string      `json:"schema,omitempty"`
-	API       APIInfo     `json:"api"`
-	Backend   BackendInfo `json:"backend,omitempty"`
-	IsProxy   bool        `json:"is_proxy,omitempty"`
+	ToolName   string      `json:"tool_name"`
+	Arguments  string      `json:"arguments,omitempty"`
+	Schema     string      `json:"schema,omitempty"`
+	API        APIInfo     `json:"api"`
+	Backend    BackendInfo `json:"backend,omitempty"`
+	IsProxy    bool        `json:"is_proxy,omitempty"`
+	BackendJWT string      `json:"backend_jwt,omitempty"`
 }
 
 type APIInfo struct {
@@ -82,4 +83,17 @@ type XMLElement struct {
 	XMLName  xml.Name
 	Content  string       `xml:",chardata"`
 	Children []XMLElement `xml:",any"`
+}
+
+type MCPResult struct {
+	Code      int    `json:"code"`
+	Response  any    `json:"response"`
+	SessionID string `json:"sessionId"`
+	Error     bool   `json:"error"`
+}
+
+type ThirdPartyRequest struct {
+	Endpoint string            `json:"endpoint"`
+	Body     map[string]any    `json:"body"`
+	Headers  map[string]string `json:"headers"`
 }

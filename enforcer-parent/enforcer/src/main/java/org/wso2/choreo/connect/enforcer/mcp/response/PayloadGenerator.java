@@ -93,7 +93,8 @@ public class PayloadGenerator {
         return data;
     }
 
-    public static String generateToolListPayload(Object id, List<ExtendedOperation> extendedOperations) {
+    public static String generateToolListPayload(Object id, List<ExtendedOperation> extendedOperations,
+                                                 boolean isThirdParty) {
         McpResponse response = new McpResponse(id);
         JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
         JsonObject result = new JsonObject();
@@ -105,7 +106,13 @@ public class PayloadGenerator {
             String schema = extendedOperation.getSchema();
             if (schema != null) {
                 JsonObject schemaObject = gson.fromJson(schema, JsonObject.class);
-                toolObject.add(McpConstants.INPUT_SCHEMA_KEY, sanitizeInputSchema(schemaObject));
+                // Avoid processing the schema in the third party server scenario
+                if (isThirdParty) {
+                    toolObject.add(McpConstants.INPUT_SCHEMA_KEY, schemaObject);
+                } else {
+                    toolObject.add(McpConstants.INPUT_SCHEMA_KEY, sanitizeInputSchema(schemaObject));
+                }
+
             }
             toolsArray.add(toolObject);
         }
@@ -160,7 +167,7 @@ public class PayloadGenerator {
 
     public static JsonObject generateTransformationRequestPayload(String toolName, String vHost, String args,
                                                                   ExtendedOperation extendedOperation,
-                                                                  String authParam) {
+                                                                  Map<String, String> additionalHeaders) {
         StringBuilder sb = new StringBuilder("https://");
         JsonObject payload = new JsonObject();
         payload.addProperty(McpConstants.PAYLOAD_TOOL_NAME, toolName);
@@ -168,7 +175,7 @@ public class PayloadGenerator {
 
         JsonObject apiInfo = new JsonObject();
         JsonObject backendInfo = new JsonObject();
-        if ("Served/Proxy".equalsIgnoreCase(extendedOperation.getMode())) {
+        if (McpConstants.SubTypeConstants.PROXY_EXISTING_REST_API.equalsIgnoreCase(extendedOperation.getMode())) {
             // The context is sent in the format of /{orgId}/context/version.Therefore, we need to remove the orgId
             // and version before passing it to the transformation service.
             String context = "/" + extendedOperation.getApiContext().split("/", 3)[2];
@@ -178,9 +185,11 @@ public class PayloadGenerator {
             apiInfo.addProperty(McpConstants.PAYLOAD_VERSION, extendedOperation.getApiVersion());
             apiInfo.addProperty(McpConstants.PAYLOAD_PATH, extendedOperation.getApiTarget());
             apiInfo.addProperty(McpConstants.PAYLOAD_VERB, extendedOperation.getApiVerb());
-            if (!authParam.isEmpty()) {
-                apiInfo.addProperty(McpConstants.PAYLOAD_AUTH, authParam);
+            if (additionalHeaders.get(McpConstants.PAYLOAD_AUTH) != null &&
+                    !additionalHeaders.get(McpConstants.PAYLOAD_AUTH).isEmpty()) {
+                apiInfo.addProperty(McpConstants.PAYLOAD_AUTH, additionalHeaders.get(McpConstants.PAYLOAD_AUTH));
             }
+            additionalHeaders.remove(McpConstants.PAYLOAD_AUTH);
             payload.addProperty(McpConstants.PAYLOAD_IS_PROXY, true);
             if ("localhost".equals(vHost)) {
                 sb.append("router").append(":").append("9095");
@@ -188,7 +197,7 @@ public class PayloadGenerator {
                 sb.append(vHost);
             }
             apiInfo.addProperty(McpConstants.PAYLOAD_ENDPOINT, sb.toString());
-        } else {
+        } else if (McpConstants.SubTypeConstants.REST_API_BACKEND.equalsIgnoreCase(extendedOperation.getMode())) {
             payload.addProperty(McpConstants.PAYLOAD_IS_PROXY, false);
             backendInfo.addProperty(McpConstants.PAYLOAD_ENDPOINT, extendedOperation.getBackendEndpoint());
             backendInfo.addProperty(McpConstants.PAYLOAD_VERB, extendedOperation.getBackendVerb());
@@ -196,8 +205,26 @@ public class PayloadGenerator {
         }
         payload.add(McpConstants.PAYLOAD_API, apiInfo);
         payload.add(McpConstants.PAYLOAD_BACKEND, backendInfo);
-
         payload.addProperty(McpConstants.ARGUMENTS_KEY, args);
+        // Send backend JWT
+        if (additionalHeaders.get(McpConstants.PAYLOAD_BACKEND_JWT) != null) {
+            payload.addProperty(McpConstants.PAYLOAD_BACKEND_JWT,
+                    additionalHeaders.get(McpConstants.PAYLOAD_BACKEND_JWT));
+        }
+        return payload;
+    }
+
+    public static JsonObject generateThirdPartyRequestPayload(String endpoint, JsonObject requestObject,
+                                                              Map<String, String> additionalHeaders) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("endpoint", endpoint);
+        payload.add("body", requestObject);
+
+        JsonObject headers = new JsonObject();
+        for (Map.Entry<String, String> entry : additionalHeaders.entrySet()) {
+            headers.addProperty(entry.getKey(), entry.getValue());
+        }
+        payload.add("headers", headers);
         return payload;
     }
 

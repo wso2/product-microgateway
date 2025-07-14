@@ -44,6 +44,7 @@ public class McpConstants {
     public static final String PROTOCOL_VERSION_REQUESTED = "requested";
     public static final String PROTOCOL_VERSION_SUPPORTED = "supported";
     public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
+    public static final String MCP_SESSION_ID_HEADER = "mcp-session-id";
     public static final String PARAMS_KEY = "params";
     public static final String TOOL_NAME_KEY = "name";
     public static final String TOOL_DESC_KEY = "description";
@@ -80,6 +81,7 @@ public class McpConstants {
     public static final String PAYLOAD_PATH = "path";
     public static final String PAYLOAD_VERB = "verb";
     public static final String PAYLOAD_AUTH = "auth";
+    public static final String PAYLOAD_BACKEND_JWT = "backend_jwt";
     public static final String PAYLOAD_ENDPOINT = "endpoint";
     public static final String PAYLOAD_IS_PROXY = "is_proxy";
     public static final String PAYLOAD_TARGET = "target";
@@ -107,5 +109,15 @@ public class McpConstants {
         public static final String METHOD_NOT_FOUND_MESSAGE = "Method not found";
         public static final String INVALID_PARAMS_MESSAGE = "Invalid params";
         public static final String INTERNAL_ERROR_MESSAGE = "Internal error";
+    }
+
+    /**
+     * This class contains constants used for MCP subtypes
+     */
+    public static class SubTypeConstants {
+        public static final String PROXY_EXISTING_REST_API = "PROXY_EXISTING_REST_API";
+        public static final String REST_API_BACKEND = "REST_API_BACKEND";
+        public static final String THIRD_PARTY_SERVER = "THIRD_PARTY_SERVER";
+
     }
 }

@@ -20,4 +20,5 @@ const (
 	ContentType     = "Content-Type"
 	ContentTypeJSON = "application/json"
 	ContentTypeXML  = "application/xml"
+	Accept          = "Accept"
 )
