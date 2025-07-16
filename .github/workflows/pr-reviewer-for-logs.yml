@@ -8,8 +8,6 @@ jobs:
   call-template:
     uses: wso2/wso2-organization-templates/.github/workflows/pr-reviewer.yml@main
     with:
-      reviewEndpoint: ${{ vars.AI_LOG_AGENT_REVIEW_ENDPOINT }}
-      tokenUrl: ${{ vars.AI_LOG_AGENT_TOKEN_URL }}
       prUrl: ${{ github.event.pull_request.html_url }}
     secrets:
       clientId: ${{ secrets.AI_LOG_AGENT_CLIENT_ID }}
