@@ -146,6 +146,7 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable, DiscoveryCli
                     subscriptionDataStore.addSubscriptionPolicies(subscriptionPolicyList);
                     logger.info("Number of subscription policies received : " + subscriptionPolicyList.size());
                     ack();
+                    logger.info("Subscription policy discovery response acked");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime

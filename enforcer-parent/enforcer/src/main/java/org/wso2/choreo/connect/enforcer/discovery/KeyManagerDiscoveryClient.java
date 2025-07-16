@@ -144,6 +144,7 @@ public class KeyManagerDiscoveryClient implements Runnable, DiscoveryClient {
                     logger.info("Number of key managers received : " + keyManagerConfig.size());
                     // TODO: fix recursive ack on ack failure
                     ack();
+                    logger.info("Key manager discovery response acked");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime

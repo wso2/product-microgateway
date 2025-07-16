@@ -146,6 +146,7 @@ public class RevokedTokenDiscoveryClient implements Runnable, DiscoveryClient {
                     handleRevokedTokens(tokens);
                     // TODO: (Praminda) fix recursive ack on ack failure
                     ack();
+                    logger.info("Revoked token discovery response acked");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     logger.info(e);

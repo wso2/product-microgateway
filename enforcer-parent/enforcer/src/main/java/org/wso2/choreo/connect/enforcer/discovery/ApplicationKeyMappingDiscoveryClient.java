@@ -148,6 +148,7 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable, Discovery
                     subscriptionDataStore.addApplicationKeyMappings(applicationKeyMappingLis);
                     logger.info("Number of application key mappings received : " + applicationKeyMappingLis.size());
                     ack();
+                    logger.info("Application key mapping discovery response acked");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime

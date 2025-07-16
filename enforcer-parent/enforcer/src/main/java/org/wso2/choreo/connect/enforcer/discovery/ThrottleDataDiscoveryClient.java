@@ -139,6 +139,7 @@ public class ThrottleDataDiscoveryClient implements Runnable, DiscoveryClient {
                         try {
                             handleResponse(response);
                             ack();
+                            logger.info("Throttle data discovery response handled successfully");
                             initialFetchCompleted = true;
                         } catch (Exception e) {
                             // catching generic error here to wrap any grpc communication errors in the runtime
