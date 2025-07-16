@@ -21,7 +21,8 @@ import (
 	"errors"
 	"strconv"
 	"sync/atomic"
-
+	"time"
+	logger "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -240,7 +241,10 @@ func (s *server) process(stream streamv3.Stream, reqCh <-chan *discovery.Discove
 			if !more {
 				return status.Errorf(codes.Unavailable, "apis watch failed")
 			}
+			sendStartTime := time.Now()
 			nonce, err := send(resp)
+			sendDuration := time.Since(sendStartTime)
+			logger.Info("APIs watch response sent in ", sendDuration)
 			if err != nil {
 				return err
 			}
@@ -250,7 +254,10 @@ func (s *server) process(stream streamv3.Stream, reqCh <-chan *discovery.Discove
 			if !more {
 				return status.Errorf(codes.Unavailable, "subscriptionList watch failed")
 			}
+			sendStartTime := time.Now()
 			nonce, err := send(resp)
+			sendDuration := time.Since(sendStartTime)
+			logger.Info("Subscription list watch response sent in ", sendDuration)
 			if err != nil {
 				return err
 			}
@@ -270,7 +277,10 @@ func (s *server) process(stream streamv3.Stream, reqCh <-chan *discovery.Discove
 			if !more {
 				return status.Errorf(codes.Unavailable, "applicationList watch failed")
 			}
+			sendStartTime := time.Now()
 			nonce, err := send(resp)
+			sendDuration := time.Since(sendStartTime)
+			logger.Info("Application watch response sent in ", sendDuration)
 			if err != nil {
 				return err
 			}
@@ -290,7 +300,10 @@ func (s *server) process(stream streamv3.Stream, reqCh <-chan *discovery.Discove
 			if !more {
 				return status.Errorf(codes.Unavailable, "subscriptionPolicyList watch failed")
 			}
+			sendStartTime := time.Now()
 			nonce, err := send(resp)
+			sendDuration := time.Since(sendStartTime)
+			logger.Info("Subscription Policy list watch response sent in ", sendDuration)
 			if err != nil {
 				return err
 			}
