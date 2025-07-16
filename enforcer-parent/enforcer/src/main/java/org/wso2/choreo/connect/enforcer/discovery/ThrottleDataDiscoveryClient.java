@@ -138,7 +138,10 @@ public class ThrottleDataDiscoveryClient implements Runnable, DiscoveryClient {
 
                         try {
                             handleResponse(response);
+                            long sendStartTime = System.currentTimeMillis();
                             ack();
+                            long sendDuration = System.currentTimeMillis() - sendStartTime;
+                            logger.info("Throttle data discovery response acked after " + sendDuration + " ms");
                             logger.info("Throttle data discovery response handled successfully");
                             initialFetchCompleted = true;
                         } catch (Exception e) {

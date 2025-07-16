@@ -139,8 +139,10 @@ public class ApiListDiscoveryClient implements Runnable, DiscoveryClient {
                     }
                     subscriptionDataStore.addApis(apiList);
                     logger.info("Number of APIs received : " + apiList.size());
+                    long sendStartTime = System.currentTimeMillis();
                     ack();
-                    logger.info("API list discovery response acked");
+                    long sendDuration = System.currentTimeMillis() - sendStartTime;
+                    logger.info("API list discovery response acked after " + sendDuration + " ms");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime

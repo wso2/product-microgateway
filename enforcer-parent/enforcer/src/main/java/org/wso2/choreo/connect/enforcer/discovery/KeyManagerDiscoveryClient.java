@@ -143,8 +143,10 @@ public class KeyManagerDiscoveryClient implements Runnable, DiscoveryClient {
                     kmHolder.populateKMIssuerConfiguration(keyManagerConfig);
                     logger.info("Number of key managers received : " + keyManagerConfig.size());
                     // TODO: fix recursive ack on ack failure
+                    long sendStartTime = System.currentTimeMillis();
                     ack();
-                    logger.info("Key manager discovery response acked");
+                    long sendDuration = System.currentTimeMillis() - sendStartTime;
+                    logger.info("Key manager discovery response acked after " + sendDuration + " ms");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
