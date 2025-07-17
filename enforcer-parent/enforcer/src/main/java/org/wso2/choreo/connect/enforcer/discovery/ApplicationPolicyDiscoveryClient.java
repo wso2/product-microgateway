@@ -146,7 +146,10 @@ public class ApplicationPolicyDiscoveryClient implements Runnable, DiscoveryClie
                     }
                     subscriptionDataStore.addApplicationPolicies(applicationPolicyList);
                     logger.info("Number of application policies received : " + applicationPolicyList.size());
+                    long sendStartTime = System.currentTimeMillis();
                     ack();
+                    long sendDuration = System.currentTimeMillis() - sendStartTime;
+                    logger.info("Application Policy discovery response acked after " + sendDuration + " ms");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime

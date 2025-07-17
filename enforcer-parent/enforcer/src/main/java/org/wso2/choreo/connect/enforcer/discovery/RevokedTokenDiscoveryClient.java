@@ -145,7 +145,10 @@ public class RevokedTokenDiscoveryClient implements Runnable, DiscoveryClient {
                     List<RevokedToken> tokens = handleResponse(response);
                     handleRevokedTokens(tokens);
                     // TODO: (Praminda) fix recursive ack on ack failure
+                    long sendStartTime = System.currentTimeMillis();
                     ack();
+                    long sendDuration = System.currentTimeMillis() - sendStartTime;
+                    logger.info("Revoked token discovery response acked after " + sendDuration + " ms");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     logger.info(e);

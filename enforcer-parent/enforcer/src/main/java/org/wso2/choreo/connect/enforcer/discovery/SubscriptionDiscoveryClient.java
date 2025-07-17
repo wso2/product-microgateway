@@ -146,7 +146,10 @@ public class SubscriptionDiscoveryClient implements Runnable, DiscoveryClient {
                     }
                     subscriptionDataStore.addSubscriptions(subscriptionList);
                     logger.info("Number of subscriptions received : " + subscriptionList.size());
+                    long sendStartTime = System.currentTimeMillis();
                     ack();
+                    long sendDuration = System.currentTimeMillis() - sendStartTime;
+                    logger.info("Subscriptions discovery response acked after " + sendDuration + " ms");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime

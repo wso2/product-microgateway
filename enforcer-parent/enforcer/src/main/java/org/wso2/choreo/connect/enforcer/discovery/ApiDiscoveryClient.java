@@ -140,7 +140,10 @@ public class ApiDiscoveryClient implements Runnable, DiscoveryClient {
                     apiFactory.addApis(apis);
                     logger.info("Number of API artifacts received : " + apis.size());
                     // TODO: (Praminda) fix recursive ack on ack failure
+                    long sendStartTime = System.currentTimeMillis();
                     ack();
+                    long sendDuration = System.currentTimeMillis() - sendStartTime;
+                    logger.info("API discovery response acked after " + sendDuration + " ms");
                     initialFetchCompleted = true;
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
