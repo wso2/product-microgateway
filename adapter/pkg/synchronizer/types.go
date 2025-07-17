@@ -57,6 +57,7 @@ type APIDeployment struct {
 	IsPaidOrg      bool   `json:"isPaidOrg"`
 	APIContext     string `json:"apiContext"`
 	Version        string `json:"version"`
+	IsEgress       bool   `json:"isEgress"`
 }
 
 // GatewayLabel represents gateway environment name, vhost and deployedTimeStamp of an API project.
