@@ -285,7 +285,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	// handle panic
 	defer func() {
 		if r := recover(); r != nil {
-			panic(fmt.Sprintf("Error encountered while applying API %v:%v to %v.", apiYaml.Name, apiYaml.Version, vHost))
+			panic(fmt.Sprintf("Error encountered while applying API %v:%v to %v. err: %v", apiYaml.Name, apiYaml.Version, vHost, r))
 		}
 	}()
 
