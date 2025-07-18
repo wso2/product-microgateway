@@ -90,6 +90,7 @@ public class McpConstants {
     public static final String ASGARDEO_WK_PLACEHOLDER
             = "https://api.asgardeo.io/t/{organization}/oauth2/token/.well-known/openid-configuration";
     public static final String MCP_PROTOCOL_VERSION_HEADER = "MCP-Protocol-Version";
+    public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 
     /**
      * This class contains constants used for RPC processing

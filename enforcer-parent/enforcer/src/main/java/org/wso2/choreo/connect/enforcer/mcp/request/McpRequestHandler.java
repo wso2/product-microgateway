@@ -186,9 +186,11 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
                         .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
                         .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
                 if (sessionId != null && !sessionId.isEmpty()) {
+                    res.headers().set(McpConstants.ACCESS_CONTROL_EXPOSE_HEADERS, McpConstants.MCP_SESSION_ID_HEADER);
                     res.headers().set(McpConstants.MCP_SESSION_ID_HEADER, sessionId);
                 }
                 if (mcpResponse.getSessionId() != null && !mcpResponse.getSessionId().isEmpty()) {
+                    res.headers().set(McpConstants.ACCESS_CONTROL_EXPOSE_HEADERS, McpConstants.MCP_SESSION_ID_HEADER);
                     res.headers().set(McpConstants.MCP_SESSION_ID_HEADER, mcpResponse.getSessionId());
                 }
             } else {
@@ -207,6 +209,7 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
                     .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
                     .setInt(HttpHeaderNames.CONTENT_LENGTH, res.content().readableBytes());
             if (sessionId != null && !sessionId.isEmpty()) {
+                res.headers().set(McpConstants.ACCESS_CONTROL_EXPOSE_HEADERS, McpConstants.MCP_SESSION_ID_HEADER);
                 res.headers().set(McpConstants.MCP_SESSION_ID_HEADER, sessionId);
             }
         }
