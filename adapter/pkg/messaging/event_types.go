@@ -117,6 +117,7 @@ type APIEvent struct {
 	APIProvider                      string                        `json:"apiProvider"`
 	APIStatus                        string                        `json:"apiStatus"`
 	APIType                          string                        `json:"apiType"`
+	IsEgress                         bool                          `json:"isEgress"`
 	Event
 	// TODO: (VirajSalaka) Remove this when the event is fixed from APIM side
 	Version string `json:"version"`
