@@ -23,6 +23,7 @@ const (
 	tracingClusterName      string = "wso2_cc_trace"
 	extAuthzHTTPCluster     string = "ext_authz_http_cluster"
 	rateLimitClusterName    string = "rate-limit"
+	varnishClusterName      string = "varnish"
 )
 
 const (
@@ -60,6 +61,7 @@ const (
 	defaultRdsConfigName            string = "default"
 	defaultHTTPListenerName         string = "HTTPListener"
 	defaultHTTPSListenerName        string = "HTTPSListener"
+	newHTTPListenerName             string = "NewHTTPListener"
 	defaultAccessLogPath            string = "/tmp/envoy.access.log"
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
 )
@@ -108,6 +110,7 @@ const (
 )
 const (
 	httpsURLType     string = "https"
+	httpURLType 	 string = "http"
 	wssURLType       string = "wss"
 	httpMethodHeader string = ":method"
 )

@@ -55,6 +55,17 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
         ResponseObject responseObject = matchedAPI.process(requestContext);
+        
+        // to only go insside GET,HEAD otherwise OPTION calls will be failed
+        if (APIConstants.HTTP_GET_METHOD.equals(requestContext.getRequestMethod()) ||
+            APIConstants.HTTP_HEAD_METHOD.equals(requestContext.getRequestMethod())) {        
+            // Check if response cache is enabled
+            if (requestContext.getMatchedResourcePath().isResponseCache()) {
+                // Add, change headers for caching enabled requests
+                addCustomHeadersForCaching(responseObject, requestContext);
+            }
+        }
+
         responseObject.setExtAuthDetails(requestContext.getExtAuthDetails());
         return responseObject;
     }
@@ -83,5 +94,17 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
                 .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
                 .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
                 .pathTemplate(pathTemplate).build();
+    }
+
+    private void addCustomHeadersForCaching(ResponseObject responseObject, RequestContext requestContext) {
+
+        String prodClusterHeaderValue = requestContext.getProdClusterHeader();
+        String actualHostHeaderValue = requestContext.getHeaders().get(":authority");
+
+            responseObject.getHeaderMap().put(AdapterConstants.ACTUAL_CLUSTER_HEADER, prodClusterHeaderValue);
+            responseObject.getHeaderMap().put(AdapterConstants.PATH_HEADER, requestContext.getRequestPath());
+            responseObject.getHeaderMap().put(AdapterConstants.CLUSTER_HEADER, "varnish");
+            responseObject.getHeaderMap().put(AdapterConstants.ACTUAL_HOST_HEADER, actualHostHeaderValue);
+
     }
 }
