@@ -40,11 +40,13 @@ public class McpConstants {
     public static final String PROTOCOL_VERSION_KEY = "protocolVersion";
     public static final String PROTOCOL_VERSION_2024_NOVEMBER = "2024-11-05";
     public static final String PROTOCOL_VERSION_2025_MARCH = "2025-03-26";
+    public static final String DEFAULT_NEGOTIATED_PROTOCOL_VERSION = PROTOCOL_VERSION_2025_MARCH;
     public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = Arrays.asList(PROTOCOL_VERSION_2025_MARCH);
     public static final String PROTOCOL_VERSION_REQUESTED = "requested";
     public static final String PROTOCOL_VERSION_SUPPORTED = "supported";
     public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
     public static final String MCP_SESSION_ID_HEADER = "mcp-session-id";
+    public static final String MCP_PROTOCOL_VERSION_HEADER = "mcp-protocol-version";
     public static final String PARAMS_KEY = "params";
     public static final String TOOL_NAME_KEY = "name";
     public static final String TOOL_DESC_KEY = "description";
@@ -89,7 +91,6 @@ public class McpConstants {
     public static final String PAYLOAD_BACKEND = "backend";
     public static final String ASGARDEO_WK_PLACEHOLDER
             = "https://api.asgardeo.io/t/{organization}/oauth2/token/.well-known/openid-configuration";
-    public static final String MCP_PROTOCOL_VERSION_HEADER = "MCP-Protocol-Version";
     public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 
     /**

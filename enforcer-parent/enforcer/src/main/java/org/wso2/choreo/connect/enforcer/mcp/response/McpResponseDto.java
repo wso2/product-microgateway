@@ -25,6 +25,7 @@ public class McpResponseDto {
     private String response;
     private int statusCode;
     private String sessionId;
+    private String protocolVersion;
 
     public McpResponseDto(String response, int statusCode, String sessionId) {
         this.response = response;
@@ -54,5 +55,13 @@ public class McpResponseDto {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(String protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 }
