@@ -23,11 +23,27 @@ import (
 
 	"github.com/Azure/go-amqp"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/config"
 )
 
 // InitAwsActiveMqConnection initializes a connection to the AWS ActiveMQ broker
-func InitAwsActiveMqConnection(ctx context.Context, connectionString string, userName string, password string, idleTimeoutDuration time.Duration) (*amqp.Conn, error) {
-	con, err := amqp.Dial(
+func InitAwsActiveMqConnection(ctx context.Context, brokerConnectionParameters config.BrokerConnectionParameters, topic string) (*amqp.Conn, error) {
+	connectionString := brokerConnectionParameters.EventListeningEndpoints[0]
+	username := brokerConnectionParameters.ActiveMqUsername
+	password := brokerConnectionParameters.ActiveMqPassword
+	idleTimeoutDuration := brokerConnectionParameters.ActiveMqIdleTimeoutDurationInSeconds
+	reconnectRetryCount := brokerConnectionParameters.ReconnectRetryCount
+	retryInterval := brokerConnectionParameters.ReconnectInterval
+
+	con, err := dialForActiveMqConnection(ctx, connectionString, username, password, idleTimeoutDuration)
+	if err != nil {
+		return retryActiveMqConnection(ctx, connectionString, username, password, idleTimeoutDuration, reconnectRetryCount, topic, int(retryInterval))
+	}
+	return con, nil
+}
+
+func dialForActiveMqConnection(ctx context.Context, connectionString string, userName string, password string, idleTimeoutDuration time.Duration) (*amqp.Conn, error) {
+	return amqp.Dial(
 		ctx,
 		connectionString,
 		&amqp.ConnOptions{
@@ -37,11 +53,23 @@ func InitAwsActiveMqConnection(ctx context.Context, connectionString string, use
 			IdleTimeout: idleTimeoutDuration * time.Second,
 		},
 	)
-	if err != nil {
-		logger.LoggerMgw.Infof("Failed to connect to AWS ActiveMQ broker. Error: %s", err.Error())
-		return nil, err
+}
+
+func retryActiveMqConnection(ctx context.Context, connectionString string, userName string, password string, idleTimeoutDuration time.Duration, retryCount int, topic string, retryInterval int) (*amqp.Conn, error) {
+	var con *amqp.Conn
+	var err error
+	logger.LoggerMgw.Infof("Retrying to connect to AWS ActiveMQ broker for topic: %s, retry count: %d", topic, retryCount)
+	for i := 0; i < retryCount; i++ {
+		con, err = dialForActiveMqConnection(ctx, connectionString, userName, password, idleTimeoutDuration)
+		if err == nil {
+			logger.LoggerMgw.Infof("Successfully connected to AWS ActiveMQ broker for topic: %s on retry %d", topic, i+1)
+			return con, nil
+		}
+		logger.LoggerMgw.Errorf("Retry %d failed to connect to AWS ActiveMQ broker for topic: %s error:%s", i+1, topic, err.Error())
+		time.Sleep(time.Duration(retryInterval * int(time.Millisecond)))
 	}
-	return con, nil
+	logger.LoggerMgw.Errorf("Failed to connect to AWS ActiveMQ broker for topic: %s even after retries. Error:%s", topic, err.Error())
+	return nil, err
 }
 
 // InitAwsActiveMqReceiverAndValidate initializes a receiver for the specified topic on the AWS ActiveMQ broker
