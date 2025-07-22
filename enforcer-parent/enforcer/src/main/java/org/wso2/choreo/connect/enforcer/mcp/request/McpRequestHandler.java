@@ -174,10 +174,22 @@ public class McpRequestHandler extends ChannelInboundHandlerAdapter {
             }
         }
 
+        String protocolVersion = null;
+        if (headers.contains(McpConstants.MCP_PROTOCOL_VERSION_HEADER)) {
+            protocolVersion = headers.get(McpConstants.MCP_PROTOCOL_VERSION_HEADER);
+        }
+        if (protocolVersion == null || protocolVersion.isEmpty()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("mcp-protocol-version header is empty for API: {}", apiName);
+            }
+            protocolVersion = McpConstants.DEFAULT_NEGOTIATED_PROTOCOL_VERSION;
+        }
+
         HttpContent requestContent = (HttpContent) msg;
         if (requestContent.content().isReadable()) {
             String body = requestContent.content().toString(StandardCharsets.UTF_8);
-            McpResponseDto mcpResponse = McpRequestProcessor.processRequest(matchedAPI, body, additionalHeaders);
+            McpResponseDto mcpResponse = McpRequestProcessor.processRequest(matchedAPI, body,
+                    additionalHeaders, protocolVersion);
             if (mcpResponse != null) {
                 res = new DefaultFullHttpResponse(req.protocolVersion(),
                         HttpResponseStatus.valueOf(mcpResponse.getStatusCode()),
