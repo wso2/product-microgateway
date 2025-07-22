@@ -48,13 +48,14 @@ public class PayloadGenerator {
     }
 
     public static String getInitializeResponse(Object id, String serverName, String serverVersion,
-                                               String serverDescription, boolean toolListChangeNotified) {
+                                               String serverDescription, boolean toolListChangeNotified,
+                                               String protocolVersion) {
         // Create the response object as specified in
         // https://modelcontextprotocol.io/specification/2025-03-26/basic/lifecycle#initialization
         McpResponse response = new McpResponse(id);
         JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
         JsonObject result = new JsonObject();
-        result.addProperty(McpConstants.PROTOCOL_VERSION_KEY, McpConstants.PROTOCOL_VERSION_2025_MARCH);
+        result.addProperty(McpConstants.PROTOCOL_VERSION_KEY, protocolVersion);
 
         JsonObject capabilities = new JsonObject();
         JsonObject toolCapabilities = new JsonObject();

@@ -27,12 +27,22 @@ public class McpException extends Exception {
     private final int errorCode;
     private final String errorMessage;
     private final Object data;
+    private final int statusCode;
 
     public McpException(int errorCode, String errorMessage, Object data) {
         super(errorMessage);
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.data = data;
+        this.statusCode = 200;
+    }
+
+    public McpException(int errorCode, String errorMessage, Object data, int statusCode) {
+        super(errorMessage);
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+        this.data = data;
+        this.statusCode = statusCode;
     }
 
     public int getErrorCode() {
@@ -45,6 +55,10 @@ public class McpException extends Exception {
 
     public Object getData() {
         return data;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
     }
 
     public String toJsonRpcErrorPayload() {

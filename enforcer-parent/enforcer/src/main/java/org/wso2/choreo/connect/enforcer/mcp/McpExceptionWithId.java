@@ -24,10 +24,16 @@ import org.wso2.choreo.connect.enforcer.mcp.response.PayloadGenerator;
  * This class is used to throw MCP related errors with an ID.
  */
 public class McpExceptionWithId extends McpException {
-    private Object id;
+    private final Object id;
+
 
     public McpExceptionWithId(Object id, int errorCode, String errorMessage, Object data) {
         super(errorCode, errorMessage, data);
+        this.id = id;
+    }
+
+    public McpExceptionWithId(Object id, int errorCode, String errorMessage, Object data, int statusCode) {
+        super(errorCode, errorMessage, data, statusCode);
         this.id = id;
     }
 

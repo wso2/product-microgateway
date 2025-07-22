@@ -57,7 +57,7 @@ public class McpRequestProcessor {
     private static final Logger logger = LogManager.getLogger(McpRequestProcessor.class);
 
     public static McpResponseDto processRequest(API matchedMcpApi, String requestBody,
-                                                Map<String, String> additionalHeaders) {
+                                                Map<String, String> additionalHeaders, String protocolVersion) {
         try {
             validateRequest(requestBody);
             JsonObject requestObject = JsonParser.parseString(requestBody).getAsJsonObject();
@@ -73,7 +73,7 @@ public class McpRequestProcessor {
             if (McpConstants.SubTypeConstants.THIRD_PARTY_SERVER.equals(mcpSubType)) {
                 return processThirdPartyRequest(matchedMcpApi, mcpServerUrl, requestObject, method, additionalHeaders);
             } else {
-                return processInternalRequest(matchedMcpApi, requestObject, method, additionalHeaders);
+                return processInternalRequest(matchedMcpApi, requestObject, method, additionalHeaders, protocolVersion);
             }
         } catch (McpException e) {
             return new McpResponseDto(e.toJsonRpcErrorPayload(), 200, null);
@@ -90,15 +90,18 @@ public class McpRequestProcessor {
      * @return the response payload as a String
      */
     public static McpResponseDto processInternalRequest(API matchedMcpApi, JsonObject requestObject, String method,
-                                                        Map<String, String> additionalHeaders) {
+                                                        Map<String, String> additionalHeaders, String protocolVersion) {
         try {
             Object id = -1;
             if (!method.contains("notifications/")) {
                 id = requestObject.get(McpConstants.RpcConstants.ID);
             }
+            if (!McpConstants.METHOD_INITIALIZE.equals(method)) {
+                validateProtocolVersion(id, protocolVersion);
+            }
             if (McpConstants.METHOD_INITIALIZE.equals(method)) {
-                validateInitializeRequest(id, requestObject);
-                return handleMcpInitialize(id, matchedMcpApi);
+                String negotiatedProtocolVersion = validateInitializeRequest(id, requestObject);
+                return handleMcpInitialize(id, matchedMcpApi, negotiatedProtocolVersion);
             } else if (McpConstants.METHOD_TOOL_LIST.equals(method)) {
                 return handleMcpToolList(id, matchedMcpApi, false);
             } else if (McpConstants.METHOD_TOOL_CALL.equals(method)) {
@@ -122,7 +125,7 @@ public class McpRequestProcessor {
                         McpConstants.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not found");
             }
         } catch (McpException e) {
-            return new McpResponseDto(e.toJsonRpcErrorPayload(), 200, null);
+            return new McpResponseDto(e.toJsonRpcErrorPayload(), e.getStatusCode(), null);
         }
     }
 
@@ -227,15 +230,15 @@ public class McpRequestProcessor {
         }
     }
 
-    public static void validateInitializeRequest(Object id, JsonObject requestObject) throws McpException {
+    public static String validateInitializeRequest(Object id, JsonObject requestObject) throws McpException {
         if (requestObject.has(McpConstants.PARAMS_KEY)) {
             JsonObject params = requestObject.getAsJsonObject(McpConstants.PARAMS_KEY);
             if (params.has(McpConstants.PROTOCOL_VERSION_KEY)) {
                 String protocolVersion = params.get(McpConstants.PROTOCOL_VERSION_KEY).getAsString();
                 if (!McpConstants.SUPPORTED_PROTOCOL_VERSIONS.contains(protocolVersion)) {
-                    throw new McpExceptionWithId(id, McpConstants.RpcConstants.INVALID_PARAMS_CODE,
-                            McpConstants.PROTOCOL_MISMATCH_ERROR,
-                            PayloadGenerator.getInitializeErrorBody(protocolVersion));
+                    return McpConstants.DEFAULT_NEGOTIATED_PROTOCOL_VERSION;
+                } else {
+                    return protocolVersion;
                 }
             } else {
                 throw new McpException(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
@@ -244,6 +247,21 @@ public class McpRequestProcessor {
         } else {
             throw new McpException(McpConstants.RpcConstants.INVALID_REQUEST_CODE,
                     McpConstants.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing params field");
+        }
+    }
+
+    /**
+     * Validates the protocol version against the supported versions.
+     *
+     * @param id              the ID of the request
+     * @param protocolVersion the protocol version to validate
+     * @throws McpException if the protocol version is not supported
+     */
+    public static void validateProtocolVersion(Object id, String protocolVersion) throws McpException {
+        if (!McpConstants.SUPPORTED_PROTOCOL_VERSIONS.contains(protocolVersion)) {
+            throw new McpExceptionWithId(id, McpConstants.RpcConstants.INVALID_PARAMS_CODE,
+                    McpConstants.PROTOCOL_MISMATCH_ERROR,
+                    PayloadGenerator.getInitializeErrorBody(protocolVersion), 400);
         }
     }
 
@@ -307,12 +325,12 @@ public class McpRequestProcessor {
         jsonObject.add(McpConstants.PARAMS_KEY, params);
     }
 
-    private static McpResponseDto handleMcpInitialize(Object id, API matchedApi) {
+    private static McpResponseDto handleMcpInitialize(Object id, API matchedApi, String protocolVersion) {
         String name = matchedApi.getAPIConfig().getName();
         String version = matchedApi.getAPIConfig().getVersion();
         String description = "This is an MCP Server";
         return new McpResponseDto(PayloadGenerator
-                .getInitializeResponse(id, name, version, description, false),
+                .getInitializeResponse(id, name, version, description, false, protocolVersion),
                 200, null);
 
     }
