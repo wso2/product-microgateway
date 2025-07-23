@@ -312,6 +312,8 @@ public const string SUBSCRIPTIONS_DELETE_EVENT = "SUBSCRIPTIONS_DELETE";
 
 public const string LISTENER_CONF_INSTANCE_ID = "listenerConfig";
 public const string LISTENER_CONF_HOST = "host";
+public const string UPSTREAM_TLS_HOSTNAME = "hostname";
+public const string UPSTREAM_TLS_PORT = "port";
 public const string LISTENER_CONF_HTTP_PORT = "httpPort";
 public const string LISTENER_CONF_HTTPS_PORT = "httpsPort";
 public const string KEY_STORE_PATH = "keyStorePath";
