@@ -18,6 +18,8 @@
 public const string DEFAULT_CONF_HOST = "0.0.0.0";
 public const int DEFAULT_HTTP_PORT = 9090;
 public const int DEFAULT_HTTPS_PORT = 9095;
+public const string DEFAULT_HOSTNAME = "*";
+public const int DEFAULT_PORT = 443;
 public const string DEFAULT_KEY_STORE_PATH = "${mgw-runtime.home}/runtime/bre/security/ballerinaKeystore.p12";
 public const string DEFAULT_KEY_STORE_PASSWORD = "ballerina";
 public const string DEFAULT_TRUST_STORE_PATH = "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12";

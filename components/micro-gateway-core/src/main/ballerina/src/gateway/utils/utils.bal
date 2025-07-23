@@ -38,7 +38,8 @@ map<APIConfiguration?> apiConfigAnnotationMap = {};
 map<ResourceConfiguration?> resourceConfigAnnotationMap = {};
 map<FilterConfiguration?> filterConfigAnnotationMap = {};
 map<http:InboundAuthHandler> authHandlersMap = {}; //all handlers except for jwt handlers
-http:InboundAuthHandler[] jwtHandlers = [];//all jwt issuer handlers
+http:InboundAuthHandler[] jwtHandlers = []; //all jwt issuer handlers
+map<http:ClientSecureSocket> customSSLProfiles = populateCustomSSLProfiles(); //custom SSL profiles for endpoints
 
 // values read from configuration
 string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
@@ -259,6 +260,18 @@ function getDefaultStringValue(anydata val, string defaultVal) returns string {
 function getDefaultBooleanValue(anydata val, boolean defaultVal) returns boolean {
     if (val is boolean) {
         return <boolean>val;
+    }
+    return defaultVal;
+}
+
+function getDefaultIntValue(anydata val, int defaultVal) returns int {
+    if (val is int) {
+        return <int>val;
+    } else if (val is string) {
+        int|error intValue = 'int:fromString(<string>val);
+        if (intValue is int) {
+            return intValue;
+        }
     }
     return defaultVal;
 }
@@ -1096,6 +1109,132 @@ public function getHandlers(string[] appSecurity) returns http:InboundAuthHandle
         handlers.push(authHandlersMap.get(API_KEY_HANDLER));
     }
     return handlers;
+}
+
+public function getClientSecureSocketByEndpointURL(string endpointURL) returns http:ClientSecureSocket {
+    printDebug(KEY_UTILS, "Retrieving secure socket for endpoint: " + endpointURL);
+    http:ClientSecureSocket? sslProfile = ();
+    boolean isHTTPS = endpointURL.startsWith("https://");
+    boolean isHTTP = endpointURL.startsWith("http://");
+    printDebug(KEY_UTILS, "URL protocol validation - HTTPS: " + isHTTPS.toString() + ", HTTP: " + isHTTP.toString());
+    if (!isHTTPS && !isHTTP) {
+        printError(KEY_UTILS, "Invalid endpoint URL: " + endpointURL + ". It should start with 'http://' or 'https://'.");
+        printDebug(KEY_UTILS, "Returning default secure socket due to invalid URL");
+        return getClientSecureSocket();
+    }
+    int startIndex = isHTTPS ? 8 : 7; // Length of "https://" or "http://"
+    string formattedEndpointURL = endpointURL.substring(startIndex);
+    printDebug(KEY_UTILS, "Formatted endpoint URL (without protocol): " + formattedEndpointURL);
+
+    int? slashIndex = formattedEndpointURL.indexOf("/");
+    int port = 443;
+
+    if (isHTTP) {
+        port = 80;
+    }
+
+    if (slashIndex is int) {
+        formattedEndpointURL = formattedEndpointURL.substring(0, slashIndex);
+        printDebug(KEY_UTILS, "Trimmed endpoint URL (host and port only): " + formattedEndpointURL);
+
+        // Check for port number
+        int? colonIndex = formattedEndpointURL.lastIndexOf(":");
+        // if no valid port is available in the URL, default values of 80 for HTTP and 443 for HTTPS will be used
+        if !(colonIndex is int && colonIndex != -1 && colonIndex < formattedEndpointURL.length() - 1) {
+            printDebug(KEY_UTILS, "No valid port in URL, therefore default port values will be used.");
+            formattedEndpointURL = formattedEndpointURL + ":" + port.toString();
+        }
+    }
+    if (customSSLProfiles.hasKey(formattedEndpointURL)) {
+        printDebug(KEY_UTILS, "Custom SSL profile found for endpoint: " + formattedEndpointURL);
+        sslProfile = customSSLProfiles[formattedEndpointURL];
+    } else {
+        printDebug(KEY_UTILS, "No custom SSL profile found for endpoint: " + formattedEndpointURL
+                + ". Using wildcard profile.");
+        sslProfile = customSSLProfiles["*"]; 
+    }
+    if (sslProfile is http:ClientSecureSocket) {
+        printDebug(KEY_UTILS, "SSL profile retrieved successfully for endpoint: " + endpointURL);
+        return sslProfile;
+    } else {
+        printError(KEY_UTILS, "Failed to retrieve secure socket for endpoint: " + endpointURL);
+        printDebug(KEY_UTILS, "Falling back to default secure socket");
+        return getClientSecureSocket();
+    }
+}
+
+public function populateCustomSSLProfiles() returns map<http:ClientSecureSocket> {
+    printDebug(KEY_UTILS, "Populating custom SSL profiles from configuration");
+
+    map<http:ClientSecureSocket> customSSLProfiles = {};
+    map<anydata>[]|error clientSSLProfiles = map <anydata> [] .constructFrom(config:getAsArray(CLIENT_SSL_CONF_INSTANCE_ID))
+        ;
+
+    if (clientSSLProfiles is map<anydata>[]) {
+        printDebug(KEY_UTILS, "Found " + clientSSLProfiles.length().toString() + " SSL profile(s) in configuration");
+    } else {
+        printError(KEY_UTILS, "Failed to read client SSL profiles from config", clientSSLProfiles);
+    }
+
+    if (clientSSLProfiles is map<anydata>[] && clientSSLProfiles.length() > 0) {
+        int profileIndex = 0;
+        foreach map<anydata> clientSSLProfile in clientSSLProfiles {
+            profileIndex = profileIndex + 1;
+            printDebug(KEY_UTILS, "Processing SSL profile " + profileIndex.toString() + " of " + clientSSLProfiles.length().toString());
+
+            string hostname = getDefaultStringValue(clientSSLProfile[UPSTREAM_TLS_HOSTNAME], DEFAULT_HOSTNAME);
+            int port = getDefaultIntValue(clientSSLProfile[UPSTREAM_TLS_PORT], DEFAULT_PORT);
+            string keystorePath = getDefaultStringValue(clientSSLProfile[KEY_STORE_PATH], DEFAULT_KEY_STORE_PATH);
+            string keystorePassword = getDefaultStringValue(clientSSLProfile[KEY_STORE_PASSWORD], DEFAULT_KEY_STORE_PASSWORD);
+            string truststorePath = getDefaultStringValue(clientSSLProfile[TRUST_STORE_PATH], DEFAULT_TRUST_STORE_PATH);
+            string truststorePassword = getDefaultStringValue(clientSSLProfile[TRUST_STORE_PASSWORD], DEFAULT_TRUST_STORE_PASSWORD);
+            string protocolName = getDefaultStringValue(clientSSLProfile[MTSL_CONF_PROTOCOL_NAME], DEFAULT_PROTOCOL_NAME);
+            string protocolVersions = getDefaultStringValue(clientSSLProfile[MTSL_CONF_PROTOCOL_VERSIONS], DEFAULT_PROTOCOL_VERSIONS);
+            string ciphers = getDefaultStringValue(clientSSLProfile[MTSL_CONF_CIPHERS], DEFAULT_CIPHERS);
+            boolean verifyHostname = getDefaultBooleanValue(clientSSLProfile[ENABLE_HOSTNAME_VERIFICATION], true);
+            boolean disableSSLVerification = getDefaultBooleanValue(clientSSLProfile[HTTP_CLIENTS_DISABLE_SSL_VERIFICATION], false);
+
+            printDebug(KEY_UTILS, "SSL profile config - Hostname: " + hostname + ", Port: " + port.toString() +
+                    ", KeyStore: " + keystorePath + ", TrustStore: " + truststorePath +
+                    ", Protocol: " + protocolName + ", VerifyHostname: " + verifyHostname.toString());
+
+            http:ClientSecureSocket secureSocket = {
+                keyStore: {
+                    path: keystorePath,
+                    password: keystorePassword
+                },
+                trustStore: {
+                    path: truststorePath,
+                    password: truststorePassword
+                },
+                protocol: {
+                    name: protocolName,
+                    versions: split(protocolVersions, ",")
+                },
+                ciphers: split(ciphers, ","),
+                verifyHostname: verifyHostname,
+                disable: disableSSLVerification
+            };
+
+            string hostnameWithPort = "*";
+            
+            if (hostname.length() > 0 && port >= 0) {
+                if (clientSSLProfile[UPSTREAM_TLS_HOSTNAME] is string ||
+                    clientSSLProfile[UPSTREAM_TLS_PORT] is int) {
+                    hostnameWithPort = hostname + ":" + port.toString();
+                }
+            }
+
+            customSSLProfiles[hostnameWithPort] = secureSocket;
+            printDebug(KEY_UTILS, "Custom SSL profile added for: " + hostnameWithPort);
+        }
+
+        printDebug(KEY_UTILS, "SSL profile processing completed. Total profiles: " + profileIndex.toString());
+    } else {
+        printDebug(KEY_UTILS, "No custom SSL profiles found in configuration. Using default SSL settings.");
+    }
+
+    return customSSLProfiles;
 }
 
 function setRequestDataToInvocationContext(http:HttpServiceConfig httpServiceConfig, http:HttpResourceConfig? httpResourceConfig) {
