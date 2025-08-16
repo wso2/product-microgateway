@@ -80,6 +80,7 @@ type Config struct {
 	GlobalAdapter globalAdapter `toml:"globalAdapter"`
 	Analytics     analytics     `toml:"analytics"`
 	Tracing       tracing
+	Varnish       varnish
 }
 
 // Adapter related Configurations
@@ -114,6 +115,8 @@ type envoy struct {
 	ListenerPort                     uint32
 	SecuredListenerHost              string
 	SecuredListenerPort              uint32
+	NewListenerHost                  string
+	NewListenerPort                  uint32
 	ClusterTimeoutInSeconds          time.Duration
 	EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
 	KeyStore                         keystore
@@ -148,6 +151,12 @@ type rateLimit struct {
 	CertFilePath           string
 	CaCertFilePath         string
 	SSLCertSANHostname     string
+}
+
+type varnish struct{
+	Enabled             bool
+	Host                string
+	Port                uint32
 }
 
 type xRateLimitHeaders struct {
