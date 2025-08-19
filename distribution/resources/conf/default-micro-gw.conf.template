@@ -549,3 +549,8 @@ password = "admin"
 [security]
   # Enable/ Disable subscription validation for opaque (reference) tokens.
   validateSubscriptions = false
+
+# API level basic auth security configuration
+[basicAuthConfig]
+# For malformed basic auth headers, enabling enableBasicAuthStrictValidation will return 401 instead of the default 500
+enableBasicAuthStrictValidation = false

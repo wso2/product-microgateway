@@ -99,6 +99,8 @@ public const string INVALID_ENTITY_MESSAGE = "Unprocessable entity";
 public const int INVALID_RESPONSE = 900916;
 public const string INVALID_RESPONSE_MESSAGE = "Unprocessable entity";
 
+public const int API_AUTH_MALFORMED_TOKEN = 900918;
+
 public function getAuthenticationFailureMessage(int errorCode) returns string {
     string errorMessage;
     if (errorCode == API_AUTH_ACCESS_TOKEN_EXPIRED) {
@@ -107,7 +109,7 @@ public function getAuthenticationFailureMessage(int errorCode) returns string {
         errorMessage = API_AUTH_ACCESS_TOKEN_INACTIVE_MESSAGE;
     } else if (errorCode == API_AUTH_GENERAL_ERROR) {
         errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
-    } else if (errorCode == API_AUTH_INVALID_CREDENTIALS) {
+    } else if (errorCode == API_AUTH_INVALID_CREDENTIALS || errorCode == API_AUTH_MALFORMED_TOKEN) {
         errorMessage = API_AUTH_INVALID_CREDENTIALS_MESSAGE;
     } else if (errorCode == API_AUTH_MISSING_CREDENTIALS) {
         errorMessage = API_AUTH_MISSING_CREDENTIALS_MESSAGE;
@@ -154,7 +156,7 @@ public function getFailureMessageDetailDescription(int errorCode, string errorMe
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION ;
     } else if (API_AUTH_ACCESS_TOKEN_EXPIRED == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION;
-    } else if (API_AUTH_INVALID_CREDENTIALS == errorCode) {
+    } else if (API_AUTH_INVALID_CREDENTIALS == errorCode || API_AUTH_MALFORMED_TOKEN == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_CREDENTIALS_DESCRIPTION;
     } else if (API_AUTH_INVALID_BASICAUTH_CREDENTIALS == errorCode) {
         errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_BASICAUTH_CREDENTIALS_DESCRIPTION;

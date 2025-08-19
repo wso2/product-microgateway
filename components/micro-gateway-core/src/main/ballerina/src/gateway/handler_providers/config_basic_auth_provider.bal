@@ -21,6 +21,8 @@ import ballerina/lang.'string as strings;
 import ballerina/runtime;
 import ballerina/config;
 
+boolean enableBasicAuthStrictValidation = getConfigBooleanValue(BASIC_AUTH_CONFIG, ENABLE_BASIC_AUTH_STRICT_VALIDATION, false);
+
 # Represents an inbound basic Auth provider, which is a configuration-file-based Auth store provider.
 # + basicAuthConfig - The Basic Auth provider configurations.
 # + inboundBasicAuthProvider - The InboundBasicAUthProvider.
@@ -58,8 +60,8 @@ public type BasicAuthProvider object {
         byte[] | error decodedCredentials = arrays:fromBase64(credential);
 
         //Extract username and password from the request
-        byte[] userName;
-        byte[] password;
+        byte[] userName = [];
+        byte[] password = [];
         string userNameAsString = "";
         if (decodedCredentials is byte[]) {
             int colonIndex = indexOfColon(decodedCredentials);
@@ -80,6 +82,10 @@ public type BasicAuthProvider object {
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 return false;
             }
+        } else if (enableBasicAuthStrictValidation) {
+            printError(KEY_AUTHN_FILTER, "Invalid authorization header for basic authentication");
+            setErrorMessageToInvocationContext(API_AUTH_MALFORMED_TOKEN);
+            return false;
         } else {
             printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
             setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);

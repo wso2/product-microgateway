@@ -366,7 +366,11 @@ public function sendErrorResponseFromInvocationContext(http:FilterContext contex
     //set WWW_AUTHENTICATE header to error response
     if (response.statusCode == UNAUTHORIZED) {
         string challengeString = getChallengeString(context);
-        response.setHeader(WWW_AUTHENTICATE, challengeString + WWW_AUTHENTICATE_ERROR);
+        if (errorCode == API_AUTH_MALFORMED_TOKEN){
+            response.setHeader(WWW_AUTHENTICATE, challengeString + WWW_INVALID_TOKEN_ERROR);
+        } else {
+            response.setHeader(WWW_AUTHENTICATE, challengeString + WWW_AUTHENTICATE_ERROR);
+        }
     }
     if (! context.attributes.hasKey(IS_GRPC)) {
         json payload = {
