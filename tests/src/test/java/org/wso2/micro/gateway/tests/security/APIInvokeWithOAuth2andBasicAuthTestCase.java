@@ -85,6 +85,7 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends APIInvokeWithBasicA
         //Invalid Credentials
         String invalidInput = "generalUser1:invalidpassword";
         String basicAuthTokenInvalid = Base64.getEncoder().encodeToString(invalidInput.getBytes());
+        String malformedInput = basicAuthTokenInvalid + "1";
 
         //test endpoint
         invokeBasic(basicAuthToken, MockHttpServer.PROD_ENDPOINT_RESPONSE, 200);
@@ -96,6 +97,7 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends APIInvokeWithBasicA
         }
         //test invoking with invalid credentials
         invokeBasic(basicAuthTokenInvalid, 401);
+        invokeBasic(malformedInput, 500);
     }
 
     private void invokeBasic(String token, String responseData, int responseCode) throws Exception {
@@ -114,7 +116,7 @@ public class APIInvokeWithOAuth2andBasicAuthTestCase extends APIInvokeWithBasicA
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic " + token);
         org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttp("/pizzashack/1.0.0/menu"), headers);
+                .doGet(getServiceURLHttp("/pizzashack/1.0.0/basic-menu"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), responseCode, "Response code mismatched");
     }
