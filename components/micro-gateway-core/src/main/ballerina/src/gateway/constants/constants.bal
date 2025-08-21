@@ -54,6 +54,7 @@ public const string UTF_8 = "UTF-8";
 public const string INVALID_COOKIE = "Cookie is Invalid";
 public const string WWW_AUTHENTICATE = "WWW-Authenticate";
 public const string WWW_AUTHENTICATE_ERROR = ", error=\"invalid token\" , error_description=\"The access token expired\"";
+public const string WWW_INVALID_TOKEN_ERROR = ", error=\"invalid token\" , error_description=\"The access token is invalid\"";
 
 public const string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
 public const string KEY_VALIDATION_RESPONSE = "KEY_VALIDATION_RESPONSE";
@@ -353,6 +354,9 @@ public const string JWKS_URL = "jwksURL";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
 public const string REMOTE_USER_CLAIM_RETRIEVAL_ENABLED = "remoteUserClaimRetrievalEnabled";
+
+public const string BASIC_AUTH_CONFIG = "basicAuthConfig";
+public const string ENABLE_BASIC_AUTH_STRICT_VALIDATION = "enableBasicAuthStrictValidation";
 
 public const string API_KEY_INSTANCE_ID = "apikey.tokenConfigs";
 public const string API_KEY_ISSUER_ENABLED = "enabled";
