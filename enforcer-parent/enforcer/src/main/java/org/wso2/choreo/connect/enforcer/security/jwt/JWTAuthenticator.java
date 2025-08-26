@@ -82,6 +82,8 @@ import java.util.UUID;
  */
 public class JWTAuthenticator implements Authenticator {
 
+    public static final String JWT_AUTHENTICATOR_NAME = "JWT";
+
     private static final Logger log = LogManager.getLogger(JWTAuthenticator.class);
     private static final String SWAGGER_OAUTH2_SECURITY_SCHEME_NAME = "default";
     private final JWTValidator jwtValidator = new JWTValidator();
@@ -306,7 +308,7 @@ public class JWTAuthenticator implements Authenticator {
                                     ThreadContext.get(APIConstants.LOG_TRACE_ID));
                         }
                         // Skip scope validation for API Keys as scopes are not supported for API Keys.
-                        if(!APIKeyAuthenticator.AUTHENTICATOR_NAME.equals(this.getName())){
+                        if(!APIKeyAuthenticator.API_KEY_AUTHENTICATOR_NAME.equals(this.getName())){
                             validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
                         }
 
@@ -504,7 +506,7 @@ public class JWTAuthenticator implements Authenticator {
 
     @Override
     public String getName() {
-        return "JWT";
+        return JWT_AUTHENTICATOR_NAME;
     }
 
     private String retrieveAuthHeaderValue(RequestContext requestContext) {

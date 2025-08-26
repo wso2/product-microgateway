@@ -60,6 +60,8 @@ import java.util.stream.Collectors;
  */
 public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
+    public static final String INTERNAL_KEY_TYPE = "Internal Key";
+
     private static final Log log = LogFactory.getLog(InternalAPIKeyAuthenticator.class);
     private static final String DEV_PORTAL_TEST_ISSUER_PREFIX = "/api/am/devportal/v2/apis/test-key";
     private String securityParam;
@@ -335,7 +337,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public String getName() {
-        return "Internal Key";
+        return INTERNAL_KEY_TYPE;
     }
 
     private String extractInternalKey(RequestContext requestContext) {

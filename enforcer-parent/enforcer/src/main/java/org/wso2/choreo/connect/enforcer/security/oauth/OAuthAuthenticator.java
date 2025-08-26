@@ -63,6 +63,9 @@ import java.util.Map;
  * //TODO: Complete the implementation.
  */
 public class OAuthAuthenticator implements Authenticator {
+
+    public static final String OAUTH_AUTHENTICATOR_NAME = "OAuth";
+
     private static final Log log = LogFactory.getLog(OAuthAuthenticator.class);
     private List<String> keyManagerList;
 
@@ -213,7 +216,7 @@ public class OAuthAuthenticator implements Authenticator {
 
     @Override
     public String getName() {
-        return "OAuth";
+        return OAUTH_AUTHENTICATOR_NAME;
     }
 
 

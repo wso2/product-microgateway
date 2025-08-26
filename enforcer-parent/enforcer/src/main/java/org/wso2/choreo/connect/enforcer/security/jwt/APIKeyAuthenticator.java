@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  */
 public class APIKeyAuthenticator extends JWTAuthenticator {
 
-    public static final String AUTHENTICATOR_NAME = "Choreo API Key";
+    public static final String API_KEY_AUTHENTICATOR_NAME = "Choreo API Key";
 
     private static final Logger log = LogManager.getLogger(APIKeyAuthenticator.class);
 
@@ -173,7 +173,7 @@ public class APIKeyAuthenticator extends JWTAuthenticator {
 
     @Override
     public String getName() {
-        return AUTHENTICATOR_NAME;
+        return API_KEY_AUTHENTICATOR_NAME;
     }
 
     @Override
