@@ -43,6 +43,8 @@ public interface Authenticator {
     /**
      * Name of the authenticator.
      * This is used in authentication context of interceptors.
+     * This name should be unique across all authenticators.
+     * 
      * @return Authenticator name
      */
     String getName();
