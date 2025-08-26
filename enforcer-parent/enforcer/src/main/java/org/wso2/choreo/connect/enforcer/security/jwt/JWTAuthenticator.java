@@ -308,7 +308,7 @@ public class JWTAuthenticator implements Authenticator {
                                     ThreadContext.get(APIConstants.LOG_TRACE_ID));
                         }
                         // Skip scope validation for API Keys as scopes are not supported for API Keys.
-                        if(!APIKeyAuthenticator.API_KEY_AUTHENTICATOR_NAME.equals(this.getName())){
+                        if (!APIKeyAuthenticator.API_KEY_AUTHENTICATOR_NAME.equals(this.getName())) {
                             validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
                         }
 
