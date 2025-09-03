@@ -46,6 +46,8 @@ import java.util.List;
  */
 public abstract class APIKeyHandler implements Authenticator {
 
+    public static final String API_KEY_HANDLER_AUTHENTICATOR_NAME = "API Key Handler";
+
     private static final Logger log = LogManager.getLogger(APIKeyHandler.class);
 
     /**
@@ -259,5 +261,10 @@ public abstract class APIKeyHandler implements Authenticator {
             }
         }
         return api;
+    }
+
+    @Override
+    public String getName() {
+        return API_KEY_HANDLER_AUTHENTICATOR_NAME;
     }
 }

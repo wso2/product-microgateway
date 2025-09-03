@@ -40,6 +40,8 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 public class UnsecuredAPIAuthenticator implements Authenticator {
 
+    public static final String UNSECURED_AUTHENTICATOR_NAME = "Unsecured";
+
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
         // Retrieve the disable security value. If security is disabled, then you can proceed directly with the
@@ -111,7 +113,7 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
 
     @Override
     public String getName() {
-        return "Unsecured";
+        return UNSECURED_AUTHENTICATOR_NAME;
     }
 
     @Override public int getPriority() {
