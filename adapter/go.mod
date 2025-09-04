@@ -1,6 +1,6 @@
 module github.com/wso2/product-microgateway/adapter
 
-go 1.23.0
+go 1.23.12
 
 toolchain go1.23.8
 
