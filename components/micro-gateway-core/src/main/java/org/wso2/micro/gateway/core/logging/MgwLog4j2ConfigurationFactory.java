@@ -82,7 +82,7 @@ public class MgwLog4j2ConfigurationFactory extends ConfigurationFactory {
         if (System.getProperty(LOG4J_CONFIGURATION_FILE) != null) {
             return;
         }
-        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(LogManager.class.getClassLoader(), false);
         Level log4j2LogLevel = Level.INFO;
         switch (logLevel) {
             case TRACE_LOG_LEVEL:

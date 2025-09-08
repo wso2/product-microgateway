@@ -1161,8 +1161,8 @@ public function getClientSecureSocketByEndpointURL(string endpointURL) returns h
         printDebug(KEY_UTILS, "SSL profile retrieved successfully for endpoint: " + endpointURL);
         return sslProfile;
     } else {
-        printError(KEY_UTILS, "Failed to retrieve secure socket for endpoint: " + endpointURL);
-        printDebug(KEY_UTILS, "Falling back to default secure socket");
+        printDebug(KEY_UTILS, "Failed to retrieve secure socket for endpoint: " + endpointURL +
+            ". Falling back to default secure socket");
         return getClientSecureSocket();
     }
 }
