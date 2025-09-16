@@ -32,6 +32,8 @@
   # Maximum allowed size for the entity body. By default it is set to -1 which means there is no
   # restriction `maxEntityBodySize`, On the Exceeding this limit will result in a`413 - Payload Too Large` response.
   maxEntityBodySize = -1
+  # Client listener timeout in milli seconds.
+  timeout = 120000
 
 
 # API Authorization security for the gateway and the backend
@@ -267,7 +269,11 @@
     waitTimeInMillis = 30000
     #Maximum active streams per connection. This only applies to HTTP/2.
     maxActiveStreamsPerConnection = 50
-  [httpClients.sslConfig]
+  [[httpClients.sslConfig]]
+    # Optional. The hostname required to configure a dynamic SSL profile.
+    hostName = "localhost"
+    # Optional. The port required to configure a dynamic SSL profile.
+    port = 8000
     # SSL Protocol to be used
     protocolName = "TLS"
     # List of ciphers to be used
@@ -430,11 +436,12 @@
   # Observability distributed tracing
   [b7a.observability.tracing]
     enabled = false
-    # Tracer name
+    # Tracer name. Value should be "zipkin" to enable Zipkin for OpenTelemetry as well.
     name = "jaeger"
-    # Jaeger for tracing
+    # The protocol. Default is "opentracing". "opentelemetry" can be used to enable OpenTelemetry
+    # Jaeger for tracing and opentelemetry
     [b7a.observability.tracing.jaeger.reporter]
-      # The port which the Jaeger server is listening to
+      # The port which the Jaeger server is listening to. Value should be 6831 for OpenTelemetry
       port = 5775
 
 # API Key authentication configurations
