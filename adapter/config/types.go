@@ -559,7 +559,7 @@ type controlPlane struct {
 	DynamicEnvironments        dynamicEnvironments
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
-	BrokerConnectionParameters brokerConnectionParameters
+	BrokerConnectionParameters BrokerConnectionParameters
 	HTTPClient                 httpClient
 	RequestWorkerPool          requestWorkerPool
 	InitialFetch               initialFetch
@@ -602,7 +602,8 @@ type globalAdapter struct {
 	RetryInterval     time.Duration
 }
 
-type brokerConnectionParameters struct {
+// BrokerConnectionParameters contains the parameters required to connect to the message broker
+type BrokerConnectionParameters struct {
 	BrokerType                           string
 	EventListeningEndpoints              []string
 	AmqpOverWebsocketsEnabled            bool

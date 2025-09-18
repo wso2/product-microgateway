@@ -17,14 +17,19 @@
 
 package messaging
 
-import "github.com/Azure/go-amqp"
+import (
+	"context"
 
+	"github.com/Azure/go-amqp"
+)
 
-
-func startActiveMQTopicConsumer(topicName string, receiver *amqp.Receiver) {
-		switch topicName {
-			case notification:
-				go handleAwsActiveMqNotification(receiver, topicName)
-		// other tpoic types related implementations comes under here		
-		}
+func startActiveMQTopicConsumer(ctx context.Context, topicName string, receiver *amqp.Receiver) {
+	switch topicName {
+	case notification:
+		go handleAwsActiveTopic(ctx, receiver, topicName, notificationHandler)
+	case tokenRevocation:
+		go handleAwsActiveTopic(ctx, receiver, topicName, tokenRevocationHandler)
+	case orgPurgeEnabled:
+		go handleAwsActiveTopic(ctx, receiver, topicName, organizationPurgeHandler)
+	}
 }
