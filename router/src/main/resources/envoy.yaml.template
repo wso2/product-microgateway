@@ -39,7 +39,7 @@ static_resources:
   clusters:
     - name: xds_cluster
       type: STRICT_DNS
-      connect_timeout: 1s
+      connect_timeout: ${XDS_CLUSTER_CONNECT_TIMEOUT}
       upstream_connection_options:
         tcp_keepalive:
           keepalive_probes: '${KEEPALIVE_PROBES}'
