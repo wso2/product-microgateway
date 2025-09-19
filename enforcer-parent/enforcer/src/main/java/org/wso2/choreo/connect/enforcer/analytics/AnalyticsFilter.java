@@ -185,6 +185,8 @@ public class AnalyticsFilter {
         requestContext.addMetadataToMap(MetadataConstants.API_PROJECT_ID_KEY, projectId);
         requestContext.addMetadataToMap(MetadataConstants.API_COMPONENT_ID_KEY, componentId);
         requestContext.addMetadataToMap(MetadataConstants.API_VERSION_ID_KEY, versionId);
+        requestContext.addMetadataToMap(MetadataConstants.CHOREO_ENVIRONMENT_ID,
+                requestContext.getMatchedAPI().getChoreoEnvironmentId());
 
         requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
         requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY,

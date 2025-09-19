@@ -36,7 +36,7 @@ public final class ApiProto {
       "y_scheme.proto\0322wso2/discovery/api/backe" +
       "nd_jwt_configuration.proto\032.wso2/discove" +
       "ry/api/choreo_component_info.proto\032*wso2" +
-      "/discovery/api/ExtendedOperation.proto\"\265" +
+      "/discovery/api/ExtendedOperation.proto\"\322" +
       "\007\n\003Api\022\n\n\002id\030\001 \001(\t\022\r\n\005title\030\002 \001(\t\022\017\n\007ver" +
       "sion\030\003 \001(\t\022\017\n\007apiType\030\004 \001(\t\022\023\n\013descripti" +
       "on\030\005 \001(\t\022@\n\023productionEndpoints\030\006 \001(\0132#." +
@@ -60,10 +60,11 @@ public final class ApiProto {
       "oComponentInfo\030\031 \001(\0132\'.wso2.discovery.ap" +
       "i.ChoreoComponentInfo\022\024\n\014apiKeyHeader\030\032 " +
       "\001(\t\022A\n\022extendedOperations\030\033 \003(\0132%.wso2.d" +
-      "iscovery.api.ExtendedOperationBr\n%org.ws" +
-      "o2.choreo.connect.discovery.apiB\010ApiProt" +
-      "oP\001Z=github.com/envoyproxy/go-control-pl" +
-      "ane/wso2/discovery/api;apib\006proto3"
+      "iscovery.api.ExtendedOperation\022\033\n\023choreo" +
+      "EnvironmentId\030\034 \001(\tBr\n%org.wso2.choreo.c" +
+      "onnect.discovery.apiB\010ApiProtoP\001Z=github" +
+      ".com/envoyproxy/go-control-plane/wso2/di" +
+      "scovery/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -81,7 +82,7 @@ public final class ApiProto {
     internal_static_wso2_discovery_api_Api_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Api_descriptor,
-        new java.lang.String[] { "Id", "Title", "Version", "ApiType", "Description", "ProductionEndpoints", "SandboxEndpoints", "Resources", "BasePath", "Tier", "ApiLifeCycleState", "SecurityScheme", "Security", "EndpointSecurity", "AuthorizationHeader", "DisableSecurity", "Vhost", "OrganizationId", "ApiProvider", "EnableBackendJWT", "DeploymentType", "EnvironmentId", "EnvironmentName", "BackendJWTConfiguration", "ChoreoComponentInfo", "ApiKeyHeader", "ExtendedOperations", });
+        new java.lang.String[] { "Id", "Title", "Version", "ApiType", "Description", "ProductionEndpoints", "SandboxEndpoints", "Resources", "BasePath", "Tier", "ApiLifeCycleState", "SecurityScheme", "Security", "EndpointSecurity", "AuthorizationHeader", "DisableSecurity", "Vhost", "OrganizationId", "ApiProvider", "EnableBackendJWT", "DeploymentType", "EnvironmentId", "EnvironmentName", "BackendJWTConfiguration", "ChoreoComponentInfo", "ApiKeyHeader", "ExtendedOperations", "ChoreoEnvironmentId", });
     org.wso2.choreo.connect.discovery.api.EndpointClusterProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.ResourceProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.EndpointSecurityProto.getDescriptor();

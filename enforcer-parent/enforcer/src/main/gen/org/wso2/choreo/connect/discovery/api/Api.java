@@ -40,6 +40,7 @@ private static final long serialVersionUID = 0L;
     environmentName_ = "";
     apiKeyHeader_ = "";
     extendedOperations_ = java.util.Collections.emptyList();
+    choreoEnvironmentId_ = "";
   }
 
   @java.lang.Override
@@ -278,6 +279,12 @@ private static final long serialVersionUID = 0L;
             }
             extendedOperations_.add(
                 input.readMessage(org.wso2.choreo.connect.discovery.api.ExtendedOperation.parser(), extensionRegistry));
+            break;
+          }
+          case 226: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            choreoEnvironmentId_ = s;
             break;
           }
           default: {
@@ -1244,6 +1251,44 @@ private static final long serialVersionUID = 0L;
     return extendedOperations_.get(index);
   }
 
+  public static final int CHOREOENVIRONMENTID_FIELD_NUMBER = 28;
+  private volatile java.lang.Object choreoEnvironmentId_;
+  /**
+   * <code>string choreoEnvironmentId = 28;</code>
+   * @return The choreoEnvironmentId.
+   */
+  @java.lang.Override
+  public java.lang.String getChoreoEnvironmentId() {
+    java.lang.Object ref = choreoEnvironmentId_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      choreoEnvironmentId_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string choreoEnvironmentId = 28;</code>
+   * @return The bytes for choreoEnvironmentId.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getChoreoEnvironmentIdBytes() {
+    java.lang.Object ref = choreoEnvironmentId_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      choreoEnvironmentId_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1338,6 +1383,9 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < extendedOperations_.size(); i++) {
       output.writeMessage(27, extendedOperations_.get(i));
+    }
+    if (!getChoreoEnvironmentIdBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 28, choreoEnvironmentId_);
     }
     unknownFields.writeTo(output);
   }
@@ -1440,6 +1488,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(27, extendedOperations_.get(i));
     }
+    if (!getChoreoEnvironmentIdBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(28, choreoEnvironmentId_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1524,6 +1575,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getApiKeyHeader())) return false;
     if (!getExtendedOperationsList()
         .equals(other.getExtendedOperationsList())) return false;
+    if (!getChoreoEnvironmentId()
+        .equals(other.getChoreoEnvironmentId())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1609,6 +1662,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + EXTENDEDOPERATIONS_FIELD_NUMBER;
       hash = (53 * hash) + getExtendedOperationsList().hashCode();
     }
+    hash = (37 * hash) + CHOREOENVIRONMENTID_FIELD_NUMBER;
+    hash = (53 * hash) + getChoreoEnvironmentId().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1840,6 +1895,8 @@ private static final long serialVersionUID = 0L;
       } else {
         extendedOperationsBuilder_.clear();
       }
+      choreoEnvironmentId_ = "";
+
       return this;
     }
 
@@ -1946,6 +2003,7 @@ private static final long serialVersionUID = 0L;
       } else {
         result.extendedOperations_ = extendedOperationsBuilder_.build();
       }
+      result.choreoEnvironmentId_ = choreoEnvironmentId_;
       onBuilt();
       return result;
     }
@@ -2182,6 +2240,10 @@ private static final long serialVersionUID = 0L;
             extendedOperationsBuilder_.addAllMessages(other.extendedOperations_);
           }
         }
+      }
+      if (!other.getChoreoEnvironmentId().isEmpty()) {
+        choreoEnvironmentId_ = other.choreoEnvironmentId_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -5044,6 +5106,82 @@ private static final long serialVersionUID = 0L;
         extendedOperations_ = null;
       }
       return extendedOperationsBuilder_;
+    }
+
+    private java.lang.Object choreoEnvironmentId_ = "";
+    /**
+     * <code>string choreoEnvironmentId = 28;</code>
+     * @return The choreoEnvironmentId.
+     */
+    public java.lang.String getChoreoEnvironmentId() {
+      java.lang.Object ref = choreoEnvironmentId_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        choreoEnvironmentId_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string choreoEnvironmentId = 28;</code>
+     * @return The bytes for choreoEnvironmentId.
+     */
+    public com.google.protobuf.ByteString
+        getChoreoEnvironmentIdBytes() {
+      java.lang.Object ref = choreoEnvironmentId_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        choreoEnvironmentId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string choreoEnvironmentId = 28;</code>
+     * @param value The choreoEnvironmentId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setChoreoEnvironmentId(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      choreoEnvironmentId_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string choreoEnvironmentId = 28;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearChoreoEnvironmentId() {
+      
+      choreoEnvironmentId_ = getDefaultInstance().getChoreoEnvironmentId();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string choreoEnvironmentId = 28;</code>
+     * @param value The bytes for choreoEnvironmentId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setChoreoEnvironmentIdBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      choreoEnvironmentId_ = value;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

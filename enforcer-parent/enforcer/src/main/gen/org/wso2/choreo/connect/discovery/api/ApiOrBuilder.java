@@ -381,4 +381,16 @@ public interface ApiOrBuilder extends
    */
   org.wso2.choreo.connect.discovery.api.ExtendedOperationOrBuilder getExtendedOperationsOrBuilder(
       int index);
+
+  /**
+   * <code>string choreoEnvironmentId = 28;</code>
+   * @return The choreoEnvironmentId.
+   */
+  java.lang.String getChoreoEnvironmentId();
+  /**
+   * <code>string choreoEnvironmentId = 28;</code>
+   * @return The bytes for choreoEnvironmentId.
+   */
+  com.google.protobuf.ByteString
+      getChoreoEnvironmentIdBytes();
 }

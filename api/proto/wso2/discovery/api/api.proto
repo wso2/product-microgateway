@@ -62,4 +62,5 @@ message Api {
 	ChoreoComponentInfo choreoComponentInfo = 25;
 	string apiKeyHeader = 26;
 	repeated ExtendedOperation extendedOperations = 27;
+	string choreoEnvironmentId = 28;
 }

@@ -257,6 +257,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		BackendJWTConfiguration: generateBackendJWTConfiguration(mgwSwagger.BackendJWTConfiguration),
 		DeploymentType:          mgwSwagger.DeploymentType,
 		EnvironmentId:           mgwSwagger.EnvironmentID,
+		ChoreoEnvironmentId:     mgwSwagger.ChoreoEnvironmentID,
 		EnvironmentName:         mgwSwagger.EnvironmentName,
 		ChoreoComponentInfo:     choreoComponentInfo,
 		ExtendedOperations:      extendedOperations,
