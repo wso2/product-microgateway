@@ -63,11 +63,12 @@ type APIDeployment struct {
 // GatewayLabel represents gateway environment name, vhost and deployedTimeStamp of an API project.
 // DeployedTimeStamp is only used for GA use case where the timestamp is appended as a suffix to the Revision ID.
 type GatewayLabel struct {
-	Name              string `json:"name"`
-	Vhost             string `json:"vhost"`
-	ID                string `json:"id"`
-	DeployedTimeStamp int64  `json:"deployedTimeStamp"`
-	DeploymentType    string `json:"deploymentType"`
+	Name                string `json:"name"`
+	Vhost               string `json:"vhost"`
+	ID                  string `json:"id"`
+	ChoreoEnvironmentID string `json:"choreoEnvironmentId"`
+	DeployedTimeStamp   int64  `json:"deployedTimeStamp"`
+	DeploymentType      string `json:"deploymentType"`
 }
 
 // APIConfigs represents env properties belongs to the API

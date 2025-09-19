@@ -95,6 +95,7 @@ type MgwSwagger struct {
 	// DeploymentType could be either "PRODUCTION" or "SANDBOX"
 	DeploymentType      string
 	EnvironmentID       string
+	ChoreoEnvironmentID string
 	EnvironmentName     string
 	ChoreoComponentInfo *ChoreoComponentInfo
 	ExtendedOperations  []*ExtendedOperation

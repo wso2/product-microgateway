@@ -358,6 +358,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	mgwSwagger.DeploymentType = deployedEnvironments[0].DeploymentType
 	mgwSwagger.APIProvider = apiProject.APIYaml.Data.Provider
 	mgwSwagger.EnvironmentID = deployedEnvironments[0].ID
+	mgwSwagger.ChoreoEnvironmentID = deployedEnvironments[0].ChoreoEnvironmentID
 	mgwSwagger.EnvironmentName = deployedEnvironments[0].Name
 
 	choreoComponentInfo := mgw.ChoreoComponentInfo{

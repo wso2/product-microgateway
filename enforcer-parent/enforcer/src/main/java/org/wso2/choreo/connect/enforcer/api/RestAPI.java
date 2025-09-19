@@ -185,6 +185,7 @@ public class RestAPI implements API {
                 .enableBackendJWT(api.getEnableBackendJWT()).backendJWTConfiguration(backendJWTConfiguration)
                 .deploymentType(api.getDeploymentType())
                 .environmentId(api.getEnvironmentId())
+                .choreoEnvironmentId(api.getChoreoEnvironmentId())
                 .environmentName(api.getEnvironmentName())
                 .choreoComponentInfo(choreoComponentInfo)
                 .extendedOperations(extendedOperations)

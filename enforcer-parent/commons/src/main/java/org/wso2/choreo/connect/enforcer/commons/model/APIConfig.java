@@ -50,6 +50,7 @@ public class APIConfig {
     private List<ResourceConfig> resources = new ArrayList<>();
     private String deploymentType;
     private String environmentId;
+    private String choreoEnvironmentId;
     private String environmentName;
     private ChoreoComponentInfo choreoComponentInfo;
     private List<ExtendedOperation> extendedOperations = new ArrayList<>();
@@ -134,6 +135,10 @@ public class APIConfig {
 
     public String getEnvironmentId() {
         return environmentId;
+    }
+
+    public String getChoreoEnvironmentId() {
+        return choreoEnvironmentId;
     }
 
     public String getEnvironmentName() {
@@ -281,6 +286,7 @@ public class APIConfig {
         private List<ResourceConfig> resources = new ArrayList<>();
         private String deploymentType = "PRODUCTION";
         private String environmentId;
+        private String choreoEnvironmentId;
         private String environmentName;
         private boolean enableBackendJWT;
         private BackendJWTConfiguration backendJWTConfiguration;
@@ -400,6 +406,13 @@ public class APIConfig {
             return this;
         }
 
+        public Builder choreoEnvironmentId(String choreoEnvironmentId) {
+            if (!StringUtils.isEmpty(choreoEnvironmentId)) {
+                this.choreoEnvironmentId = choreoEnvironmentId;
+            }
+            return this;
+        }
+
         public Builder environmentName(String environmentName) {
             if (!StringUtils.isEmpty(environmentName)) {
                 this.environmentName = environmentName;
@@ -441,6 +454,7 @@ public class APIConfig {
             apiConfig.backendJWTConfiguration = this.backendJWTConfiguration;
             apiConfig.deploymentType = this.deploymentType;
             apiConfig.environmentId = this.environmentId;
+            apiConfig.choreoEnvironmentId = this.choreoEnvironmentId;
             apiConfig.environmentName = this.environmentName;
             apiConfig.choreoComponentInfo = this.choreoComponentInfo;
             apiConfig.extendedOperations = this.extendedOperations;
