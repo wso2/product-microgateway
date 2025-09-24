@@ -113,7 +113,7 @@ func TestCreateRoute(t *testing.T) {
 
 	TimeOutConfig := ptypes.DurationProto(60 * time.Second)
 
-	IdleTimeOutConfig := ptypes.DurationProto(300 * time.Second)
+	IdleTimeOutConfig := ptypes.DurationProto(240 * time.Second)
 
 	expectedRouteActionWithXWso2BasePath := &routev3.Route_Route{
 		Route: &routev3.RouteAction{
