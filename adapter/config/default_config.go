@@ -111,7 +111,7 @@ var defaultConfig = &Config{
 			Timeouts: upstreamTimeout{
 				MaxRouteTimeoutInSeconds:  60,
 				RouteTimeoutInSeconds:     60,
-				RouteIdleTimeoutInSeconds: 300,
+				RouteIdleTimeoutInSeconds: 240,
 			},
 			Health: upstreamHealth{
 				Timeout:            1,
@@ -163,7 +163,7 @@ var defaultConfig = &Config{
 			Timeouts: connectionTimeouts{
 				RequestTimeoutInSeconds:        0,
 				RequestHeadersTimeoutInSeconds: 0,
-				StreamIdleTimeoutInSeconds:     300,
+				StreamIdleTimeoutInSeconds:     240,
 				IdleTimeoutInSeconds:           3600,
 			},
 		},
