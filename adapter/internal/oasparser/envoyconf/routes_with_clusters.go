@@ -2009,11 +2009,3 @@ func validateEnvoyRouteMethodString(method string) error {
 	}
 	return errors.New("method is invalid ")
 }
-
-func mustMarshalAny(pb proto.Message) []byte {
-	b, err := proto.Marshal(pb)
-	if err != nil {
-		panic(err)
-	}
-	return b
-}
