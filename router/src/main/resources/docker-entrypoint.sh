@@ -32,17 +32,17 @@ echo "Starting Choreo Connect Router"
     --concurrency "${CONCURRENCY}" \
     $TRAILING_ARGS &
 
- ENVOY_PID=$!
+ENVOY_PID=$!
 
- _term() {
-     echo "Stopping Choreo Connect Router. Sending SIGTERM to the envoy process..."
-     kill -SIGTERM $ENVOY_PID
-     wait $ENVOY_PID
-     echo "Choreo Connect Router stopped."
-     exit 0
- }
+_term() {
+   echo "Stopping Choreo Connect Router. Sending SIGTERM to the envoy process..."
+   kill -SIGTERM $ENVOY_PID
+   wait $ENVOY_PID
+   echo "Choreo Connect Router stopped."
+   exit 0
+}
 
- # trap handle_signal SIGTERM
- trap _term SIGTERM
+# trap handle_signal SIGTERM
+trap _term SIGTERM
 
- wait $ENVOY_PID
+wait $ENVOY_PID
