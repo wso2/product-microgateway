@@ -62,8 +62,7 @@ public class GRPCUtils {
                 .sslContext(sslContext)
                 .overrideAuthority(ConfigHolder.getInstance().getEnvVarConfig().getAdapterHostName());
 
-        channelBuilder.keepAliveTime(6, TimeUnit.MINUTES);
-
+        channelBuilder.keepAliveTime(6, TimeUnit.MINUTES).keepAliveWithoutCalls(true);
         return channelBuilder.build();
     }
 
