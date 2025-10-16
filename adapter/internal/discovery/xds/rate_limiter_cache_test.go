@@ -588,7 +588,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
 						RequestCount: 100,
-						TimeUnit:     "sec",
+						TimeUnit:     "second",
 					},
 				},
 				Organization: "org1",
@@ -636,7 +636,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
 						RequestCount: 124,
-						TimeUnit:     "sec",
+						TimeUnit:     "second",
 					},
 				},
 				Organization: "org2",
