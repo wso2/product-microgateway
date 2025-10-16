@@ -57,7 +57,7 @@ func getRateLimitUnit(name string) (rls_config.RateLimitUnit, error) {
 
 func parseRateLimitUnitFromSubscriptionPolicy(name string) (rls_config.RateLimitUnit, error) {
 	switch name {
-	case "sec":
+	case "second":
 		return rls_config.RateLimitUnit_SECOND, nil
 	case "min":
 		return rls_config.RateLimitUnit_MINUTE, nil
