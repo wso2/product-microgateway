@@ -58,10 +58,28 @@ public class AuthenticatorUtils {
                 if (responseHeadersToAddMap == null) {
                     responseHeadersToAddMap = new HashMap<>();
                 }
-                responseHeadersToAddMap.put(
-                        HttpConstants.WEBSOCKET_PROTOCOL_HEADER,
-                        protocolKeyword);
-                requestContext.setResponseHeadersToAddMap(responseHeadersToAddMap);
+                
+                // Check if protocolKeyword is already present in response headers
+                String existingResponseHeader = responseHeadersToAddMap.get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
+                boolean protocolKeywordAlreadyPresent = false;
+                
+                if (existingResponseHeader != null) {
+                    String[] existingValues = existingResponseHeader.split(",");
+                    for (String value : existingValues) {
+                        if (value.trim().equals(protocolKeyword)) {
+                            protocolKeywordAlreadyPresent = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // Only add the header if protocolKeyword is not already present in response headers
+                if (!protocolKeywordAlreadyPresent) {
+                    responseHeadersToAddMap.put(
+                            HttpConstants.WEBSOCKET_PROTOCOL_HEADER,
+                            protocolKeyword);
+                    requestContext.setResponseHeadersToAddMap(responseHeadersToAddMap);
+                }
             }
         }
     }
