@@ -592,7 +592,7 @@ public class JWTAuthenticator implements Authenticator {
             } else {
                 String message = "User is NOT authorized to access the Resource: " + matchingResource.getPath()
                         + ". Scope validation failed.";
-                log.debug(message);
+                log.error(message);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.INVALID_SCOPE, message);
             }
