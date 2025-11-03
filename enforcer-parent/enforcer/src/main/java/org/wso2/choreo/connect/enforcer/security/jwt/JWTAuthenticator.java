@@ -312,7 +312,11 @@ public class JWTAuthenticator implements Authenticator {
                             validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
                         }
 
-                    } finally {
+                    } catch (APISecurityException e) {
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                                APISecurityConstants.INVALID_SCOPE, e.getMessage());
+                    }
+                    finally {
                         if (Utils.tracingEnabled()) {
                             validateScopesSpanScope.close();
                             Utils.finishSpan(validateScopesSpan);
@@ -592,7 +596,7 @@ public class JWTAuthenticator implements Authenticator {
             } else {
                 String message = "User is NOT authorized to access the Resource: " + matchingResource.getPath()
                         + ". Scope validation failed.";
-                log.error(message);
+                log.debug(message);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.INVALID_SCOPE, message);
             }
