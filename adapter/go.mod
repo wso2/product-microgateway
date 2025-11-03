@@ -1,8 +1,6 @@
 module github.com/wso2/product-microgateway/adapter
 
-go 1.23.12
-
-toolchain go1.23.8
+go 1.24.9
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.6.0
