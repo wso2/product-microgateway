@@ -1,6 +1,6 @@
 module mcp-server
 
-go 1.23.8
+go 1.24.9
 
 require (
 	github.com/gin-gonic/gin v1.10.0
