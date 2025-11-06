@@ -58,6 +58,8 @@ spec:
               value: "admin"
             - name: adapter_admin_pwd
               value: "admin"
+            - name: MGW_ENABLE_GRAPHQL
+              value: "false"
           resources:
             requests:
               memory: "500Mi"

@@ -54,6 +54,7 @@ import (
 	wso2_resource "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semanticversion"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
+	"github.com/wso2/product-microgateway/adapter/pkg/utils"
 )
 
 var (
@@ -313,7 +314,8 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 		return nil, err
 	}
 
-	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.MCP || apiProject.APIType == mgw.WEBHOOK || apiProject.APIType == mgw.WS {
+	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.MCP || apiProject.APIType == mgw.WEBHOOK || apiProject.APIType == mgw.WS || 
+	(utils.IsGraphQLEnabled() && apiProject.APIType == mgw.GRAPHQL) {
 		err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
 		if err != nil {
 			logger.LoggerXds.Error("Error while populating swagger from api definition. ", err)
@@ -323,7 +325,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 		// it will enable folowing securities globally for the API, overriding swagger securities.
 		isYamlAPIKey := false
 		isYamlOauth := false
-		logger.LoggerAPI.Info("API Type is HTTP, Webhook or WebSocket. Checking for security schemes in api.yaml", apiYaml.SecurityScheme)
+		logger.LoggerAPI.Info("API Type is HTTP, Webhook, GraphQL or WebSocket. Checking for security schemes in api.yaml", apiYaml.SecurityScheme)
 		for _, value := range apiYaml.SecurityScheme {
 			if value == model.APIMAPIKeyType {
 				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)

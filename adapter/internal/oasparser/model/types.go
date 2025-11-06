@@ -27,6 +27,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
+	"github.com/wso2/product-microgateway/adapter/pkg/utils"
 	"gopkg.in/yaml.v2"
 )
 
@@ -255,9 +256,13 @@ func (apiProject *ProjectAPI) ValidateAPIType() error {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")
 		return err
-	} else if apiProject.APIType != HTTP && apiProject.APIType != WS && apiProject.APIType != WEBHOOK && apiProject.APIType != MCP {
-		errMsg := "API type is not currently supported with Choreo Connect"
-		err = errors.New(errMsg)
+	} else if apiProject.APIType != HTTP &&
+		apiProject.APIType != WS &&
+		apiProject.APIType != WEBHOOK &&
+		apiProject.APIType != MCP &&
+		!(utils.IsGraphQLEnabled() &&
+			apiProject.APIType == GRAPHQL) {
+		err = errors.New("API type is not currently supported with Choreo Connect")
 		return err
 	}
 	return nil
