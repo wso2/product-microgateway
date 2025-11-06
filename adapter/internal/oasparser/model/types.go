@@ -355,7 +355,7 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 
 		if apiYaml.Data.EndpointImplementationType == inlineEndpointType {
 			errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
-			loggers.LoggerAPI.Warnf(errmsg)
+			loggers.LoggerAPI.Warn(errmsg)
 			err = errors.New(errmsg)
 			return err
 		}

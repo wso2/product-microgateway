@@ -377,7 +377,7 @@ func MarshalKeyManager(keyManager *types.KeyManager) *keymgt.KeyManagerConfig {
 		}
 		return newKeyManager
 	}
-	logger.LoggerXds.Debugf("Error happens while marshaling key manager data for " + fmt.Sprint(keyManager.Name))
+	logger.LoggerXds.Errorf("Error happens while marshaling key manager data for %v", keyManager.Name)
 	return nil
 }
 

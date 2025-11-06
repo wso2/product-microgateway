@@ -312,6 +312,9 @@ public class JWTAuthenticator implements Authenticator {
                             validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
                         }
 
+                    } catch (APISecurityException e) {
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                                APISecurityConstants.INVALID_SCOPE, e.getMessage());
                     } finally {
                         if (Utils.tracingEnabled()) {
                             validateScopesSpanScope.close();

@@ -954,7 +954,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 		logger.LoggerXds.Errorf("Error while updating the snapshot : %v", err.Error())
 		return false
 	}
-	logger.LoggerXds.Infof("New Router cache updated for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Router cache updated for the label: %s version: %v", label, version)
 	return true
 }
 
@@ -983,7 +983,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 	}
 
 	enforcerConfigMap[label] = configs
-	logger.LoggerXds.Infof("New Config cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Config cache update for the label: %s version: %d", label, version)
 }
 
 // UpdateEnforcerApis Sets new update to the enforcer's Apis
@@ -1002,7 +1002,7 @@ func UpdateEnforcerApis(label string, apis []types.Resource, version string) {
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
-	logger.LoggerXds.Infof("New API cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New API cache update for the label: %s version: %v", label, version)
 }
 
 // UpdateEnforcerSubscriptions sets new update to the enforcer's Subscriptions
@@ -1024,7 +1024,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 		logger.LoggerXds.Error(err)
 	}
 	enforcerSubscriptionMap[label] = subscriptionList
-	logger.LoggerXds.Infof("New Subscription cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Subscription cache update for the label: %s version: %v", label, version)
 }
 
 // UpdateEnforcerApplications sets new update to the enforcer's Applications
@@ -1044,7 +1044,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 		logger.LoggerXds.Error(err)
 	}
 	enforcerApplicationMap[label] = applicationList
-	logger.LoggerXds.Infof("New Application cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Application cache update for the label: %s version: %v", label, version)
 }
 
 // UpdateEnforcerAPIList sets new update to the enforcer's Apis
@@ -1063,7 +1063,7 @@ func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 		logger.LoggerXds.Error(err)
 	}
 	enforcerAPIListMap[label] = apiList
-	logger.LoggerXds.Infof("New API List cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New API List cache update for the label: %s version: %v", label, version)
 }
 
 // UpdateEnforcerApplicationPolicies sets new update to the enforcer's Application Policies
@@ -1083,7 +1083,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 		logger.LoggerXds.Error(err)
 	}
 	enforcerApplicationPolicyMap[label] = applicationPolicyList
-	logger.LoggerXds.Infof("New Application Policy cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Application Policy cache update for the label: %s version: %v", label, version)
 }
 
 // UpdateEnforcerSubscriptionPolicies sets new update to the enforcer's Subscription Policies
@@ -1108,7 +1108,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 		// To update subscription rate limit policies
 		UpdateRateLimiterPolicies(env)
 	}
-	logger.LoggerXds.Infof("New Subscription Policy cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Subscription Policy cache update for the label: %s version: %v", label, version)
 }
 
 // UpdateEnforcerApplicationKeyMappings sets new update to the enforcer's Application Key Mappings
@@ -1128,7 +1128,7 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 		logger.LoggerXds.Error(err)
 	}
 	enforcerApplicationKeyMappingMap[label] = applicationKeyMappingList
-	logger.LoggerXds.Infof("New Application Key Mapping cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Application Key Mapping cache update for the label: %s version: %v", label, version)
 }
 
 // UpdateXdsCacheWithLock uses mutex and lock to avoid different go routines updating XDS at the same time
@@ -1251,7 +1251,7 @@ func UpdateEnforcerKeyManagers(keyManagerConfigList []types.Resource) {
 		logger.LoggerXds.Error(err)
 	}
 	enforcerKeyManagerMap[label] = keyManagerConfigList
-	logger.LoggerXds.Infof("New key manager cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New key manager cache update for the label: %s version: %v", label, version)
 }
 
 // UpdateEnforcerRevokedTokens method update the revoked tokens
@@ -1272,7 +1272,7 @@ func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 		logger.LoggerXds.Error(err)
 	}
 	enforcerRevokedTokensMap[label] = tokens
-	logger.LoggerXds.Infof("New Revoked token cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Revoked token cache update for the label: %s version: %v", label, version)
 }
 
 // UpdateEnforcerThrottleData update the key template and blocking conditions
@@ -1319,5 +1319,5 @@ func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
 		logger.LoggerXds.Error(err)
 	}
 	enforcerThrottleData = t
-	logger.LoggerXds.Infof("New Throttle Data cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Throttle Data cache update for the label: %s version: %v", label, version)
 }
