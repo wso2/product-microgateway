@@ -20,15 +20,33 @@ package utils
 import (
 	"os"
 	"strconv"
+	"sync"
 
+	"github.com/wso2/product-microgateway/adapter/pkg/loggers"
+)
+
+var (
+	graphqlEnabled     bool
+	graphqlEnabledOnce sync.Once
 )
 
 // IsGraphQLEnabled returns true only when MGW_ENABLE_GRAPHQL is set and parses to a true value.
 // Unset or invalid values default to false.
 func IsGraphQLEnabled() bool {
-	if v, ok := os.LookupEnv("MGW_ENABLE_GRAPHQL"); ok {
-		b, _ := strconv.ParseBool(v)
-		return b
-	}
-	return false
+	graphqlEnabledOnce.Do(func() {
+		if v, ok := os.LookupEnv("MGW_ENABLE_GRAPHQL"); ok {
+			b, err := strconv.ParseBool(v)
+			if err != nil {
+				loggers.LoggerUtils.Warnf("Invalid boolean value for MGW_ENABLE_GRAPHQL: %s, defaulting to disabled", v)
+				graphqlEnabled = false
+				return
+			}
+			loggers.LoggerUtils.Infof("GraphQL enabled status: %t", b)
+			graphqlEnabled = b
+		} else {
+			loggers.LoggerUtils.Debug("MGW_ENABLE_GRAPHQL not set, defaulting to disabled")
+			graphqlEnabled = false
+		}
+	})
+	return graphqlEnabled
 }

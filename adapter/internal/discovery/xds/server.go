@@ -316,9 +316,10 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.MCP || apiProject.APIType == mgw.WEBHOOK || apiProject.APIType == mgw.WS || 
 	(utils.IsGraphQLEnabled() && apiProject.APIType == mgw.GRAPHQL) {
+		logger.LoggerXds.Infof("Processing API of type %s for %s", apiProject.APIType, vHost)
 		err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
 		if err != nil {
-			logger.LoggerXds.Error("Error while populating swagger from api definition. ", err)
+			logger.LoggerXds.Errorf("Failed to process API definition for %s:%s", apiYaml.Name, apiYaml.Version)
 			return nil, err
 		}
 		// the following will be used for APIM specific security config.

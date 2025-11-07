@@ -262,6 +262,7 @@ func (apiProject *ProjectAPI) ValidateAPIType() error {
 		apiProject.APIType != MCP &&
 		!(utils.IsGraphQLEnabled() &&
 			apiProject.APIType == GRAPHQL) {
+		loggers.LoggerOasparser.Errorf("Unsupported API type: %s", apiProject.APIType)
 		err = errors.New("API type is not currently supported with Choreo Connect")
 		return err
 	}
