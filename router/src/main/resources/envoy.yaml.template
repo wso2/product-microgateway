@@ -17,6 +17,7 @@ admin:
     socket_address:
       address: '${ROUTER_ADMIN_HOST}'
       port_value: '${ROUTER_ADMIN_PORT}'
+  profile_path: /tmp/envoy.prof
 dynamic_resources:
   ads_config:
     api_type: GRPC

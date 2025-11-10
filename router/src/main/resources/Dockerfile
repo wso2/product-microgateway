@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------
-FROM envoyproxy/envoy:v1.24.7
+FROM renukafernando/envoy-gperftools:v1.34.1-amd64
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 USER root
@@ -86,3 +86,4 @@ EXPOSE 9000 9090 9095
 
 # initiate container and start Router.
 ENTRYPOINT ["/home/wso2/docker-entrypoint.sh"]
+CMD []
