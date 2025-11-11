@@ -38,6 +38,7 @@ const (
 	pkgAdapter         = "github.com/wso2/product-microgateway/adapter/pkg/adapter"
 	pkgSync            = "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	pkgSemanticVersion = "github.com/wso2/product-microgateway/adapter/pkg/semanticversion"
+	pkgUtils           = "github.com/wso2/product-microgateway/adapter/pkg/utils"
 )
 
 // logger package references
@@ -48,6 +49,7 @@ var (
 	LoggerAdapter         *logrus.Logger
 	LoggerSync            *logrus.Logger
 	LoggerSemanticVersion *logrus.Logger
+	LoggerUtils           *logrus.Logger
 )
 
 func init() {
@@ -62,5 +64,6 @@ func UpdateLoggers() {
 	LoggerAdapter = logging.InitPackageLogger(pkgAdapter)
 	LoggerSync = logging.InitPackageLogger(pkgSync)
 	LoggerSemanticVersion = logging.InitPackageLogger(pkgSemanticVersion)
+	LoggerUtils = logging.InitPackageLogger(pkgUtils)
 	logrus.Info("Updated loggers")
 }
