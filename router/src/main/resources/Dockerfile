@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------
-FROM envoyproxy/envoy:v1.24.7
+FROM envoyproxy/envoy:v1.35.4
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 USER root
