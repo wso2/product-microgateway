@@ -621,23 +621,25 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		}
 	}
 
-	dnsClusterConf, err := getDNSClusterConfig()
+	dnsResolverConf, err := getDNSResolverConf()
 	if err != nil {
 		return nil, nil, err
 	}
 
 	cluster := clusterv3.Cluster{
-		Name:           clusterName,
-		ConnectTimeout: ptypes.DurationProto(timeout * time.Second),
-		ClusterDiscoveryType: &clusterv3.Cluster_ClusterType{
-			ClusterType: dnsClusterConf,
-		},
-		LbPolicy: clusterv3.Cluster_ROUND_ROBIN,
+		Name:                 clusterName,
+		ConnectTimeout:       ptypes.DurationProto(timeout * time.Second),
+		ClusterDiscoveryType: &clusterv3.Cluster_Type{Type: clusterv3.Cluster_STRICT_DNS},
+		DnsLookupFamily:      clusterv3.Cluster_V4_ONLY,
+		LbPolicy:             clusterv3.Cluster_ROUND_ROBIN,
 		LoadAssignment: &endpointv3.ClusterLoadAssignment{
 			ClusterName: clusterName,
 			Endpoints:   lbEPs,
 		},
 		TransportSocketMatches: transportSocketMatches,
+		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
+		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+		TypedDnsResolverConfig: dnsResolverConf,
 	}
 
 	// If the endpoint is within the cluster, set the max requests per connection to 1
