@@ -30,16 +30,17 @@ echo "Starting Choreo Connect Router"
     -c /etc/envoy/envoy.yaml \
     --config-yaml "${MG_ENVOY_YAML}" \
     --concurrency "${CONCURRENCY}" \
+    "${args[@]}" \
     $TRAILING_ARGS &
 
 ENVOY_PID=$!
 
 _term() {
-   echo "Stopping Choreo Connect Router. Sending SIGTERM to the envoy process..."
-   kill -SIGTERM $ENVOY_PID
-   wait $ENVOY_PID
-   echo "Choreo Connect Router stopped."
-   exit 0
+    echo "Stopping Choreo Connect Router. Sending SIGTERM to the envoy process..."
+    kill -SIGTERM $ENVOY_PID
+    wait $ENVOY_PID
+    echo "Choreo Connect Router stopped."
+    exit 0
 }
 
 # trap handle_signal SIGTERM
