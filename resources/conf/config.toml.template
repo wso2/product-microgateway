@@ -149,7 +149,7 @@ retainKeys = ["self_validate_jwt", "issuer", "claim_mappings", "consumer_key_cla
   # If there are no available network interfaces for a given IP family, filter those addresses from the results
   filterUnroutableFamilies = false
   # Use TCP for all DNS queries instead of the default protocol UDP.
-  useTCPForDNSLookups = false
+  useTCPForDNSLookups = true
   # Do not use the default search domains; only query hostnames as-is or as aliases.
   noDefaultSearchDomain = false
 [[router.upstream.dNS.DNSResolver.cAres.resolvers]]
