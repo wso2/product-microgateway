@@ -35,7 +35,10 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
+import org.wso2.choreo.connect.enforcer.api.API;
+import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
+import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
@@ -271,6 +274,33 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 responseObject.getApiUuid());
         addMetadata(structBuilder, RouterAccessLogConstants.EXT_AUTH_DETAILS,
                 responseObject.getExtAuthDetails());
+        String servicePath = extractResourcePath(responseObject, request);
+        addMetadata(structBuilder, RouterAccessLogConstants.RESOURCE_PATH,
+                servicePath);
+    }
+
+    private String extractResourcePath(ResponseObject responseObject, CheckRequest request) {
+        String requestPath = responseObject.getRequestPath();
+        List<String> queryParamsToRemove = responseObject.getQueryParamsToRemove();
+        
+        // Get matched API to determine the context version dynamically
+        API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
+        String resourcePath = requestPath;
+        
+        if (matchedAPI != null) {
+            APIConfig apiConfig = matchedAPI.getAPIConfig();
+
+            // Remove the contextVersion from the request path
+            if (requestPath.startsWith(apiConfig.getBasePath())) {
+                resourcePath = requestPath.substring(apiConfig.getBasePath().length());
+            }
+        }
+        
+        if (queryParamsToRemove.size() > 0) {
+            return constructQueryParamString(resourcePath,
+                    responseObject.getQueryParamMap(), queryParamsToRemove);
+        }
+        return resourcePath;
     }
 
     /**
