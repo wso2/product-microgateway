@@ -26,4 +26,5 @@ public class RouterAccessLogConstants {
     public static final String ORIGINAL_HOST_DATA_NAME = "originalHost";
     public static final String API_UUID_DATA_NAME = "apiUUID";
     public static final String EXT_AUTH_DETAILS = "extAuthDetails";
+    public static final String RESOURCE_PATH = "resourcePath";
 }
