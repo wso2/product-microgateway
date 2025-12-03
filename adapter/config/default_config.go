@@ -127,8 +127,8 @@ var defaultConfig = &Config{
 				StatusCodes:   []uint32{504},
 			},
 			DNS: upstreamDNS{
-				DNSRefreshRate: 5000,
-				RespectDNSTtl:  false,
+				DNSRefreshRate: 10000,
+                RespectDNSTtl:  true,  // Respect DNS TTL to reduce queries
 				DNSResolver: dnsResolverConfig{
 					ResolverType: "",
 					CAres: cAres{

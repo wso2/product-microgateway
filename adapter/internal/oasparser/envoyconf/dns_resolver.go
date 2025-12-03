@@ -98,13 +98,27 @@ func getDNSClusterConfig() (*clusterv3.Cluster_CustomClusterType, error) {
 		return nil, err
 	}
 
-	dnsClusterConf = &dnsclusterv3.DnsCluster{
-		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
-		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
-		DnsJitter:              durationpb.New(1 * time.Second),
-		TypedDnsResolverConfig: dnsResolverConf,
-		DnsLookupFamily:        dnsv3.DnsLookupFamily_V4_ONLY,
-	}
+	// Calculate optimal refresh rate and jitter to reduce socket churn
+    refreshRate := time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond
+    if refreshRate < 30*time.Second {
+        // Minimum refresh rate to prevent excessive DNS queries
+        refreshRate = 30 * time.Second
+        logger.LoggerOasparser.Warnf("DNS refresh rate increased to %v to reduce CPU overhead", refreshRate)
+    }
+
+    // Reduce jitter to minimize unnecessary variance
+    jitter := refreshRate / 10 // 10% jitter instead of fixed 1 second
+    if jitter > 5*time.Second {
+        jitter = 5 * time.Second
+    }
+
+    dnsClusterConf = &dnsclusterv3.DnsCluster{
+        DnsRefreshRate:         durationpb.New(refreshRate),
+    	RespectDnsTtl:          true, // Respect DNS TTL to reduce unnecessary queries
+    	DnsJitter:              durationpb.New(jitter),
+    	TypedDnsResolverConfig: dnsResolverConf,
+    	DnsLookupFamily:        dnsv3.DnsLookupFamily_V4_ONLY,
+    }
 
 	dnsClusterConfPbAny, err := anypb.New(dnsClusterConf)
 	if err != nil {
