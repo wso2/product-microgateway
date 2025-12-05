@@ -634,5 +634,8 @@ type filter struct {
 }
 
 type httpClient struct {
-	RequestTimeOut time.Duration
+	RequestTimeOut        time.Duration // in seconds
+	TLSHandshakeTimeout   time.Duration // in seconds
+	ResponseHeaderTimeout time.Duration // in seconds
+	IdleConnTimeout       time.Duration // in seconds
 }
