@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sync"
+	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
@@ -106,6 +107,9 @@ func IsPublicCertificate(certContent []byte) bool {
 
 // InvokeControlPlane sends request to the control plane and returns the response
 func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error) {
+	conf, _ := config.ReadConfigs()
+	httpClientConfig := conf.ControlPlane.HTTPClient
+
 	tr := &http.Transport{}
 	if !skipSSL {
 		_, _, truststoreLocation := GetKeyLocations()
@@ -119,9 +123,14 @@ func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error)
 		}
 	}
 
+	tr.TLSHandshakeTimeout = httpClientConfig.TLSHandshakeTimeout * time.Second
+	tr.IdleConnTimeout = httpClientConfig.IdleConnTimeout * time.Second
+	tr.ResponseHeaderTimeout = httpClientConfig.ResponseHeaderTimeout * time.Second
+
 	// Configuring the http client
 	client := &http.Client{
 		Transport: tr,
+		Timeout:   httpClientConfig.RequestTimeOut * time.Second,
 	}
 	return client.Do(req)
 }

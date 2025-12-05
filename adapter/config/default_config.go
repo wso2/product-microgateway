@@ -388,7 +388,10 @@ var defaultConfig = &Config{
 		},
 		SendRevisionUpdate: false,
 		HTTPClient: httpClient{
-			RequestTimeOut: 30,
+			RequestTimeOut:        30,
+			TLSHandshakeTimeout:   10,
+			ResponseHeaderTimeout: 10,
+			IdleConnTimeout:       90,
 		},
 		RequestWorkerPool: requestWorkerPool{
 			PoolSize:              4,
