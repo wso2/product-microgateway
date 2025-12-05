@@ -115,19 +115,17 @@ func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error)
 		_, _, truststoreLocation := GetKeyLocations()
 		caCertPool := GetTrustedCertPool(truststoreLocation)
 		tr = &http.Transport{
-			TLSClientConfig:       &tls.Config{RootCAs: caCertPool},
-			TLSHandshakeTimeout:   httpClientConfig.TLSHandshakeTimeout * time.Second,
-			IdleConnTimeout:       httpClientConfig.IdleConnTimeout * time.Second,
-			ResponseHeaderTimeout: httpClientConfig.ResponseHeaderTimeout * time.Second,
+			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
 		}
 	} else {
 		tr = &http.Transport{
-			TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
-			TLSHandshakeTimeout:   httpClientConfig.TLSHandshakeTimeout * time.Second,
-			IdleConnTimeout:       httpClientConfig.IdleConnTimeout * time.Second,
-			ResponseHeaderTimeout: httpClientConfig.ResponseHeaderTimeout * time.Second,
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
+
+	tr.TLSHandshakeTimeout = httpClientConfig.TLSHandshakeTimeout * time.Second
+	tr.IdleConnTimeout = httpClientConfig.IdleConnTimeout * time.Second
+	tr.ResponseHeaderTimeout = httpClientConfig.ResponseHeaderTimeout * time.Second
 
 	// Configuring the http client
 	client := &http.Client{
