@@ -68,10 +68,7 @@ public class JWTValidator {
         ExtendedTokenIssuerDto tokenIssuer = KeyManagerHolder.getInstance()
                 .getTokenIssuerDTO(organizationUUID, issuer);
         if (tokenIssuer != null && StringUtils.isNotEmpty(issuer)) {
-            this.jwtTransformer = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
-            if (this.jwtTransformer == null) {
-                this.jwtTransformer = new DefaultJWTTransformer();
-            }
+            this.jwtTransformer = new DefaultJWTTransformer();
             this.jwtTransformer.loadConfiguration(tokenIssuer);
             return validateToken(signedJWTInfo, tokenIssuer);
         }
