@@ -31,6 +31,7 @@ public class ResourceConfig {
     private Map<String, List<String>> securitySchemas = new HashMap(); // security_schema_name -> scopes
     private String tier = "Unlimited";
     private boolean disableSecurity = false;
+    public  boolean responseCache = false;
     private Map<String, EndpointCluster> endpoints; // "PRODUCTION" OR "SANDBOX" -> endpoint cluster
 
     /**
@@ -126,6 +127,11 @@ public class ResourceConfig {
 
     public void setEndpoints(Map<String, EndpointCluster> endpoints) {
         this.endpoints = endpoints;
+    }
+
+    // check for the response caching enabled apis
+    public boolean isResponseCache() {
+        return responseCache;
     }
 
 }

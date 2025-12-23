@@ -465,6 +465,29 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 	return cluster, address, nil
 }
 
+// CreateVarnishCluster creates cluster relevant to the varnish 
+func CreateVarnishCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
+
+    conf, _ := config.ReadConfigs()
+
+    varnishCluster := &model.EndpointCluster{
+        Endpoints: []model.Endpoint{
+            {
+                Host:    conf.Varnish.Host,
+                URLType: httpURLType, 
+                Port:    conf.Varnish.Port,
+            },
+        },
+    }
+
+    cluster, address, varnishErr := processEndpoints(varnishClusterName, varnishCluster, nil, 20, "")
+    if varnishErr != nil {
+        return nil, nil, varnishErr
+    }
+
+    return cluster, address, nil
+}
+
 // CreateTracingCluster creates a cluster definition for router's tracing server.
 func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
 	var epHost string

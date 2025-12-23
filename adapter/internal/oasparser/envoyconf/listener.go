@@ -40,6 +40,7 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	config_access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 )
 
 var retryBannedVhosts map[string]struct{}
@@ -100,56 +101,14 @@ func CreateListenersWithRds() []*listenerv3.Listener {
 func createListeners(conf *config.Config) []*listenerv3.Listener {
 	httpFilters := getHTTPFilters()
 	upgradeFilters := getUpgradeFilters()
+	router := getHTTPRouterFilters()
 	accessLogs := getAccessLogs()
 	var filters []*listenerv3.Filter
+	var customFilters []*listenerv3.Filter
 	var listeners []*listenerv3.Listener
 
-	manager := &hcmv3.HttpConnectionManager{
-		CodecType:  hcmv3.HttpConnectionManager_AUTO,
-		StatPrefix: httpConManagerStartPrefix,
-		// WebSocket upgrades enabled from the HCM
-		UpgradeConfigs: []*hcmv3.HttpConnectionManager_UpgradeConfig{{
-			UpgradeType: "websocket",
-			Enabled:     &wrappers.BoolValue{Value: true},
-			Filters:     upgradeFilters,
-		}},
-		RouteSpecifier: &hcmv3.HttpConnectionManager_Rds{
-			Rds: &hcmv3.Rds{
-				RouteConfigName: defaultRdsConfigName,
-				ConfigSource: &corev3.ConfigSource{
-					ConfigSourceSpecifier: &corev3.ConfigSource_Ads{
-						Ads: &corev3.AggregatedConfigSource{},
-					},
-					ResourceApiVersion: corev3.ApiVersion_V3,
-				},
-			},
-		},
-		HttpFilters: httpFilters,
-		LocalReplyConfig: &hcmv3.LocalReplyConfig{
-			Mappers: getErrorResponseMappers(),
-		},
-		RequestTimeout:        ptypes.DurationProto(conf.Envoy.Connection.Timeouts.RequestTimeoutInSeconds * time.Second),        // default disabled
-		RequestHeadersTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.RequestHeadersTimeoutInSeconds * time.Second), // default disabled
-		StreamIdleTimeout:     ptypes.DurationProto(conf.Envoy.Connection.Timeouts.StreamIdleTimeoutInSeconds * time.Second),     // Default 5 mins
-		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
-			IdleTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.IdleTimeoutInSeconds * time.Second), // Default 1 hr
-		},
-	}
-
-	if len(accessLogs) > 0 {
-		manager.AccessLog = accessLogs
-	}
-
-	if conf.Tracing.Enabled && conf.Tracing.Type != TracerTypeAzure {
-		if tracing, err := getTracing(conf); err == nil {
-			manager.Tracing = tracing
-			manager.GenerateRequestId = &wrappers.BoolValue{Value: conf.Tracing.Enabled}
-		} else {
-			logger.LoggerOasparser.Error("Failed to initialize tracing. Router tracing will be disabled. ", err)
-			conf.Tracing.Enabled = false
-		}
-	}
-
+	//creating the manager for exisitng listener
+	manager := createHTTPConnectionManager(httpFilters, upgradeFilters, accessLogs, conf)
 	pbst, err := anypb.New(manager)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)
@@ -160,9 +119,24 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 			TypedConfig: pbst,
 		},
 	}
-
 	// add filters
 	filters = append(filters, &connectionManagerFilterP)
+
+	// Creating the new manager for new listener
+	newManager := createHTTPConnectionManager(router, router, accessLogs, conf)
+	pbstNewManager, err := anypb.New(newManager)
+	if err != nil {
+		logger.LoggerOasparser.Fatal(err)
+	}
+	connectionManagerFilterNew := listenerv3.Filter{
+		Name: wellknown.HTTPConnectionManager,
+		ConfigType: &listenerv3.Filter_TypedConfig{
+			TypedConfig: pbstNewManager,
+		},
+	}
+	// add new filters
+	customFilters = append(customFilters, &connectionManagerFilterNew)
+
 
 	if conf.Envoy.SecuredListenerPort > 0 {
 		listenerHostAddress := defaultListenerHostAddress
@@ -259,6 +233,39 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 	} else {
 		logger.LoggerOasparser.Info("No Non-securedListenerPort is included.")
 	}
+
+	// new listener
+	if conf.Envoy.NewListenerPort > 0 {
+		listenerHostAddress := defaultListenerHostAddress
+		if len(conf.Envoy.NewListenerHost) > 0 {
+			listenerHostAddress = conf.Envoy.NewListenerHost
+		}
+		listenerAddress := &corev3.Address_SocketAddress{
+			SocketAddress: &corev3.SocketAddress{
+				Protocol: corev3.SocketAddress_TCP,
+				Address:  listenerHostAddress,
+				PortSpecifier: &corev3.SocketAddress_PortValue{
+					PortValue: conf.Envoy.NewListenerPort,
+				},
+			},
+		}
+
+		listener := listenerv3.Listener{
+			Name: newHTTPListenerName, 
+			Address: &corev3.Address{
+				Address: listenerAddress,
+			},
+			FilterChains: []*listenerv3.FilterChain{{
+				Filters: customFilters,
+			},
+			},
+		}
+		listeners = append(listeners, &listener)
+		logger.LoggerOasparser.Infof("New Listener is added. %s : %d", listenerHostAddress, conf.Envoy.NewListenerPort)
+	} else {
+		logger.LoggerOasparser.Info("No NewListenerPort is included.")
+	}
+
 
 	if len(listeners) == 0 {
 		err := errors.New("No Listeners are configured as no port value is mentioned under securedListenerPort or ListenerPort")
@@ -387,4 +394,57 @@ func getTracing(conf *config.Config) (*hcmv3.HttpConnectionManager_Tracing, erro
 		}
 	}
 	return tracing, nil
+}
+
+// function to create http managers
+func createHTTPConnectionManager(httpFilters []*hcmv3.HttpFilter, upgradeFilters []*hcmv3.HttpFilter, accessLogs []*config_access_logv3.AccessLog, conf *config.Config) *hcmv3.HttpConnectionManager {
+    manager := &hcmv3.HttpConnectionManager{
+        CodecType:  hcmv3.HttpConnectionManager_AUTO,
+        StatPrefix: httpConManagerStartPrefix,
+	    // WebSocket upgrades enabled from the HCM
+        UpgradeConfigs: []*hcmv3.HttpConnectionManager_UpgradeConfig{{
+            UpgradeType: "websocket",
+            Enabled:     &wrappers.BoolValue{Value: true},
+            Filters:     upgradeFilters,
+        }},
+        RouteSpecifier: &hcmv3.HttpConnectionManager_Rds{
+            Rds: &hcmv3.Rds{
+                RouteConfigName: defaultRdsConfigName,
+                ConfigSource: &corev3.ConfigSource{
+                    ConfigSourceSpecifier: &corev3.ConfigSource_Ads{
+                        Ads: &corev3.AggregatedConfigSource{},
+                    },
+                    ResourceApiVersion: corev3.ApiVersion_V3,
+                },
+            },
+        },
+		HttpFilters: httpFilters,
+        LocalReplyConfig: &hcmv3.LocalReplyConfig{
+            Mappers: getErrorResponseMappers(),
+        },
+        RequestTimeout:        ptypes.DurationProto(conf.Envoy.Connection.Timeouts.RequestTimeoutInSeconds * time.Second),        // default disabled
+        RequestHeadersTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.RequestHeadersTimeoutInSeconds * time.Second), // default disabled
+        StreamIdleTimeout:     ptypes.DurationProto(conf.Envoy.Connection.Timeouts.StreamIdleTimeoutInSeconds * time.Second),     // Default 5 mins
+        CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
+            IdleTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.IdleTimeoutInSeconds * time.Second), // Default 1 hr
+        },
+
+    }
+
+
+    if len(accessLogs) > 0 {
+        manager.AccessLog = accessLogs
+    }
+
+	if conf.Tracing.Enabled && conf.Tracing.Type != TracerTypeAzure {
+        if tracing, err := getTracing(conf); err == nil {
+            manager.Tracing = tracing
+            manager.GenerateRequestId = &wrappers.BoolValue{Value: conf.Tracing.Enabled}
+        } else {
+            logger.LoggerOasparser.Error("Failed to initialize tracing. Router tracing will be disabled. ", err)
+            conf.Tracing.Enabled = false
+        }
+    }
+
+    return manager
 }
