@@ -390,13 +390,14 @@ func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
 }
 
 func getHeaderToMetadataHTTPFilter() *hcmv3.HttpFilter {
+    logger.LoggerOasparser.Debug("Creating header-to-metadata HTTP filter")
     headerToMetadataConf := header_to_metadata_v3.Config{
         ResponseRules: []*header_to_metadata_v3.Config_Rule{
             {
                 Header: "x-choreo-host",
                 OnHeaderPresent: &header_to_metadata_v3.Config_KeyValuePair{
                     MetadataNamespace: "envoy.lb",
-                    Key:               "choreo-host-url",
+                    Key:               "choreo-upstream-host",
                     Type:              header_to_metadata_v3.Config_STRING,
                 },
                 Remove: true,
@@ -409,6 +410,7 @@ func getHeaderToMetadataHTTPFilter() *hcmv3.HttpFilter {
     if err != nil {
     	logger.LoggerOasparser.Error("Error marshaling header-to-metadata filter configs. ", err)
     }
+    logger.LoggerOasparser.Debug("Successfully created header-to-metadata filter configuration")
     filter := hcmv3.HttpFilter{
     	Name:       "envoy.filters.http.header_to_metadata",
     	ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: filterTypedConf},
