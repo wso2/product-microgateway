@@ -84,7 +84,8 @@
     <test name="cc-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfigAndTransformer"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>
+<!--        Ignore the custom JWT transformer test due to the removal of the functionality    -->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>-->
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.CustomFilterTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.ratelimit.APILevelWithoutRateLimitTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.ratelimit.ApiLevelRatelimitTestCase"/>

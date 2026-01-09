@@ -122,6 +122,7 @@ func getDefaultLogConfig() *LogConfig {
 				"apiUuid":       "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%",
 				"extAuthDtls":   "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:extAuthDetails)%",
 				"resourcePath":  "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:resourcePath)%",
+				"choreoUpstreamHost": "%DYNAMIC_METADATA(envoy.lb:choreo-upstream-host)%",
 			},
 		},
 		InsightsLogs: &insightsLog{

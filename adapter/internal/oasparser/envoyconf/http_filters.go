@@ -26,6 +26,7 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	envoy_config_ratelimit_v3 "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
+	header_to_metadata_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/header_to_metadata/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	local_ratelimit_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	luav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
@@ -56,8 +57,10 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	lua := getLuaFilter()
 	cors := getCorsHTTPFilter()
 	localRateLimit := getHTTPLocalRateLimitFilter()
+	headerToMetadata := getHeaderToMetadataHTTPFilter()
 
 	httpFilters := []*hcmv3.HttpFilter{
+	    headerToMetadata,
 		cors,
 		localRateLimit,
 		extAauth,
@@ -384,4 +387,45 @@ func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
 	}
 	return &mgwWebSocketFilter
 
+}
+
+func getHeaderToMetadataHTTPFilter() *hcmv3.HttpFilter {
+    logger.LoggerOasparser.Debug("Creating header-to-metadata HTTP filter")
+    headerToMetadataConf := header_to_metadata_v3.Config{
+        ResponseRules: []*header_to_metadata_v3.Config_Rule{
+            {
+                Header: "x-choreo-host",
+                OnHeaderPresent: &header_to_metadata_v3.Config_KeyValuePair{
+                    MetadataNamespace: "envoy.lb",
+                    Key:               "choreo-upstream-host",
+                    Type:              header_to_metadata_v3.Config_STRING,
+                },
+                Remove: true,
+            },
+        },
+    }
+
+    filterTypedConf, err := anypb.New(&headerToMetadataConf)
+
+    if err != nil {
+    	logger.LoggerOasparser.Error("Error marshaling header-to-metadata filter configs. ", err)
+    }
+    logger.LoggerOasparser.Debug("Successfully created header-to-metadata filter configuration")
+    filter := hcmv3.HttpFilter{
+    	Name:       "envoy.filters.http.header_to_metadata",
+    	ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: filterTypedConf},
+    }
+
+    if (enableRouterConfigValidation) {
+        err = filter.Validate()
+        if err != nil {
+            if panicOnValidationFailure {
+                 logger.LoggerOasparser.Fatal("Error while validating header-to-metadata HTTP filter configs. ", err)
+            } else {
+                 logger.LoggerOasparser.Error("Error while validating header-to-metadata HTTP filter configs. ", err)
+            }
+        }
+    }
+
+    return &filter
 }
