@@ -17,6 +17,8 @@
 set -e
 PROTOC_VERSION=1.34_4
 
+# Test
+
 # get script location
 cur_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 cd $cur_dir
