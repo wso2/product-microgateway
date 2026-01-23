@@ -138,4 +138,28 @@ public interface SubscriptionOrBuilder extends
    */
   com.google.protobuf.ByteString
       getVersionRangeBytes();
+
+  /**
+   * <code>string billingCustomerId = 14;</code>
+   * @return The billingCustomerId.
+   */
+  java.lang.String getBillingCustomerId();
+  /**
+   * <code>string billingCustomerId = 14;</code>
+   * @return The bytes for billingCustomerId.
+   */
+  com.google.protobuf.ByteString
+      getBillingCustomerIdBytes();
+
+  /**
+   * <code>string billingSubscriptionId = 15;</code>
+   * @return The billingSubscriptionId.
+   */
+  java.lang.String getBillingSubscriptionId();
+  /**
+   * <code>string billingSubscriptionId = 15;</code>
+   * @return The bytes for billingSubscriptionId.
+   */
+  com.google.protobuf.ByteString
+      getBillingSubscriptionIdBytes();
 }

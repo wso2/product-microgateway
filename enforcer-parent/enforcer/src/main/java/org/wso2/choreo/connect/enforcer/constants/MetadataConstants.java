@@ -51,6 +51,9 @@ public class MetadataConstants {
     public static final String APP_NAME_KEY = WSO2_METADATA_PREFIX + "application-name";
     public static final String APP_OWNER_KEY = WSO2_METADATA_PREFIX + "application-owner";
 
+    public static final String BILLING_CUSTOMER_ID = WSO2_METADATA_PREFIX + "billing-customer";
+    public static final String BILLING_SUBSCRIPTION_ID = WSO2_METADATA_PREFIX + "billing-subscription-id";
+
     public static final String CORRELATION_ID_KEY = WSO2_METADATA_PREFIX + "correlation-id";
     public static final String REGION_KEY = WSO2_METADATA_PREFIX + "region";
 

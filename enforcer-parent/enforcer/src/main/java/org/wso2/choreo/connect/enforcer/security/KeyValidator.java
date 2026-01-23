@@ -281,6 +281,9 @@ public class KeyValidator {
         infoDTO.setApiUUID(apiConfig.getUuid());
         infoDTO.setType(keyType);
         infoDTO.setSubscriberTenantDomain(app.getTenantDomain());
+        infoDTO.setBillingCustomerId(sub.getBillingCustomerId());
+        infoDTO.setBillingSubscriptionId(sub.getBillingSubscriptionId());
+
         // Advanced Level Throttling Related Properties
         String apiTier = apiConfig.getTier();
 
