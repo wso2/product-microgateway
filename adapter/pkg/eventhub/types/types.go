@@ -32,6 +32,8 @@ type Subscription struct {
 	TimeStamp         int64  `json:"timeStamp,omitempty"`
 	Context           string `json:"context,omitempty"`
 	VersionRange      string `json:"versionRange,omitempty"`
+	BillingSubscriptionID string `json:"billingSubscriptionId,omitempty"`
+	BillingCustomerID string `json:"billingCustomerId,omitempty"`
 }
 
 // SubscriptionList for struct list of applications
