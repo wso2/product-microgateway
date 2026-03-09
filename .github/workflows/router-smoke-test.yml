@@ -2,6 +2,13 @@ name: Router Smoke Test
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/router-smoke-test.yml'
+      - 'dev-scripts/directory-structure-maker/**'
+      - 'resources/license/**'
+      - 'router/**'
+      - 'test.sh'
 
 permissions:
   contents: read
