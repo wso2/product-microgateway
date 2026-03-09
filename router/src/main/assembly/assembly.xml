@@ -48,6 +48,11 @@
             <destName>LICENSE.txt</destName>
         </file>
         <file>
+            <source>../resources/license/NOTICE-ROUTER.txt</source>
+            <outputDirectory/>
+            <destName>NOTICE.txt</destName>
+        </file>
+        <file>
             <source>src/main/resources/envoy.yaml.template</source>
             <outputDirectory/>
             <destName>envoy.yaml.template</destName>

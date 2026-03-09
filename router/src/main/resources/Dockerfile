@@ -13,11 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------
-FROM envoyproxy/envoy:v1.24.1
+FROM envoyproxy/envoy:v1.24.1 AS envoy-binary
+
+FROM ubuntu:22.04
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apt-get update && apt-get upgrade -y \
-    && apt-get install --no-install-recommends --no-install-suggests -y gettext-base
+    && apt-get install --no-install-recommends --no-install-suggests -y ca-certificates gettext-base \
+    && apt-get autoremove -y && apt-get clean \
+    && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
 
 ENV LANG=C.UTF-8
 
@@ -34,8 +38,8 @@ ARG MOTD="\n\
  which is under the Apache License, Version 2.0. \n\
  Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
 
-RUN \
-    groupadd --system -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
+RUN mkdir -p /etc/envoy \
+    && groupadd --system -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
     && useradd --system --create-home --home-dir ${MG_USER_HOME} --no-log-init -g ${MG_USER_GROUP_ID} -u ${MG_USER_ID} ${MG_USER} \
     && chown -R ${MG_USER}:${MG_USER_GROUP} ${MG_USER_HOME} \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
@@ -66,7 +70,9 @@ USER ${MG_USER}
 ENV ENVOY_UID=0
 ENV ENVOY_GID=0
 
+COPY --from=envoy-binary /usr/local/bin/envoy /usr/local/bin/envoy
 COPY maven/LICENSE.txt .
+COPY maven/NOTICE.txt .
 COPY maven/wasm /home/wso2/wasm
 COPY maven/interceptor /home/wso2/interceptor
 COPY maven/envoy.yaml /etc/envoy/envoy.yaml

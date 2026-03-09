@@ -91,6 +91,9 @@ echo "Building Router image"
 mkdir -p router/maven/security/truststore/
 cp -r ROUTER/\$HOME/* router/maven
 cp ROUTER/LICENSE.txt router/maven
+if [ -f ROUTER/NOTICE.txt ]; then
+    cp ROUTER/NOTICE.txt router/maven
+fi
 cp ROUTER/etc/envoy/envoy.yaml router/maven/envoy.yaml
 docker build -f ROUTER/Dockerfile -t "${docker_repo}/choreo-connect-router:${docker_tag}" router
 

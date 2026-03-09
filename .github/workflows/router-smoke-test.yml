@@ -1,0 +1,48 @@
+name: Router Smoke Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          df -h
+          sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
+          docker system prune -af || true
+          df -h
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+
+      - name: Set up Go 1.18
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.18.10'
+
+      - name: Show tool versions
+        run: |
+          java -version
+          mvn -version
+          go version
+          docker version
+          docker compose version
+
+      - name: Run smoke test
+        env:
+          COMPOSE_PROJECT_NAME: ccsmokegha
+        run: ./test.sh

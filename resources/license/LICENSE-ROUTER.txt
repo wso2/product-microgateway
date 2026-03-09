@@ -14,6 +14,7 @@ below is and where the actual text of the license can be found.
 
 Dependency                                              Version                                     License
 -------------------------------------------------------------------------------------------------------------
+https://github.com/envoyproxy/envoy                     v1.24.1                                     apache2
 https://github.com/proxy-wasm/proxy-wasm-cpp-sdk	     c32d380ca6c9b1afac38a3841be99c37af2698bf	 apache2
 
 The license types used by the above libraries and their information is given below:
