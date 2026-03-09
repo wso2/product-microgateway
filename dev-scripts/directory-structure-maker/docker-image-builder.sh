@@ -93,6 +93,9 @@ cp -r ROUTER/\$HOME/* router/maven
 cp ROUTER/LICENSE.txt router/maven
 if [ -f ROUTER/NOTICE.txt ]; then
     cp ROUTER/NOTICE.txt router/maven
+else
+    echo "error: ROUTER/NOTICE.txt is missing; router docker build will fail without maven/NOTICE.txt"
+    exit 1
 fi
 cp ROUTER/etc/envoy/envoy.yaml router/maven/envoy.yaml
 docker build -f ROUTER/Dockerfile -t "${docker_repo}/choreo-connect-router:${docker_tag}" router

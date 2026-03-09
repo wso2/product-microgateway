@@ -42,7 +42,8 @@ RUN mkdir -p /etc/envoy \
     && groupadd --system -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
     && useradd --system --create-home --home-dir ${MG_USER_HOME} --no-log-init -g ${MG_USER_GROUP_ID} -u ${MG_USER_ID} ${MG_USER} \
     && chown -R ${MG_USER}:${MG_USER_GROUP} ${MG_USER_HOME} \
-    && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
+    && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc \
+    && echo "${MOTD}" > /etc/motd
 
 ENV ROUTER_ADMIN_HOST=0.0.0.0
 ENV ROUTER_ADMIN_PORT=9000

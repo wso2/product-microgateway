@@ -10,6 +10,10 @@ on:
       - 'router/**'
       - 'test.sh'
 
+concurrency:
+  group: router-smoke-test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -53,3 +57,11 @@ jobs:
         env:
           COMPOSE_PROJECT_NAME: ccsmokegha
         run: ./test.sh
+
+      - name: Upload smoke test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-logs
+          path: test-artifacts/**
+          if-no-files-found: ignore

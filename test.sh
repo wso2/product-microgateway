@@ -8,6 +8,7 @@ TMP_DIR="$(mktemp -d)"
 COMPOSE_FILE="$TMP_DIR/docker-compose.smoke.yaml"
 API_PROJECT_DIR="$TMP_DIR/petstore"
 MOUNTED_APIS_DIR="$TMP_DIR/mounted-apis"
+ARTIFACTS_DIR="${ARTIFACTS_DIR:-$REPO_ROOT/test-artifacts/${COMPOSE_PROJECT_NAME:-ccsmoke$$}}"
 PROJECT_VERSION="$(grep -m1 '<version>' "$REPO_ROOT/pom.xml" | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/')"
 COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-ccsmoke$$}"
 MVN_BIN="${MVN_BIN:-mvn}"
@@ -75,19 +76,22 @@ cleanup() {
     set +e
 
     if [[ "$FAILURE" -ne 0 ]]; then
+        mkdir -p "$ARTIFACTS_DIR"
         echo
         echo "Smoke test failed. Recent container status:"
-        run_compose ps || true
+        run_compose ps | tee "$ARTIFACTS_DIR/compose-ps.log" || true
         echo
         echo "Recent logs:"
-        run_compose logs --tail=100 || true
+        run_compose logs --tail=100 | tee "$ARTIFACTS_DIR/compose-logs.log" || true
+        if [[ -f "$COMPOSE_FILE" ]]; then
+            cp "$COMPOSE_FILE" "$ARTIFACTS_DIR/docker-compose.smoke.yaml"
+        fi
     fi
 
     if [[ "$KEEP_RUNNING" != "1" ]]; then
         run_compose down -v --remove-orphans >/dev/null 2>&1 || true
+        rm -rf "$TMP_DIR"
     fi
-
-    rm -rf "$TMP_DIR"
 }
 
 trap cleanup EXIT
@@ -96,7 +100,9 @@ require_command docker
 require_command curl
 require_command grep
 require_command sed
-require_command "$MVN_BIN"
+if [[ "$SKIP_BUILD" != "1" ]]; then
+    require_command "$MVN_BIN"
+fi
 
 docker info >/dev/null
 
@@ -217,8 +223,8 @@ wait_for_http_code "https://localhost:9095/v2/pet/findByStatus?status=available"
 echo
 echo "==> Verifying unauthorized invoke is rejected"
 UNAUTHORIZED_CODE="$(curl -ksS -o /dev/null -w '%{http_code}' "https://localhost:9095/v2/pet/findByStatus?status=available")"
-if [[ "$UNAUTHORIZED_CODE" == "200" ]]; then
-    echo "error: unauthorized invoke unexpectedly succeeded" >&2
+if [[ "$UNAUTHORIZED_CODE" != "401" ]]; then
+    echo "error: unauthorized invoke returned HTTP $UNAUTHORIZED_CODE, expected 401" >&2
     exit 1
 fi
 echo "Unauthorized invoke returned HTTP $UNAUTHORIZED_CODE"
