@@ -76,6 +76,7 @@ choreo-connect-1.1.0
 │   ├── Dockerfile
 │   ├── Dockerfile.ubuntu
 │   ├── LICENSE.txt
+│   ├── NOTICE.txt
 │   └── etc
 │       ├── envoy
 │       │   └── envoy.yaml

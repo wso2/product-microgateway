@@ -84,6 +84,9 @@ mv ./ENFORCER/bin/grpc_health_probe                    ./ENFORCER/bin/grpc_healt
 docker cp $ROUTER_IMAGE_ID:home/wso2/interceptor        ./ROUTER/\$HOME/
 docker cp $ROUTER_IMAGE_ID:home/wso2/wasm               ./ROUTER/\$HOME/
 cp ../temp/LICENSE.txt                                     ./ROUTER/
+if docker cp $ROUTER_IMAGE_ID:/NOTICE.txt ./ROUTER/; then
+  echo "Router NOTICE.txt copied"
+fi
 docker cp $ROUTER_IMAGE_ID:/etc/envoy/envoy.yaml        ./ROUTER/etc/envoy/
 docker cp $ROUTER_IMAGE_ID:/home/wso2/envoy.yaml.template  ./ROUTER/\$HOME/
 docker cp $ROUTER_IMAGE_ID:/home/wso2/docker-entrypoint.sh ./ROUTER/\$HOME/
