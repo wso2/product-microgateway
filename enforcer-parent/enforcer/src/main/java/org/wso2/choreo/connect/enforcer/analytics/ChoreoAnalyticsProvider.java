@@ -238,8 +238,10 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         String gwURL = getValueAsString(fieldsMap, MetadataConstants.GATEWAY_URL);
         String deploymentType = getValueAsString(fieldsMap, MetadataConstants.DEPLOYMENT_TYPE);
+        String environmentName = getValueAsString(fieldsMap, MetadataConstants.API_ENVIRONMENT_NAME);
         map.put(AnalyticsConstants.GATEWAY_URL, gwURL);
         map.put(AnalyticsConstants.DEPLOYMENT_TYPE, deploymentType);
+        map.put(AnalyticsConstants.ENVIRONMENT_NAME, environmentName);
         return map;
     }
 

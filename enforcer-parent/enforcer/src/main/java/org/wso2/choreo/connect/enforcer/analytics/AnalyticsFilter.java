@@ -231,6 +231,8 @@ public class AnalyticsFilter {
                 requestContext.getMatchedAPI().getBasePath());
         requestContext.addMetadataToMap(MetadataConstants.DEPLOYMENT_TYPE,
                 requestContext.getMatchedAPI().getDeploymentType());
+        requestContext.addMetadataToMap(MetadataConstants.API_ENVIRONMENT_NAME,
+                requestContext.getMatchedAPI().getEnvironmentName());
 
         // Adding Gateway URL
         String gatewayUrl = requestContext.getHeaders().get(GATEWAY_URL);
