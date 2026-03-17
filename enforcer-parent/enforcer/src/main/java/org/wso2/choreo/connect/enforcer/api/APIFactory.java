@@ -70,8 +70,10 @@ public class APIFactory {
         ConcurrentHashMap<String, API> newApis = new ConcurrentHashMap<>();
 
         for (Api api : apis) {
-            // TODO: Refactor duplicate vhost registration code to avoid code duplication between WebSocket and REST API branches.
+            // TODO: Refactor duplicate vhost registration to a shared method
+            //  to avoid code duplication between WebSocket and REST branches.
             if (APIConstants.ApiType.WEB_SOCKET.equals(api.getApiType())) {
+                logger.info("Processing WebSocket API: {}", api.getId());
                 WebSocketAPI webSocketAPI = new WebSocketAPI();
                 webSocketAPI.init(api);
                 String apiKey = getApiKey(webSocketAPI);
@@ -79,6 +81,8 @@ public class APIFactory {
                 if ((EnvVarConfig.getInstance().isDuplicateVhostEnabled() &&
                         KNOWN_VHOST_PREFIXES.contains(api.getVhost().split("\\.")[0])) ||
                         (EnvVarConfig.getInstance().isDuplicateVhostEnabledPdp())) {
+                    logger.info("Registering duplicate vhost for WebSocket API: {} with vhost: {}",
+                            api.getId(), api.getVhost());
                     newApis.put(getApiKeyWithOrgId(webSocketAPI), webSocketAPI);
                     if (api.getVhost().startsWith("sandbox.")) {
                         String duplicatedVhostProd =
