@@ -167,8 +167,8 @@ type SubscriptionEvent struct {
 	SubscriptionState string `json:"subscriptionState"`
 	Context           string `json:"context"`
 	VersionRange      string `json:"versionRange"`
-	BillingCustomerID string `json:"billingCustomerId"`
-	BillingSubscriptionID string `json:"billingSubscriptionId"`
+	BillingCustomerID     string `json:"billingCustomerId,omitempty"`
+	BillingSubscriptionID string `json:"billingSubscriptionId,omitempty"`
 	Event
 }
 
