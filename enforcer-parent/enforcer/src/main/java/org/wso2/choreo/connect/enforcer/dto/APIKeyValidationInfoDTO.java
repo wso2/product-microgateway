@@ -67,6 +67,8 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String apiUUID;
     private String applicationUUID;
     private Map<String, String> appAttributes;
+    private String billingCustomerId;
+    private String billingSubscriptionId;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -236,6 +238,22 @@ public class APIKeyValidationInfoDTO implements Serializable {
         this.scopes = scopes;
     }
 
+    public void setBillingCustomerId(String billingCustomerId) {
+        this.billingCustomerId = billingCustomerId;
+    }   
+
+    public String getBillingCustomerId() {
+        return billingCustomerId;
+    }   
+
+    public void setBillingSubscriptionId(String billingSubscriptionId) {
+        this.billingSubscriptionId = billingSubscriptionId;
+    }
+
+    public String getBillingSubscriptionId() {
+        return billingSubscriptionId;
+    }       
+
     public String toString() {
 
         StringBuilder builder = new StringBuilder(20);
@@ -262,7 +280,9 @@ public class APIKeyValidationInfoDTO implements Serializable {
                 append(" , productProvider:").append(productProvider).
                 append(" , apiPublisher:").append(apiPublisher).
                 append(" , graphQLMaxDepth:").append(graphQLMaxDepth).
-                append(" , graphQLMaxComplexity:").append(graphQLMaxComplexity);
+                append(" , graphQLMaxComplexity:").append(graphQLMaxComplexity).
+                append(" , billingCustomerId:").append(billingCustomerId).
+                append(" , billingSubscriptionId:").append(billingSubscriptionId);
 
         if (authorizedDomains != null && !authorizedDomains.isEmpty()) {
             builder.append(" , authorizedDomains:[");

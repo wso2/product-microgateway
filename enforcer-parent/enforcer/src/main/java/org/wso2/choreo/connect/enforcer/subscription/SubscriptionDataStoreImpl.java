@@ -171,6 +171,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             newSubscription.setTimeStamp(subscription.getTimeStamp());
             newSubscription.setContext(subscription.getContext());
             newSubscription.setVersionRange(subscription.getVersionRange());
+            newSubscription.setBillingCustomerId(subscription.getBillingCustomerId());
+            newSubscription.setBillingSubscriptionId(subscription.getBillingSubscriptionId());
 
             newSubscriptionMap.put(newSubscription.getCacheKey(), newSubscription);
 

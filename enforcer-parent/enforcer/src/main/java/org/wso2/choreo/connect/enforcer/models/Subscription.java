@@ -34,6 +34,8 @@ public class Subscription implements CacheableEntity<String> {
     private long timeStamp;
     private String context;
     private String versionRange;
+    private String billingCustomerId;
+    private String billingSubscriptionId;
 
     public String getSubscriptionId() {
 
@@ -99,6 +101,8 @@ public class Subscription implements CacheableEntity<String> {
                 ", timeStamp=" + timeStamp + '\'' +
                 ", context=" + context + '\'' +
                 ", versionRange=" + versionRange +
+                ", billingCustomerId=" + billingCustomerId +
+                ", billingSubscriptionId=" + billingSubscriptionId +
                 '}';
     }
 
@@ -132,6 +136,22 @@ public class Subscription implements CacheableEntity<String> {
 
     public void setVersionRange(String versionRange) {
         this.versionRange = versionRange;
+    }
+    
+    public String getBillingCustomerId() {
+        return billingCustomerId;
+    }
+
+    public void setBillingCustomerId(String billingCustomerId) {
+        this.billingCustomerId = billingCustomerId;
+    }
+
+    public String getBillingSubscriptionId() {
+        return billingSubscriptionId;
+    }
+
+    public void setBillingSubscriptionId(String billingSubscriptionId) {
+        this.billingSubscriptionId = billingSubscriptionId;
     }
 }
 

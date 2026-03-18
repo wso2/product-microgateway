@@ -49,6 +49,10 @@ public class AuthenticationContext {
     private String apiUUID;
     private String rawToken;
 
+    // Billing fields
+    private String billingCustomerId;
+    private String billingSubscriptionId;
+
     public static final String UNKNOWN_VALUE = "__unknown__";
 
     public AuthenticationContext() {
@@ -378,5 +382,22 @@ public class AuthenticationContext {
 
     public void setApplicationUUID(String applicationUUID) {
         this.applicationUUID = applicationUUID;
+    }
+
+    // Billing fields getters and setters
+    public String getBillingCustomerId() {
+        return billingCustomerId;
+    }
+
+    public void setBillingCustomerId(String billingCustomerId) {
+        this.billingCustomerId = billingCustomerId;
+    }
+
+    public String getBillingSubscriptionId() {
+        return billingSubscriptionId;
+    }
+
+    public void setBillingSubscriptionId(String billingSubscriptionId) {
+        this.billingSubscriptionId = billingSubscriptionId;
     }
 }
