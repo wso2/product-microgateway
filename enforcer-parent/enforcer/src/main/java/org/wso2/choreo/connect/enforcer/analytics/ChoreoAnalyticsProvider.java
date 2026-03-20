@@ -242,6 +242,10 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         map.put(AnalyticsConstants.GATEWAY_URL, gwURL);
         map.put(AnalyticsConstants.DEPLOYMENT_TYPE, deploymentType);
         map.put(AnalyticsConstants.ENVIRONMENT_NAME, environmentName);
+        map.put(AnalyticsConstants.BILLING_CUSTOMER_ID, 
+            getValueAsString(fieldsMap, MetadataConstants.BILLING_CUSTOMER_ID));
+        map.put(AnalyticsConstants.BILLING_SUBSCRIPTION_ID, 
+            getValueAsString(fieldsMap, MetadataConstants.BILLING_SUBSCRIPTION_ID));
         return map;
     }
 

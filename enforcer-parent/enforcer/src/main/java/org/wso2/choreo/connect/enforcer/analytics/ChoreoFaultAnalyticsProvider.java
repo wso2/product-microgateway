@@ -214,13 +214,19 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public Map<String, Object> getProperties() {
         Map map = new HashMap();
+        AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
         String gwURL = requestContext.getHeaders().get(AnalyticsConstants.GATEWAY_URL);
         String deploymentType = requestContext.getMatchedAPI().getDeploymentType();
         String environmentName = requestContext.getMatchedAPI().getEnvironmentName();
+        String billingCustomerId = AnalyticsUtils.setDefaultIfNull(authContext.getBillingCustomerId());
+        String billingSubscriptionId = AnalyticsUtils.setDefaultIfNull(authContext.getBillingSubscriptionId());
+
         map.put(AnalyticsConstants.GATEWAY_URL, gwURL);
         map.put(AnalyticsConstants.DEPLOYMENT_TYPE, deploymentType);
         map.put(AnalyticsConstants.ENVIRONMENT_NAME, environmentName);
         map.put(AnalyticsConstants.API_METHOD, requestContext.getRequestMethod());
+        map.put(AnalyticsConstants.BILLING_CUSTOMER_ID,  billingCustomerId);
+        map.put(AnalyticsConstants.BILLING_SUBSCRIPTION_ID, billingSubscriptionId);
         return map;
     }
 }

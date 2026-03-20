@@ -234,6 +234,8 @@ public class FilterUtils {
             authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
+            authContext.setBillingCustomerId(apiKeyValidationInfoDTO.getBillingCustomerId());
+            authContext.setBillingSubscriptionId(apiKeyValidationInfoDTO.getBillingSubscriptionId());
             authContext.setTier(apiKeyValidationInfoDTO.getTier());
             authContext.setSubscriberTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain());
             authContext.setApiName(apiKeyValidationInfoDTO.getApiName());

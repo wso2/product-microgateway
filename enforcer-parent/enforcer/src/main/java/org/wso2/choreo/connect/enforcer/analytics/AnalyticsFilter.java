@@ -210,6 +210,10 @@ public class AnalyticsFilter {
                 AnalyticsUtils.setDefaultIfNull(authContext.getApplicationName()));
         requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY,
                 AnalyticsUtils.setDefaultIfNull(authContext.getSubscriber()));
+        requestContext.addMetadataToMap(MetadataConstants.BILLING_CUSTOMER_ID,
+                AnalyticsUtils.setDefaultIfNull(authContext.getBillingCustomerId()));
+        requestContext.addMetadataToMap(MetadataConstants.BILLING_SUBSCRIPTION_ID,
+                AnalyticsUtils.setDefaultIfNull(authContext.getBillingSubscriptionId()));
 
         requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getRequestID());
         requestContext.addMetadataToMap(MetadataConstants.REGION_KEY,

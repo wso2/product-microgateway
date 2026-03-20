@@ -381,7 +381,8 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 		PolicyID: subscriptionEvent.PolicyID, APIUUID: subscriptionEvent.APIUUID, ApplicationUUID: subscriptionEvent.ApplicationUUID,
 		APIID: subscriptionEvent.APIID, AppID: subscriptionEvent.ApplicationID, SubscriptionState: subscriptionEvent.SubscriptionState,
 		TenantID: subscriptionEvent.TenantID, TenantDomain: subscriptionEvent.TenantDomain, TimeStamp: subscriptionEvent.TimeStamp,
-		Context: subscriptionEvent.Context, VersionRange: subscriptionEvent.VersionRange}
+		Context: subscriptionEvent.Context, VersionRange: subscriptionEvent.VersionRange, 
+		BillingSubscriptionID: subscriptionEvent.BillingSubscriptionID, BillingCustomerID: subscriptionEvent.BillingCustomerID}
 
 	if isLaterEvent(subsriptionsListTimeStampMap, fmt.Sprint(subscriptionEvent.SubscriptionID), subscriptionEvent.TimeStamp) {
 		return

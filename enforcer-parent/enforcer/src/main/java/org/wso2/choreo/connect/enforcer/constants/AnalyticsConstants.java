@@ -43,6 +43,8 @@ public class AnalyticsConstants {
     public static final String DEPLOYMENT_TYPE = "deployment-type";
     public static final String API_METHOD = "apiMethod";
     public static final String ENVIRONMENT_NAME = "environmentName";
+    public static final String BILLING_CUSTOMER_ID = "billingCustomerId";
+    public static final String BILLING_SUBSCRIPTION_ID = "billingSubscriptionId";
 
     public static final int API_THROTTLE_OUT_ERROR_CODE = 900800;
     public static final int HARD_LIMIT_EXCEEDED_ERROR_CODE = 900801;

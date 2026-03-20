@@ -29,6 +29,8 @@ private static final long serialVersionUID = 0L;
     apiUUID_ = "";
     context_ = "";
     versionRange_ = "";
+    billingCustomerId_ = "";
+    billingSubscriptionId_ = "";
   }
 
   @java.lang.Override
@@ -133,6 +135,18 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             versionRange_ = s;
+            break;
+          }
+          case 114: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            billingCustomerId_ = s;
+            break;
+          }
+          case 122: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            billingSubscriptionId_ = s;
             break;
           }
           default: {
@@ -553,6 +567,82 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int BILLINGCUSTOMERID_FIELD_NUMBER = 14;
+  private volatile java.lang.Object billingCustomerId_;
+  /**
+   * <code>string billingCustomerId = 14;</code>
+   * @return The billingCustomerId.
+   */
+  @java.lang.Override
+  public java.lang.String getBillingCustomerId() {
+    java.lang.Object ref = billingCustomerId_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      billingCustomerId_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string billingCustomerId = 14;</code>
+   * @return The bytes for billingCustomerId.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getBillingCustomerIdBytes() {
+    java.lang.Object ref = billingCustomerId_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      billingCustomerId_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int BILLINGSUBSCRIPTIONID_FIELD_NUMBER = 15;
+  private volatile java.lang.Object billingSubscriptionId_;
+  /**
+   * <code>string billingSubscriptionId = 15;</code>
+   * @return The billingSubscriptionId.
+   */
+  @java.lang.Override
+  public java.lang.String getBillingSubscriptionId() {
+    java.lang.Object ref = billingSubscriptionId_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      billingSubscriptionId_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string billingSubscriptionId = 15;</code>
+   * @return The bytes for billingSubscriptionId.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getBillingSubscriptionIdBytes() {
+    java.lang.Object ref = billingSubscriptionId_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      billingSubscriptionId_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -606,6 +696,12 @@ private static final long serialVersionUID = 0L;
     if (!getVersionRangeBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 13, versionRange_);
     }
+    if (!getBillingCustomerIdBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 14, billingCustomerId_);
+    }
+    if (!getBillingSubscriptionIdBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 15, billingSubscriptionId_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -658,6 +754,12 @@ private static final long serialVersionUID = 0L;
     if (!getVersionRangeBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, versionRange_);
     }
+    if (!getBillingCustomerIdBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, billingCustomerId_);
+    }
+    if (!getBillingSubscriptionIdBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(15, billingSubscriptionId_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -699,6 +801,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getContext())) return false;
     if (!getVersionRange()
         .equals(other.getVersionRange())) return false;
+    if (!getBillingCustomerId()
+        .equals(other.getBillingCustomerId())) return false;
+    if (!getBillingSubscriptionId()
+        .equals(other.getBillingSubscriptionId())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -737,6 +843,10 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getContext().hashCode();
     hash = (37 * hash) + VERSIONRANGE_FIELD_NUMBER;
     hash = (53 * hash) + getVersionRange().hashCode();
+    hash = (37 * hash) + BILLINGCUSTOMERID_FIELD_NUMBER;
+    hash = (53 * hash) + getBillingCustomerId().hashCode();
+    hash = (37 * hash) + BILLINGSUBSCRIPTIONID_FIELD_NUMBER;
+    hash = (53 * hash) + getBillingSubscriptionId().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -900,6 +1010,10 @@ private static final long serialVersionUID = 0L;
 
       versionRange_ = "";
 
+      billingCustomerId_ = "";
+
+      billingSubscriptionId_ = "";
+
       return this;
     }
 
@@ -939,6 +1053,8 @@ private static final long serialVersionUID = 0L;
       result.apiUUID_ = apiUUID_;
       result.context_ = context_;
       result.versionRange_ = versionRange_;
+      result.billingCustomerId_ = billingCustomerId_;
+      result.billingSubscriptionId_ = billingSubscriptionId_;
       onBuilt();
       return result;
     }
@@ -1033,6 +1149,14 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getVersionRange().isEmpty()) {
         versionRange_ = other.versionRange_;
+        onChanged();
+      }
+      if (!other.getBillingCustomerId().isEmpty()) {
+        billingCustomerId_ = other.billingCustomerId_;
+        onChanged();
+      }
+      if (!other.getBillingSubscriptionId().isEmpty()) {
+        billingSubscriptionId_ = other.billingSubscriptionId_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -1868,6 +1992,158 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       versionRange_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object billingCustomerId_ = "";
+    /**
+     * <code>string billingCustomerId = 14;</code>
+     * @return The billingCustomerId.
+     */
+    public java.lang.String getBillingCustomerId() {
+      java.lang.Object ref = billingCustomerId_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        billingCustomerId_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string billingCustomerId = 14;</code>
+     * @return The bytes for billingCustomerId.
+     */
+    public com.google.protobuf.ByteString
+        getBillingCustomerIdBytes() {
+      java.lang.Object ref = billingCustomerId_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        billingCustomerId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string billingCustomerId = 14;</code>
+     * @param value The billingCustomerId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBillingCustomerId(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      billingCustomerId_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string billingCustomerId = 14;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearBillingCustomerId() {
+      
+      billingCustomerId_ = getDefaultInstance().getBillingCustomerId();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string billingCustomerId = 14;</code>
+     * @param value The bytes for billingCustomerId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBillingCustomerIdBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      billingCustomerId_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object billingSubscriptionId_ = "";
+    /**
+     * <code>string billingSubscriptionId = 15;</code>
+     * @return The billingSubscriptionId.
+     */
+    public java.lang.String getBillingSubscriptionId() {
+      java.lang.Object ref = billingSubscriptionId_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        billingSubscriptionId_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string billingSubscriptionId = 15;</code>
+     * @return The bytes for billingSubscriptionId.
+     */
+    public com.google.protobuf.ByteString
+        getBillingSubscriptionIdBytes() {
+      java.lang.Object ref = billingSubscriptionId_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        billingSubscriptionId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string billingSubscriptionId = 15;</code>
+     * @param value The billingSubscriptionId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBillingSubscriptionId(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      billingSubscriptionId_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string billingSubscriptionId = 15;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearBillingSubscriptionId() {
+      
+      billingSubscriptionId_ = getDefaultInstance().getBillingSubscriptionId();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string billingSubscriptionId = 15;</code>
+     * @param value The bytes for billingSubscriptionId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBillingSubscriptionIdBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      billingSubscriptionId_ = value;
       onChanged();
       return this;
     }
