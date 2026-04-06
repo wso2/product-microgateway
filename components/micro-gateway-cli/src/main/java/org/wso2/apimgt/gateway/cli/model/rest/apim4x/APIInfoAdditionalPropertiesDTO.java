@@ -17,6 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest.apim4x;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -26,6 +27,7 @@ import java.util.Objects;
 /**
  * DTO for API Info additional properties
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class APIInfoAdditionalPropertiesDTO {
   
     private String name = null;

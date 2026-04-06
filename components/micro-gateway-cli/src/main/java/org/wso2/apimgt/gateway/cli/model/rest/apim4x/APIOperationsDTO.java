@@ -17,6 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest.apim4x;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -30,6 +31,7 @@ import javax.validation.Valid;
  * DTO for API Operations/Resources
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class APIOperationsDTO   {
   
     private String id = null;

@@ -17,6 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest.apim4x;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -30,6 +31,7 @@ import javax.validation.constraints.Size;
 /**
  * DTO for Scopes
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ScopeDTO {
   
     private String id = null;
