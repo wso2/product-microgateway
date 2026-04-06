@@ -17,6 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest.apim4x;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -29,6 +30,7 @@ import javax.validation.constraints.NotNull;
 /**
  * DTO for Monetization information
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class APIMonetizationInfoDTO {
   
     private Boolean enabled = null;

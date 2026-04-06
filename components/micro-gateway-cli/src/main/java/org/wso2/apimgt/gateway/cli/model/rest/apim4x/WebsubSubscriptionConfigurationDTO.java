@@ -17,6 +17,7 @@
  */
 package org.wso2.apimgt.gateway.cli.model.rest.apim4x;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -26,6 +27,7 @@ import java.util.Objects;
 /**
  * DTO for Web-Sub Subscription Configurations
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WebsubSubscriptionConfigurationDTO {
   
     private Boolean enable = false;
