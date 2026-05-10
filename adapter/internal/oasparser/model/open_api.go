@@ -79,10 +79,10 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		return err
 	}
 
-	if swagger.apiType != MCP {
+	if swagger.apiType != MCP && swagger.apiType != GRAPHQL {
 		swagger.apiType = HTTP
 	} else {
-		logger.LoggerOasparser.Info("Received swagger for MCP API")
+		logger.LoggerOasparser.Infof("Received swagger for %s API", swagger.apiType)
 	}
 	var productionUrls []Endpoint
 	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
