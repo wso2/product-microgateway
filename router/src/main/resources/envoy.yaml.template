@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-admin:
-  address:
-    socket_address:
-      address: '${ROUTER_ADMIN_HOST}'
-      port_value: '${ROUTER_ADMIN_PORT}'
 dynamic_resources:
   ads_config:
     api_type: GRPC
