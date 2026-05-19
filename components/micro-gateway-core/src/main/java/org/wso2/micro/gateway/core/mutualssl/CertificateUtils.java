@@ -24,14 +24,14 @@ import org.wso2.micro.gateway.core.utils.ErrorUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-
-import javax.security.cert.CertificateEncodingException;
-import javax.security.cert.CertificateException;
-import javax.security.cert.X509Certificate;
+import java.security.cert.X509Certificate;
 
 /**
  * This class is responsible for do certificate level functionalities.
@@ -41,16 +41,16 @@ public class CertificateUtils {
 
     public static String getAliasFromHeaderCert(String base64EncodedCertificate) {
         try {
-            base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate).
-                    replaceAll(Constants.BEGIN_CERTIFICATE_STRING, "").replaceAll(Constants.END_CERTIFICATE_STRING, "");
+            base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate, StandardCharsets.UTF_8.name())
+                    .replaceAll(Constants.BEGIN_CERTIFICATE_STRING, "")
+                    .replaceAll(Constants.END_CERTIFICATE_STRING, "");
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
             InputStream inputStream = new ByteArrayInputStream(bytes);
-            X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
-            if (getAliasFromTrustStore(x509Certificate, LoadKeyStore.trustStore) != null) {
-                return getAliasFromTrustStore(x509Certificate, LoadKeyStore.trustStore);
-            }
-            return "";
-        } catch (KeyStoreException | java.security.cert.CertificateException | CertificateException e) {
+            X509Certificate x509Certificate = (X509Certificate) CertificateFactory.getInstance("X.509")
+                    .generateCertificate(inputStream);
+            String alias = getAliasFromTrustStore(x509Certificate, LoadKeyStore.trustStore);
+            return alias != null ? alias : "";
+        } catch (KeyStoreException | CertificateException | UnsupportedEncodingException e) {
             String msg = "Error while decoding certificate present in the header and validating with the trust store.";
             log.error(msg, e);
             throw ErrorUtils.getBallerinaError(msg, e);
@@ -58,35 +58,40 @@ public class CertificateUtils {
     }
 
     /**
-     *  Used to get the certificate alias for a certificate which is get from header send by payload.
+     * Gets the certificate alias for a certificate from the request header by
+     * validating it against the trust store.
+     *
+     * @param certificate the X509 certificate from the request header
+     * @param trustStore  the trust store to validate against
+     * @return the certificate alias if found and valid
+     * @throws CertificateException if certificate validation fails
+     * @throws KeyStoreException    if trust store access fails
      */
-    public static String getAliasFromTrustStore(X509Certificate certificate, KeyStore truststore) throws
-            java.security.cert.CertificateException, CertificateEncodingException, KeyStoreException {
-        KeyStore trustStore = truststore;
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        byte[] certificateEncoded = certificate.getEncoded();
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(certificateEncoded);
-        java.security.cert.X509Certificate x509Certificate =
-                (java.security.cert.X509Certificate) cf.generateCertificate(byteArrayInputStream);
-        x509Certificate.checkValidity();
-        String certificateAlias = trustStore.getCertificateAlias(x509Certificate);
+    public static String getAliasFromTrustStore(X509Certificate certificate, KeyStore trustStore)
+            throws CertificateException, KeyStoreException {
+        certificate.checkValidity();
+        String certificateAlias = trustStore.getCertificateAlias(certificate);
         return certificateAlias;
     }
 
     /**
-     * Used to get the certificate alias for a certificate which is get from the Request .
+     * Gets the certificate alias for a certificate from the request context.
+     *
+     * @param certB64 the Base64-encoded certificate from the request
+     * @return the certificate alias if found in the trust store, empty string
+     *         otherwise
      */
     public static String getAliasFromRequest(String certB64) {
         try {
             byte[] decoded = java.util.Base64.getDecoder().decode(certB64);
-            java.security.cert.X509Certificate cert = (java.security.cert.X509Certificate) CertificateFactory
+            X509Certificate cert = (X509Certificate) CertificateFactory
                     .getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));
             String certificateAlias = LoadKeyStore.trustStore.getCertificateAlias(cert);
             if (certificateAlias != null) {
                 return certificateAlias;
             }
             return "";
-        } catch (java.security.cert.CertificateException | KeyStoreException e) {
+        } catch (CertificateException | KeyStoreException e) {
             String msg = "Error while decoding certificate present in the context and validating with the trust store.";
             log.error(msg, e);
             throw ErrorUtils.getBallerinaError(msg, e);
