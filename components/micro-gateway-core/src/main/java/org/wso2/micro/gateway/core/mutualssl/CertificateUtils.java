@@ -49,6 +49,11 @@ public class CertificateUtils {
             X509Certificate x509Certificate = (X509Certificate) CertificateFactory.getInstance("X.509")
                     .generateCertificate(inputStream);
             String alias = getAliasFromTrustStore(x509Certificate, LoadKeyStore.trustStore);
+            if (alias != null) {
+                log.debug("Certificate alias found in trust store: {}", alias);
+            } else {
+                log.debug("Certificate not found in trust store");
+            }
             return alias != null ? alias : "";
         } catch (KeyStoreException | CertificateException | UnsupportedEncodingException e) {
             String msg = "Error while decoding certificate present in the header and validating with the trust store.";
