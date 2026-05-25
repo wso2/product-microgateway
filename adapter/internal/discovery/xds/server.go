@@ -360,7 +360,11 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	// Number of environments will always be 1 in Choreo
 	mgwSwagger.DeploymentType = deployedEnvironments[0].DeploymentType
 	mgwSwagger.APIProvider = apiProject.APIYaml.Data.Provider
-	mgwSwagger.EnvironmentID = deployedEnvironments[0].ID
+	if deployedEnvironments[0].ID != "" {
+		mgwSwagger.EnvironmentID = deployedEnvironments[0].ID
+	} else {
+		mgwSwagger.EnvironmentID = conf.ControlPlane.DynamicEnvironments.DataPlaneID
+	}
 	mgwSwagger.ChoreoEnvironmentID = deployedEnvironments[0].ChoreoEnvironmentID
 	mgwSwagger.EnvironmentName = deployedEnvironments[0].Name
 

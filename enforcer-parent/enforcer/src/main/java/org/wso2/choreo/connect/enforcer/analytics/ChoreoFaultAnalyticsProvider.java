@@ -107,7 +107,8 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiVersion(requestContext.getMatchedAPI().getVersion());
         api.setApiCreatorTenantDomain(APIConstants.SUPER_TENANT_DOMAIN_NAME);
         api.setOrganizationId(requestContext.getMatchedAPI().getOrganizationId());
-        api.setEnvironmentId(requestContext.getMatchedAPI().getEnvironmentId());
+        String envId = requestContext.getMatchedAPI().getEnvironmentId();
+        api.setEnvironmentId(envId == null ? APIConstants.DEFAULT_ENVIRONMENT_NAME : envId);
         api.setApiContext(requestContext.getMatchedAPI().getBasePath());
         return api;
     }
