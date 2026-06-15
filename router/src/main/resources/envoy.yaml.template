@@ -13,10 +13,13 @@
 # limitations under the License.
 
 admin:
+  # The admin interface is bound to a unix domain socket instead of a TCP port so
+  # it has no direct network exposure. This removes the SSRF surface created by an
+  # admin endpoint listening on 0.0.0.0. Network access to admin is served only by
+  # the 'admin_listener' below, which enforces HTTP basic auth before proxying here.
   address:
-    socket_address:
-      address: '${ROUTER_ADMIN_HOST}'
-      port_value: '${ROUTER_ADMIN_PORT}'
+    pipe:
+      path: '${ROUTER_ADMIN_SOCKET_PATH}'
 dynamic_resources:
   ads_config:
     api_type: GRPC
@@ -36,7 +39,71 @@ node:
   metadata:
     instanceIdentifier: ${HOSTNAME}
 static_resources:
+  listeners:
+    # Authenticated network entry point for the Envoy admin interface. The admin
+    # endpoint itself listens only on a unix domain socket (see 'admin' above);
+    # this listener applies HTTP basic auth (via the Lua filter) and forwards
+    # authenticated requests to the admin socket (admin_cluster).
+    - name: admin_listener
+      address:
+        socket_address:
+          address: '${ROUTER_ADMIN_HOST}'
+          port_value: '${ROUTER_ADMIN_PORT}'
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: admin_proxy
+                codec_type: AUTO
+                route_config:
+                  name: admin_route
+                  virtual_hosts:
+                    - name: admin
+                      domains:
+                        - '*'
+                      routes:
+                        - match:
+                            prefix: /
+                          route:
+                            cluster: admin_cluster
+                http_filters:
+                  - name: envoy.filters.http.lua
+                    typed_config:
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+                      inline_code: |
+                        -- Enforce HTTP basic auth on every admin request. The expected
+                        -- "Basic <base64(user:pass)>" value is injected by
+                        -- docker-entrypoint.sh (via envsubst) from ROUTER_ADMIN_USERNAME
+                        -- and ROUTER_ADMIN_PASSWORD.
+                        function envoy_on_request(request_handle)
+                          local expected = "${ROUTER_ADMIN_BASIC_AUTH_HEADER}"
+                          local provided = request_handle:headers():get("authorization")
+                          if provided == nil or provided ~= expected then
+                            request_handle:respond(
+                              {
+                                [":status"] = "401",
+                                ["www-authenticate"] = "Basic realm=\"Choreo Connect Router Admin\""
+                              },
+                              "Unauthorized\n")
+                          end
+                        end
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
+    # Upstream for the admin interface, reachable only over its unix domain socket.
+    - name: admin_cluster
+      type: STATIC
+      connect_timeout: 1s
+      load_assignment:
+        cluster_name: admin_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    pipe:
+                      path: '${ROUTER_ADMIN_SOCKET_PATH}'
     - name: xds_cluster
       type: STRICT_DNS
       connect_timeout: ${XDS_CLUSTER_CONNECT_TIMEOUT}

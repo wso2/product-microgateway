@@ -44,6 +44,12 @@ RUN \
 
 ENV ROUTER_ADMIN_HOST=0.0.0.0
 ENV ROUTER_ADMIN_PORT=9000
+# Unix domain socket the Envoy admin endpoint binds to (no TCP exposure). It is
+# fronted by a basic-auth proxy listener on ROUTER_ADMIN_HOST:ROUTER_ADMIN_PORT.
+ENV ROUTER_ADMIN_SOCKET_PATH=/home/wso2/admin.sock
+# Credentials for the admin basic-auth proxy. Override these in real deployments.
+ENV ROUTER_ADMIN_USERNAME=""
+ENV ROUTER_ADMIN_PASSWORD=""
 
 ENV ROUTER_CLUSTER=default_cluster
 ENV ROUTER_LABEL="Default"
