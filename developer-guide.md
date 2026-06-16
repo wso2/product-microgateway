@@ -54,7 +54,10 @@ maven plugin would fail to create the new docker images)
  
  - Make sure three containers up and running using `docker ps`.
  
- - See if the envoy configuration is correct by navigating to `localhost:9000`
+ - See if the envoy configuration is correct by navigating to `localhost:9000`. The
+ admin interface is now bound to a unix socket and fronted by a basic-auth proxy, so
+ supply credentials (default `admin:admin`, e.g. `curl -u admin:admin localhost:9000/config_dump`).
+ Override the defaults with the `ROUTER_ADMIN_USERNAME` / `ROUTER_ADMIN_PASSWORD` env vars.
  
  - Then navigate to the component and execute `mvn clean install`
  
