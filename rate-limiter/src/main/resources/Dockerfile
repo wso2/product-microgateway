@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM envoyproxy/ratelimit:87adad26
+FROM envoyproxy/ratelimit:f2fb1577
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apk update && apk upgrade --no-cache
