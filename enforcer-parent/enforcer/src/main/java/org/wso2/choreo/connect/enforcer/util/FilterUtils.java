@@ -355,9 +355,12 @@ public class FilterUtils {
                 apiConfig.getBackendJWTConfiguration().getAudiences().size() > 0) {
             log.debug("Setting available audiences for the backendJWT. Available audiences are : " +
                     apiConfig.getBackendJWTConfiguration().getAudiences());
-            jwtInfoDto.getJwtValidationInfo().setClaims(new HashMap<>() {{
-                put("aud", apiConfig.getBackendJWTConfiguration().getAudiences());
-            }});
+            JWTValidationInfo backendJwtValidationInfo = new JWTValidationInfo(jwtValidationInfo);
+            Map<String, Object> claims = jwtValidationInfo.getClaims() != null
+                    ? new HashMap<>(jwtValidationInfo.getClaims()) : new HashMap<>();
+            claims.put("aud", apiConfig.getBackendJWTConfiguration().getAudiences());
+            backendJwtValidationInfo.setClaims(claims);
+            jwtInfoDto.setJwtValidationInfo(backendJwtValidationInfo);
         }
         return jwtInfoDto;
     }

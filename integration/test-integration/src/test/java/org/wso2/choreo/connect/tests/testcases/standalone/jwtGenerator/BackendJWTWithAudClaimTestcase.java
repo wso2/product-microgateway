@@ -25,6 +25,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
+import org.wso2.choreo.connect.tests.common.model.API;
+import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -66,5 +68,44 @@ public class BackendJWTWithAudClaimTestcase {
         Assert.assertTrue(audList.get(0).equals("https://petstore.swagger.io")
                         && audList.get(1).equals("https://petstore.swagger.io/pet"),
                 "Audience claims do not matched.");
+    }
+
+    @Test(description = "Test that original token claims are retained when aud claims are added to backend JWT")
+    public void testOriginalClaimsRetainedWithAudienceClaims() throws Exception {
+        API api = new API();
+        api.setName("PetStoreAPI");
+        api.setContext("v2");
+        api.setProdEndpoint(Utils.getMockServiceURLHttp("/echo/prod"));
+        api.setVersion("1.0.5");
+        api.setProvider("admin");
+
+        ApplicationDTO application = new ApplicationDTO();
+        application.setName("jwtApp");
+        application.setTier("Unlimited");
+        application.setId((int) (Math.random() * 1000));
+
+        JSONObject customClaims = new JSONObject();
+        customClaims.put("email", "user@example.com");
+        String jwtWithCustomClaims = TokenUtil.getJWT(api, application, "Unlimited",
+                TestConstant.KEY_TYPE_PRODUCTION, 3600, customClaims);
+        Map<String, String> customClaimHeaders = new HashMap<>();
+        customClaimHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithCustomClaims);
+
+        String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/echo");
+        HttpResponse response = HttpsClientRequest
+                .doGet(Utils.getServiceURLHttps(endpoint), customClaimHeaders);
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getHeaders());
+        Map<String, String> respHeaders = response.getHeaders();
+        Assert.assertTrue(respHeaders.containsKey(ResponseConstants.BACKEND_JWT_DEFAULT_HEADER_NAME),
+                "Backend JWT relevant header not found in the response");
+        String backendJWT = respHeaders.get(ResponseConstants.BACKEND_JWT_DEFAULT_HEADER_NAME);
+        String strTokenBody = backendJWT.split("\\.")[1];
+        String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
+        JSONObject tokenBody = new JSONObject(decodedTokenBody);
+        Assert.assertEquals(((JSONArray) tokenBody.get("aud")).length(), 2,
+                "Cannot find required audience count in the backend JWT");
+        Assert.assertEquals(tokenBody.optString("email"), "user@example.com",
+                "Original token claim is not available in the backend JWT");
     }
 }
