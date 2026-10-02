@@ -18,6 +18,13 @@
 set -e
 
 echo "Configuring Choreo Connect Router"
+# Derive the admin basic-auth header from the configured credentials. If either
+# credential is unset, leave it empty so the admin proxy denies all requests (fail closed).
+if [ -n "$ROUTER_ADMIN_USERNAME" ] && [ -n "$ROUTER_ADMIN_PASSWORD" ]; then
+  export ROUTER_ADMIN_BASIC_AUTH_HEADER="Basic $(printf '%s:%s' "$ROUTER_ADMIN_USERNAME" "$ROUTER_ADMIN_PASSWORD" | base64 | tr -d '\n')"
+else
+  export ROUTER_ADMIN_BASIC_AUTH_HEADER=""
+fi
 MG_ENVOY_YAML="$(envsubst < /home/wso2/envoy.yaml.template)"
 
 args=()
