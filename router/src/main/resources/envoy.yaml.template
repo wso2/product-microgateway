@@ -75,11 +75,12 @@ static_resources:
                         -- Enforce HTTP basic auth on every admin request. The expected
                         -- "Basic <base64(user:pass)>" value is injected by
                         -- docker-entrypoint.sh (via envsubst) from ROUTER_ADMIN_USERNAME
-                        -- and ROUTER_ADMIN_PASSWORD.
+                        -- and ROUTER_ADMIN_PASSWORD. When no credential is configured the
+                        -- expected value is empty and every request is denied (fail closed).
                         function envoy_on_request(request_handle)
                           local expected = "${ROUTER_ADMIN_BASIC_AUTH_HEADER}"
                           local provided = request_handle:headers():get("authorization")
-                          if provided == nil or provided ~= expected then
+                          if expected == "" or provided == nil or provided ~= expected then
                             request_handle:respond(
                               {
                                 [":status"] = "401",
