@@ -340,7 +340,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 		app := types.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
 			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber,
 			Policy: applicationEvent.ApplicationPolicy, TokenType: applicationEvent.TokenType,
-			GroupIds: applicationEvent.GroupID, Attributes: nil,
+			GroupIds: applicationEvent.GroupID, Attributes: applicationEvent.Attributes,
 			TenantID: -1, TenantDomain: applicationEvent.TenantDomain, TimeStamp: applicationEvent.TimeStamp}
 
 		if isLaterEvent(applicationListTimeStampMap, fmt.Sprint(applicationEvent.ApplicationID), applicationEvent.TimeStamp) {
