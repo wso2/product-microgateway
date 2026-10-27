@@ -19,11 +19,8 @@ LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 USER root
 
 # ca-certificates is upgraded to the newest version this base image's archives
-# offer, then the CA bundle contents are pinned. The router validates upstream
-# TLS for user-supplied backends against this bundle whenever an endpoint
-# carries no certificate of its own, so its contents are security relevant.
-# harden-ca-bundle.sh verifies its own result and fails the build if the
-# expected state is not reached.
+# offer, then the CA bundle contents are pinned. harden-ca-bundle.sh verifies
+# its own result and fails the build if the expected state is not reached.
 COPY harden-ca-bundle.sh /tmp/harden-ca-bundle.sh
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install --no-install-recommends --no-install-suggests -y gettext-base \

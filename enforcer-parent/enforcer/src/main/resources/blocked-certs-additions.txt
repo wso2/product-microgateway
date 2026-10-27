@@ -1,9 +1,6 @@
 # ---------------------------------------------------------------------------
-# Additional certificate digests appended to $JAVA_HOME/lib/security/blocked.certs.
-#
-# The JVM consults blocked.certs on every certificate-path validation,
-# independently of which trust store supplied the anchors, so entries here also
-# cover operator-supplied trust stores mounted at TRUSTED_CA_CERTS_PATH.
+# Certificate digests appended to $JAVA_HOME/lib/security/blocked.certs by
+# harden-truststore.sh.
 #
 # Format: one uppercase hex SHA-256 digest per line; '#' begins a comment.
 # Maintained alongside harden-truststore.sh - update both together.

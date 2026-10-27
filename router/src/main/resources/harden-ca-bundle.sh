@@ -15,27 +15,17 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 #
-# Build-time CA bundle hardening for the router image. Run as root during the
+# Pins the OS CA bundle contents of the router image. Run as root during the
 # image build.
 #
-# Why the router is in scope: when an API definition supplies no per-endpoint
-# certificate, the adapter points the upstream TLS validation context at
-# Envoy.Upstream.TLS.TrustedCertPath rather than at an inline CA
-# (routes_with_clusters.go, buildUpstreamTLSContext). That path defaults to
-# /etc/ssl/certs/ca-certificates.crt (config/default_config.go). Every upstream
-# call to a user-supplied backend that does not carry its own certificate is
-# therefore validated against the OS bundle, so the bundle contents decide
-# which issuers are accepted for arbitrary user endpoints.
+# The shipped root files are deleted and their entries dropped from
+# /etc/ca-certificates.conf before update-ca-certificates --fresh regenerates
+# /etc/ssl/certs/ca-certificates.crt and the hash symlinks. Rewriting the
+# concatenated bundle directly is avoided because it would be undone the next
+# time anything triggered update-ca-certificates.
 #
-# Removal is done the Debian way rather than by rewriting the concatenated
-# bundle in place: the shipped root files are deleted and their entries dropped
-# from /etc/ca-certificates.conf before update-ca-certificates --fresh rebuilds
-# /etc/ssl/certs/ca-certificates.crt and the hash symlinks. Editing the
-# concatenated file directly would be silently undone the next time anything
-# triggered update-ca-certificates.
-#
-# The script fails the build if any pinned-out root survives, so the image can
-# never ship silently un-remediated.
+# The bundle is re-read afterwards and the build fails if the expected state is
+# not reached.
 # -----------------------------------------------------------------------
 
 set -eu
@@ -73,7 +63,7 @@ fi
 echo "[harden-ca-bundle] Rebuilding ${CA_BUNDLE}"
 update-ca-certificates --fresh
 
-# --- Verification: fail the build rather than ship a vulnerable image --------
+# --- Verification: fail the build if the expected state is not reached -------
 echo "[harden-ca-bundle] Verifying"
 
 [ -s "${CA_BUNDLE}" ] || fail "${CA_BUNDLE} is missing or empty after rebuild"

@@ -14,9 +14,9 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# adoptopenjdk/* is end-of-life and this tag is pinned to JDK 11.0.14.1 with a
-# 2022-era CA bundle. Eclipse Temurin is the successor image line and keeps the
-# multi-arch manifests this image is built for.
+# adoptopenjdk/* is end-of-life and this tag is pinned to JDK 11.0.14.1.
+# Eclipse Temurin is the successor image line and keeps the multi-arch
+# manifests this image is built for.
 FROM eclipse-temurin:11.0.32.1_1-jre-noble
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
@@ -65,9 +65,9 @@ COPY maven/grpc_health_probe-linux-${TARGETARCH} ${GRPC_HEALTH_PROBE_PATH}
 RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
 
 # Pin the JDK and OS certificate store contents before dropping privileges.
-# Kept identical to the Alpine image so both published enforcer variants have
-# the same trust posture. harden-truststore.sh verifies its own result and
-# fails the build if the expected state is not reached.
+# Kept identical to the Alpine image so both published enforcer variants match.
+# harden-truststore.sh verifies its own result and fails the build if the
+# expected state is not reached.
 COPY harden-truststore.sh blocked-certs-additions.txt /tmp/
 RUN apt-get update \
     && apt-get install --no-install-recommends --no-install-suggests -y openssl \

@@ -15,36 +15,23 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 #
-# Build-time trust store hardening. Run as root during the image build, before
-# dropping to the unprivileged runtime user.
+# Pins the certificate trust store contents of the enforcer image. Run as root
+# during the image build, before dropping to the unprivileged runtime user.
 #
-# Why the enforcer is in scope: ConfigHolder.loadTrustStore() copies every
-# accepted issuer out of the JDK default trust store into the enforcer's own
-# KeyStore whenever TRUST_DEFAULT_CERTS is true (the default, see
-# EnvVarConfig.DEFAULT_TRUST_DEFAULT_CERTS). That KeyStore backs the SSLContext
-# used by ExtendedJWKSResourceRetriever for outbound JWKS / OAuth calls made
-# during JWT validation, so the JDK trust store contents directly determine
-# which issuers are accepted when fetching identity-provider signing keys.
+# Steps, applied in order:
+#   1. Remove the listed roots from the JDK cacerts.
+#   2. Append the digests in the companion file to blocked.certs.
+#   3. Remove the listed roots from the OS CA bundle.
 #
-# Three controls, applied in order:
-#   1. Remove the pinned-out roots from the JDK cacerts. This is the control
-#      that holds: with the anchor gone, re-encoded variants of a subordinate
-#      certificate fail to chain as well.
-#   2. Append the digests in the companion file to blocked.certs, which the JVM
-#      consults on every path validation regardless of trust store. This also
-#      covers operator-supplied trust stores mounted at TRUSTED_CA_CERTS_PATH.
-#   3. Remove the same roots from the OS CA bundle (defence in depth - the Java
-#      process does not read it, but anything else in the container would).
-#
-# The script fails the build if any pinned-out root survives, so the image can
-# never ship silently un-remediated.
+# Each step is re-read afterwards and the build fails if the expected state is
+# not reached.
 # -----------------------------------------------------------------------
 
 set -eu
 
-# Alias / subject substrings identifying the roots to remove. Matched case
-# insensitively against both keytool aliases and X.509 subjects, so this works
-# regardless of whether cacerts uses DN-derived or short-form aliases.
+# Substrings identifying the roots to remove. Matched case insensitively
+# against both keytool aliases and X.509 subjects, so this works regardless of
+# whether cacerts uses DN-derived or short-form aliases.
 REMOVED_ROOT_PATTERN='emsign|aaa.?(certificate|services)'
 
 BLOCKED_CERTS_SRC="${1:-/tmp/blocked-certs-additions.txt}"
@@ -85,9 +72,9 @@ cat "${BLOCKED_CERTS_SRC}" >> "${BLOCKED_CERTS}"
 # Prefer the distribution's own tooling: delete the shipped root files, prune
 # the manifest, then let update-ca-certificates regenerate the concatenated
 # bundle and the hash symlinks. Rewriting the concatenated file directly would
-# be silently undone the next time anything triggered a regeneration. The
-# direct rewrite is kept only as a fallback for images that ship a pre-built
-# bundle without the tooling.
+# be undone the next time anything triggered a regeneration, so the direct
+# rewrite is kept only as a fallback for images that ship a pre-built bundle
+# without the tooling.
 if [ -d "${CA_CERT_DIR}" ] && command -v update-ca-certificates >/dev/null 2>&1; then
     echo "[harden-truststore] Removing pinned-out roots via update-ca-certificates"
     find "${CA_CERT_DIR}" -type f -name '*.crt' | while IFS= read -r cert_file; do
@@ -122,7 +109,7 @@ elif [ -f "${OS_CA_BUNDLE}" ]; then
     rm -rf "${split_dir}"
 fi
 
-# --- Verification: fail the build rather than ship a vulnerable image --------
+# --- Verification: fail the build if the expected state is not reached -------
 echo "[harden-truststore] Verifying"
 
 if keytool -list -cacerts -storepass "${STOREPASS}" 2>/dev/null | grep -qiE "${REMOVED_ROOT_PATTERN}"; then
