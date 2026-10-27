@@ -14,7 +14,10 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM adoptopenjdk/openjdk11:jre-11.0.25_9-alpine
+# adoptopenjdk/* is end-of-life and pinned to Alpine 3.14, which is itself out
+# of support and ships a 2022-era CA bundle. Eclipse Temurin is the successor
+# image line; this tag carries Alpine 3.24 with a current ca-certificates.
+FROM eclipse-temurin:11.0.32.1_1-jre-alpine-3.24
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apk update && apk upgrade --no-cache
@@ -62,6 +65,18 @@ RUN \
 
 COPY maven/grpc_health_probe-linux-amd64 ${GRPC_HEALTH_PROBE_PATH}
 RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
+
+# Pin the JDK and OS certificate store contents before dropping privileges. The
+# enforcer copies the JDK default trust store into its own KeyStore when
+# TRUST_DEFAULT_CERTS is true (default), and that KeyStore backs outbound
+# JWKS / OAuth calls during JWT validation. harden-truststore.sh verifies its
+# own result and fails the build if the expected state is not reached.
+COPY harden-truststore.sh blocked-certs-additions.txt /tmp/
+RUN apk add --no-cache --virtual .trust-harden-deps openssl \
+    && chmod +x /tmp/harden-truststore.sh \
+    && /tmp/harden-truststore.sh /tmp/blocked-certs-additions.txt \
+    && apk del .trust-harden-deps \
+    && rm -f /tmp/harden-truststore.sh /tmp/blocked-certs-additions.txt
 
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
