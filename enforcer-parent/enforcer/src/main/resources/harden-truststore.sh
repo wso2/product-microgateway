@@ -45,12 +45,14 @@ set -eu
 # Alias / subject substrings identifying the roots to remove. Matched case
 # insensitively against both keytool aliases and X.509 subjects, so this works
 # regardless of whether cacerts uses DN-derived or short-form aliases.
-REMOVED_ROOT_PATTERN='emsign|aaa.?certificate.?services'
+REMOVED_ROOT_PATTERN='emsign|aaa.?(certificate|services)'
 
 BLOCKED_CERTS_SRC="${1:-/tmp/blocked-certs-additions.txt}"
 JAVA_SECURITY_DIR="${JAVA_HOME}/lib/security"
 BLOCKED_CERTS="${JAVA_SECURITY_DIR}/blocked.certs"
 OS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
+CA_CERT_DIR="/usr/share/ca-certificates"
+CA_CONF="/etc/ca-certificates.conf"
 STOREPASS="changeit"
 
 fail() {
@@ -80,8 +82,27 @@ echo "[harden-truststore] Appending $(grep -c '^[0-9A-Fa-f]\{64\}$' "${BLOCKED_C
 cat "${BLOCKED_CERTS_SRC}" >> "${BLOCKED_CERTS}"
 
 # --- 3. Remove the pinned-out roots from the OS CA bundle --------------------
-if [ -f "${OS_CA_BUNDLE}" ]; then
-    echo "[harden-truststore] Filtering ${OS_CA_BUNDLE}"
+# Prefer the distribution's own tooling: delete the shipped root files, prune
+# the manifest, then let update-ca-certificates regenerate the concatenated
+# bundle and the hash symlinks. Rewriting the concatenated file directly would
+# be silently undone the next time anything triggered a regeneration. The
+# direct rewrite is kept only as a fallback for images that ship a pre-built
+# bundle without the tooling.
+if [ -d "${CA_CERT_DIR}" ] && command -v update-ca-certificates >/dev/null 2>&1; then
+    echo "[harden-truststore] Removing pinned-out roots via update-ca-certificates"
+    find "${CA_CERT_DIR}" -type f -name '*.crt' | while IFS= read -r cert_file; do
+        if basename "${cert_file}" | grep -qiE "${REMOVED_ROOT_PATTERN}"; then
+            echo "[harden-truststore]   deleting ${cert_file}"
+            rm -f "${cert_file}"
+        fi
+    done
+    if [ -f "${CA_CONF}" ]; then
+        grep -ivE "${REMOVED_ROOT_PATTERN}" "${CA_CONF}" > "${CA_CONF}.new" || true
+        mv "${CA_CONF}.new" "${CA_CONF}"
+    fi
+    update-ca-certificates --fresh
+elif [ -f "${OS_CA_BUNDLE}" ]; then
+    echo "[harden-truststore] Filtering ${OS_CA_BUNDLE} (no ca-certificates tooling present)"
     split_dir="$(mktemp -d)"
     awk -v d="${split_dir}" 'BEGIN { n = 0 }
          /BEGIN CERTIFICATE/ { n++ }
@@ -117,6 +138,11 @@ if [ -f "${OS_CA_BUNDLE}" ]; then
         | grep -i '^[[:space:]]*subject:' | grep -qiE "${REMOVED_ROOT_PATTERN}"; then
         fail "pinned-out root(s) still present in ${OS_CA_BUNDLE}"
     fi
+fi
+
+if [ -d "${CA_CERT_DIR}" ] && find "${CA_CERT_DIR}" -type f -name '*.crt' 2>/dev/null \
+    | xargs -r basename -a 2>/dev/null | grep -qiE "${REMOVED_ROOT_PATTERN}"; then
+    fail "pinned-out root file(s) still present under ${CA_CERT_DIR}"
 fi
 
 echo "[harden-truststore] OK - trust store contents verified"
