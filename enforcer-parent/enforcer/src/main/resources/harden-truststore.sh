@@ -47,6 +47,17 @@ fail() {
     exit 1
 }
 
+# Both stores are read back through external tools - keytool for cacerts,
+# openssl for the OS bundle. If either is missing, its verification step
+# produces no output and the check passes vacuously, so the build would succeed
+# on an unverified image. Require them up front instead. The Dockerfiles
+# install openssl explicitly; this guards against a base image or build change
+# that drops either tool.
+command -v keytool >/dev/null 2>&1 \
+    || fail "keytool not found - the JDK trust store cannot be read, so the result cannot be verified"
+command -v openssl >/dev/null 2>&1 \
+    || fail "openssl not found - the OS CA bundle cannot be read, so the result cannot be verified"
+
 # --- 1. Remove the pinned-out roots from the JDK trust store -----------------
 echo "[harden-truststore] Removing pinned-out roots from ${JAVA_SECURITY_DIR}/cacerts"
 keytool -list -cacerts -storepass "${STOREPASS}" 2>/dev/null \
@@ -98,7 +109,8 @@ elif [ -f "${OS_CA_BUNDLE}" ]; then
     : > "${OS_CA_BUNDLE}.new"
     for pem in "${split_dir}"/cert-*.pem; do
         [ -f "${pem}" ] || continue
-        subject="$(openssl x509 -in "${pem}" -noout -subject 2>/dev/null)" || continue
+        subject="$(openssl x509 -in "${pem}" -noout -subject)" \
+            || fail "could not decode ${pem} from ${OS_CA_BUNDLE}"
         if echo "${subject}" | grep -qiE "${REMOVED_ROOT_PATTERN}"; then
             echo "[harden-truststore]   dropping OS bundle cert: ${subject}"
             continue
@@ -121,8 +133,10 @@ for digest in $(grep '^[0-9A-Fa-f]\{64\}$' "${BLOCKED_CERTS_SRC}"); do
 done
 
 if [ -f "${OS_CA_BUNDLE}" ]; then
-    if openssl storeutl -noout -text "${OS_CA_BUNDLE}" 2>/dev/null \
-        | grep -i '^[[:space:]]*subject:' | grep -qiE "${REMOVED_ROOT_PATTERN}"; then
+    bundle_subjects="$(openssl storeutl -noout -text "${OS_CA_BUNDLE}")" \
+        || fail "could not read ${OS_CA_BUNDLE}"
+    if echo "${bundle_subjects}" | grep -i '^[[:space:]]*subject:' \
+        | grep -qiE "${REMOVED_ROOT_PATTERN}"; then
         fail "pinned-out root(s) still present in ${OS_CA_BUNDLE}"
     fi
 fi
