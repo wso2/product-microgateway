@@ -43,6 +43,16 @@ fail() {
     exit 1
 }
 
+# The rebuilt bundle is read back with openssl, and the pruning itself goes
+# through update-ca-certificates. Neither is installed by the Dockerfiles - both
+# come from the base image - and a missing openssl would make the subject check
+# produce no output and pass vacuously, so the build would succeed on an
+# unverified bundle. Require both up front instead.
+command -v update-ca-certificates >/dev/null 2>&1 \
+    || fail "update-ca-certificates not found - the base image does not ship the ca-certificates tooling this script relies on"
+command -v openssl >/dev/null 2>&1 \
+    || fail "openssl not found - ${CA_BUNDLE} cannot be read, so the result cannot be verified"
+
 # --- 1. Delete the shipped root files ----------------------------------------
 echo "[harden-ca-bundle] Removing pinned-out roots from ${CA_CERT_DIR}"
 find "${CA_CERT_DIR}" -type f -name '*.crt' | while IFS= read -r cert_file; do
@@ -68,8 +78,10 @@ echo "[harden-ca-bundle] Verifying"
 
 [ -s "${CA_BUNDLE}" ] || fail "${CA_BUNDLE} is missing or empty after rebuild"
 
-if openssl storeutl -noout -text "${CA_BUNDLE}" 2>/dev/null \
-    | grep -i '^[[:space:]]*subject:' | grep -qiE "${REMOVED_ROOT_PATTERN}"; then
+bundle_subjects="$(openssl storeutl -noout -text "${CA_BUNDLE}")" \
+    || fail "could not read ${CA_BUNDLE}"
+if echo "${bundle_subjects}" | grep -i '^[[:space:]]*subject:' \
+    | grep -qiE "${REMOVED_ROOT_PATTERN}"; then
     fail "pinned-out root(s) still present in ${CA_BUNDLE}"
 fi
 
