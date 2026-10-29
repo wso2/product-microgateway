@@ -2,6 +2,11 @@
 # Certificate digests appended to $JAVA_HOME/lib/security/blocked.certs by
 # harden-truststore.sh.
 #
+# Source: OpenJDK vulnerability advisory 2026-10-21 (CVE-2026-91403) - the 16
+# compromised eMudhra/emSign intermediate CAs plus the 32 alternate DER and
+# malleable ECDSA encodings emitted by OpenJDK's BlockedCertsConverter.
+# https://openjdk.org/groups/vulnerability/advisories/2026-10-21
+#
 # Format: one uppercase hex SHA-256 digest per line; '#' begins a comment.
 # Maintained alongside harden-truststore.sh - update both together.
 # ---------------------------------------------------------------------------
