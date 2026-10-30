@@ -2,6 +2,8 @@ module github.com/wso2/product-microgateway/adapter
 
 go 1.27.0
 
+toolchain go1.27.3
+
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.6.0
 	github.com/Azure/go-amqp v1.0.4
@@ -28,8 +30,8 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/net v0.57.0
-	golang.org/x/text v0.41.0
+	golang.org/x/net v0.62.0
+	golang.org/x/text v0.43.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98
 	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.34.1
@@ -59,7 +61,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/klauspost/compress v1.13.6 // indirect
+	github.com/klauspost/compress v1.20.3 // indirect
 	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
@@ -74,8 +76,8 @@ require (
 	github.com/speakeasy-api/jsonpath v0.6.2 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.9-0.20240815153524-6ea36470d1bd // indirect
 	go.mongodb.org/mongo-driver v1.7.5 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
 	google.golang.org/genproto v0.0.0-20230711160842-782d3b101e98 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230711160842-782d3b101e98 // indirect
 )
