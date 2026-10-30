@@ -1394,7 +1394,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 
 	} else if definitionVersion == constants.OpenAPIV30 {
 		// map json to struct
-		var apiData3 openapi3.Swagger
+		var apiData3 openapi3.T
 
 		err = json.Unmarshal(apiJsn, &apiData3)
 		if err != nil {

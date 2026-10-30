@@ -36,13 +36,13 @@ import (
 
 func TestSetInfoOpenAPI(t *testing.T) {
 	type setInfoTestItem struct {
-		input   openapi3.Swagger
+		input   openapi3.T
 		result  MgwSwagger
 		message string
 	}
 	dataItems := []setInfoTestItem{
 		{
-			openapi3.Swagger{
+			openapi3.T{
 				OpenAPI: "openApi",
 				Info: &openapi3.Info{
 					Title:       "petsore",
@@ -60,7 +60,7 @@ func TestSetInfoOpenAPI(t *testing.T) {
 			"usual case",
 		},
 		{
-			openapi3.Swagger{
+			openapi3.T{
 				OpenAPI: "openApi",
 				Info:    nil,
 			},
@@ -84,30 +84,30 @@ func TestSetInfoOpenAPI(t *testing.T) {
 
 func TestSetResourcesOpenAPI(t *testing.T) {
 	type setResourcesTestItem struct {
-		input   openapi3.Swagger
+		input   openapi3.T
 		result  []*Resource
 		message string
 	}
 
 	dataItems := []setResourcesTestItem{
 		{
-			openapi3.Swagger{
+			openapi3.T{
 				Paths: nil,
 			},
 			nil,
 			"when paths are nil",
 		},
 		{
-			openapi3.Swagger{
-				Paths: openapi3.Paths{
-					"/pet/{petId}": &openapi3.PathItem{
+			openapi3.T{
+				Paths: openapi3.NewPaths(
+					openapi3.WithPath("/pet/{petId}", &openapi3.PathItem{
 						Get: &openapi3.Operation{
 							OperationID: "petfindbyid",
 						},
 						Summary:     "pet find by id",
 						Description: "this retrieve data from id",
-					},
-				},
+					}),
+				),
 			},
 			[]*Resource{
 				{
@@ -196,14 +196,14 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 
 func TestGetXWso2Label(t *testing.T) {
 	// TODO: (Vajira) add more test scenarios
-	//newLabels := GetXWso2Label(openAPIV3Struct.ExtensionProps)
+	//newLabels := GetXWso2Label(openAPIV3Struct.Extensions)
 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_xwso2label.yaml"
-	swagger, err := openapi3.NewSwaggerLoader().LoadSwaggerFromFile(apiYamlFilePath)
+	swagger, err := openapi3.NewLoader().LoadFromFile(apiYamlFilePath)
 	assert.Nil(t, err, "Swagger loader failed")
 
 	assert.Nil(t, swagger.Validate(context.Background()), "Swagger Validation Failed")
 
-	wso2Label := GetXWso2Label(swagger.ExtensionProps)
+	wso2Label := GetXWso2Label(swagger.Extensions)
 
 	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
 

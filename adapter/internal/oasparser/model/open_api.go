@@ -61,7 +61,7 @@ const (
 // UUID.
 //
 // No operation specific information is extracted.
-func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
+func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.T) error {
 	var err error
 	if swagger3.Info != nil {
 		swagger.description = swagger3.Info.Description
@@ -69,7 +69,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		swagger.version = swagger3.Info.Version
 	}
 
-	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
+	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.Extensions)
 	swagger.securityScheme = setSecuritySchemesOpenAPI(swagger3)
 	for _, security := range swagger3.Security {
 		swagger.security = append(swagger.security, security)
@@ -121,36 +121,36 @@ func setPathInfoOpenAPI(path string, methods []*Operation, pathItem *openapi3.Pa
 			//Schemes: operation.,
 			//tags: operation.Tags,
 			//security: pathItem.operation.Security.,
-			vendorExtensions: convertExtensibletoReadableFormat(pathItem.ExtensionProps),
+			vendorExtensions: convertExtensibletoReadableFormat(pathItem.Extensions),
 		}
 	}
 	return resource
 }
 
-func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
+func setResourcesOpenAPI(openAPI openapi3.T) ([]*Resource, error) {
 	var resources []*Resource
 
 	// Check the disable security vendor ext at API level.
 	// If it's present, then the same value should be added to the
 	// resource level if vendor ext is not present at each resource level.
-	val, found := resolveDisableSecurity(openAPI.ExtensionProps)
+	val, found := resolveDisableSecurity(openAPI.Extensions)
 	if openAPI.Paths != nil {
 		conf, _ := config.ReadConfigs()
-		for path, pathItem := range openAPI.Paths {
+		for path, pathItem := range openAPI.Paths.Map() {
 			if conf.Envoy.MaximumResourcePathLengthInKB != -1 &&
 				isResourcePathLimitExceeds(path, int(conf.Envoy.MaximumResourcePathLengthInKB)) {
 				return nil, errors.New("path: " + path + " exceeds maximum allowed length")
 			}
 			// Checks for resource level security. (security is disabled in resource level using x-wso2-disable-security extension)
-			isResourceLvlSecurityDisabled, foundInResourceLevel := resolveDisableSecurity(pathItem.ExtensionProps)
+			isResourceLvlSecurityDisabled, foundInResourceLevel := resolveDisableSecurity(pathItem.Extensions)
 			methodsArray := make([]*Operation, len(pathItem.Operations()))
 			var arrayIndex int = 0
 			for httpMethod, operation := range pathItem.Operations() {
 				if operation != nil {
 					if foundInResourceLevel {
-						operation.ExtensionProps = addDisableSecurityIfNotPresent(operation.ExtensionProps, isResourceLvlSecurityDisabled)
+						operation.Extensions = addDisableSecurityIfNotPresent(operation.Extensions, isResourceLvlSecurityDisabled)
 					} else if found {
-						operation.ExtensionProps = addDisableSecurityIfNotPresent(operation.ExtensionProps, val)
+						operation.Extensions = addDisableSecurityIfNotPresent(operation.Extensions, val)
 					}
 					methodsArray[arrayIndex] = getOperationLevelDetails(operation, httpMethod)
 					arrayIndex++
@@ -184,8 +184,11 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 	return SortResources(resources), nil
 }
 
-func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
+func setSecuritySchemesOpenAPI(openAPI openapi3.T) []SecurityScheme {
 	var securitySchemes []SecurityScheme
+	if openAPI.Components == nil {
+		return securitySchemes
+	}
 	for key, val := range openAPI.Components.SecuritySchemes {
 		scheme := SecurityScheme{DefinitionName: key, Type: val.Value.Type, Name: val.Value.Name, In: val.Value.In}
 		securitySchemes = append(securitySchemes, scheme)
@@ -195,7 +198,7 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 }
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) *Operation {
-	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
+	extensions := convertExtensibletoReadableFormat(operation.Extensions)
 
 	if operation.Security == nil {
 		return NewOperation(method, nil, extensions)
@@ -295,9 +298,8 @@ func isServerURLIsAvailable(servers openapi3.Servers) bool {
 }
 
 // convertExtensibletoReadableFormat unmarshalls the vendor extensible in open api3.
-func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps) map[string]interface{} {
-	jsnRawExtensible := vendorExtensions.Extensions
-	b, err := json.Marshal(jsnRawExtensible)
+func convertExtensibletoReadableFormat(vendorExtensions map[string]interface{}) map[string]interface{} {
+	b, err := json.Marshal(vendorExtensions)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marshalling vendor extensions: ", err)
 	}
@@ -315,7 +317,7 @@ func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps)
 // If found, it will return two bool values which are the following in order.
 // 1st bool represnt the value of the vendor extension.
 // 2nd bool represent if the vendor extension present.
-func resolveDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, bool) {
+func resolveDisableSecurity(vendorExtensions map[string]interface{}) (bool, bool) {
 	extensions := convertExtensibletoReadableFormat(vendorExtensions)
 	if y, found := extensions[xWso2DisableSecurity]; found {
 		if val, ok := y.(bool); ok {
@@ -327,10 +329,13 @@ func resolveDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, boo
 }
 
 // This method add the disable security to given vendor extensions, if it's not present.
-func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, val bool) openapi3.ExtensionProps {
+func addDisableSecurityIfNotPresent(vendorExtensions map[string]interface{}, val bool) map[string]interface{} {
 	_, found := resolveDisableSecurity(vendorExtensions)
 	if !found {
-		vendorExtensions.Extensions[xWso2DisableSecurity] = val
+		if vendorExtensions == nil {
+			vendorExtensions = make(map[string]interface{})
+		}
+		vendorExtensions[xWso2DisableSecurity] = val
 	}
 	return vendorExtensions
 }
@@ -338,7 +343,7 @@ func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, va
 // GetXWso2Label extracts the vendor-extension (openapi v3) property.
 //
 // Default value is 'default'
-func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
+func GetXWso2Label(vendorExtensions map[string]interface{}) []string {
 	vendorExtensionsMap := convertExtensibletoReadableFormat(vendorExtensions)
 	var labelArray []string
 	if y, found := vendorExtensionsMap[xWso2Label]; found {
