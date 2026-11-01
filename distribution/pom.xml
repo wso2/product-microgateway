@@ -258,6 +258,36 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!-- Block the compromised eMudhra intermediate CA certificates in the bundled JREs -->
+                        <id>blacklist-emudhra-certs</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <fail message="JRE blocklist not found: ${project.build.directory}/extracted-jre-linux/jdk8u382-b05-jre/lib/security/blacklisted.certs">
+                                    <condition><not><available file="${project.build.directory}/extracted-jre-linux/jdk8u382-b05-jre/lib/security/blacklisted.certs" /></not></condition>
+                                </fail>
+                                <concat append="true" destfile="${project.build.directory}/extracted-jre-linux/jdk8u382-b05-jre/lib/security/blacklisted.certs">
+                                    <filelist dir="${basedir}/resources/security" files="emudhra-blacklisted-certs.txt" />
+                                </concat>
+                                <fail message="JRE blocklist not found: ${project.build.directory}/extracted-jre-macos/jdk8u382-b05-jre/Contents/Home/lib/security/blacklisted.certs">
+                                    <condition><not><available file="${project.build.directory}/extracted-jre-macos/jdk8u382-b05-jre/Contents/Home/lib/security/blacklisted.certs" /></not></condition>
+                                </fail>
+                                <concat append="true" destfile="${project.build.directory}/extracted-jre-macos/jdk8u382-b05-jre/Contents/Home/lib/security/blacklisted.certs">
+                                    <filelist dir="${basedir}/resources/security" files="emudhra-blacklisted-certs.txt" />
+                                </concat>
+                                <fail message="JRE blocklist not found: ${project.build.directory}/extracted-jre-windows/jdk8u382-b05-jre/lib/security/blacklisted.certs">
+                                    <condition><not><available file="${project.build.directory}/extracted-jre-windows/jdk8u382-b05-jre/lib/security/blacklisted.certs" /></not></condition>
+                                </fail>
+                                <concat append="true" destfile="${project.build.directory}/extracted-jre-windows/jdk8u382-b05-jre/lib/security/blacklisted.certs">
+                                    <filelist dir="${basedir}/resources/security" files="emudhra-blacklisted-certs.txt" />
+                                </concat>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>modify-toml</id>
                         <phase>process-resources</phase>
                         <goals>
