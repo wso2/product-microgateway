@@ -47,7 +47,11 @@ PRGDIR=`dirname "$PRG"`
 GW_HOME=`cd "$PRGDIR/.." ; pwd`
 export MGW_VERSION="3.2.10"
 
-JAVA_PATH=$GW_HOME/lib/jdk8u382-b05-jre
+# Temurin 8u512 is not published for macOS x64, so the macOS pack bundles 8u504
+case "`uname`" in
+  Darwin*) JAVA_PATH=$GW_HOME/lib/jdk8u504-b01-jre;;
+  *) JAVA_PATH=$GW_HOME/lib/jdk8u512-b09-jre;;
+esac
 if [ -d "$JAVA_HOME" ]; then
   echo "JAVA_HOME: $JAVA_HOME"
 else
