@@ -5,12 +5,14 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.Assert;
 import org.wso2.micro.gateway.tests.common.JMSPublisher;
 import org.wso2.micro.gateway.tests.common.MockBackEndServer;
+import org.wso2.micro.gateway.tests.common.MockBackEndServerForMultiSSLProfiles;
 import org.wso2.micro.gateway.tests.context.Utils;
 
 import java.io.File;
 
 public class PreRequisites {
     private MockBackEndServer mockBackEndServer;
+    private MockBackEndServerForMultiSSLProfiles mockBackEndServerForMultiSSL;
     @BeforeSuite
     private void initializeMessageBroker() throws Exception {
         JMSPublisher jmsPublisher = new JMSPublisher();
@@ -27,10 +29,20 @@ public class PreRequisites {
         mockBackEndServer.start();
     }
 
+    @BeforeSuite
+    public void startMockBackendServerForMultiSSL() {
+        int port = 2381;
+        boolean isOpen = Utils.isPortOpen(port);
+        Assert.assertFalse(isOpen, "Port: " + port + " already in use.");
+        mockBackEndServerForMultiSSL = new MockBackEndServerForMultiSSLProfiles(port);
+        mockBackEndServerForMultiSSL.start();
+    }
+
     @AfterSuite
     public void stop() throws Exception {
         //Stop all the mock servers
         mockBackEndServer.stopIt();
+        mockBackEndServerForMultiSSL.stopIt();
     }
 
     @BeforeSuite
