@@ -258,6 +258,74 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!-- Remove legacy root CA certificates from the bundled JRE trust stores -->
+                        <id>remove-legacy-root-cas</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target xmlns:if="ant:if">
+                                <!-- Deletes the alias if the JRE still ships it (newer JREs may already have dropped it),
+                                     then fails the build if it is still present -->
+                                <macrodef name="remove-ca">
+                                    <attribute name="cacerts" />
+                                    <attribute name="alias" />
+                                    <sequential>
+                                        <local name="list.rc" />
+                                        <local name="ca.present" />
+                                        <local name="list.out" />
+                                        <exec executable="${java.home}/bin/keytool" resultproperty="list.rc" failonerror="false" outputproperty="list.out">
+                                            <arg line="-list -keystore" />
+                                            <arg value="@{cacerts}" />
+                                            <arg line="-storepass changeit -alias" />
+                                            <arg value="@{alias}" />
+                                        </exec>
+                                        <condition property="ca.present">
+                                            <equals arg1="${list.rc}" arg2="0" />
+                                        </condition>
+                                        <echo if:set="ca.present" message="Removing @{alias} from @{cacerts}" />
+                                        <exec if:set="ca.present" executable="${java.home}/bin/keytool" failonerror="true">
+                                            <arg line="-delete -noprompt -keystore" />
+                                            <arg value="@{cacerts}" />
+                                            <arg line="-storepass changeit -alias" />
+                                            <arg value="@{alias}" />
+                                        </exec>
+                                    </sequential>
+                                </macrodef>
+                                <macrodef name="remove-legacy-cas">
+                                    <attribute name="cacerts" />
+                                    <sequential>
+                                        <fail message="JRE trust store not found: @{cacerts}">
+                                            <condition><not><available file="@{cacerts}" /></not></condition>
+                                        </fail>
+                                        <remove-ca cacerts="@{cacerts}" alias="cn=emsign_ecc_root_ca_-_g3,o=emudhra_technologies_limited,ou=emsign_pki,c=in" />
+                                        <remove-ca cacerts="@{cacerts}" alias="cn=emsign_root_ca_-_g1,o=emudhra_technologies_limited,ou=emsign_pki,c=in" />
+                                        <remove-ca cacerts="@{cacerts}" alias="cn=aaa_certificate_services,o=comodo_ca_limited,l=salford,st=greater_manchester,c=gb" />
+                                        <local name="remaining" />
+                                        <exec executable="${java.home}/bin/keytool" failonerror="true" outputproperty="remaining">
+                                            <arg line="-list -keystore" />
+                                            <arg value="@{cacerts}" />
+                                            <arg line="-storepass changeit" />
+                                        </exec>
+                                        <fail message="Removed root CA still present in @{cacerts}">
+                                            <condition>
+                                                <or>
+                                                    <contains string="${remaining}" substring="emsign_ecc_root_ca_-_g3" />
+                                                    <contains string="${remaining}" substring="emsign_root_ca_-_g1" />
+                                                    <contains string="${remaining}" substring="aaa_certificate_services" />
+                                                </or>
+                                            </condition>
+                                        </fail>
+                                    </sequential>
+                                </macrodef>
+                                <remove-legacy-cas cacerts="${project.build.directory}/extracted-jre-linux/jdk8u382-b05-jre/lib/security/cacerts" />
+                                <remove-legacy-cas cacerts="${project.build.directory}/extracted-jre-macos/jdk8u382-b05-jre/Contents/Home/lib/security/cacerts" />
+                                <remove-legacy-cas cacerts="${project.build.directory}/extracted-jre-windows/jdk8u382-b05-jre/lib/security/cacerts" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>modify-toml</id>
                         <phase>process-resources</phase>
                         <goals>
