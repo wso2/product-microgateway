@@ -29,6 +29,7 @@ import org.wso2.micro.gateway.tests.context.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -158,10 +159,18 @@ public class CLIExecutor {
         }
     }
 
+    /**
+     * Copies only the validation jars referenced by the toolkit's Ballerina.toml template. The validation
+     * directory also contains other jars (e.g. swagger-core 2.0.8) whose classes clash with
+     * swagger-parser 2.1.22.wso2v2 when packaged into the gateway executable.
+     */
     private void copyValidationArtifactsToProject(String sourcePath, String desPath) throws IOException {
+        String template = new String(Files.readAllBytes(Paths.get(cliHome, "resources", "templates",
+                "ballerinaToml.mustache")), StandardCharsets.UTF_8);
         Files.walk(Paths.get(sourcePath)).filter(path -> {
             Path fileName = path.getFileName();
-            return fileName != null && fileName.toString().endsWith(CliConstants.EXTENSION_JAR);
+            return fileName != null && fileName.toString().endsWith(CliConstants.EXTENSION_JAR)
+                    && template.contains(CliConstants.CLI_VALIDATION_DEPENDENCIES + "/" + fileName);
         }).forEach(path -> {
             File sourceFile = new File(path.toString());
             File destination = new File(desPath + path.getFileName().toString());
