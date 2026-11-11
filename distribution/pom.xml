@@ -225,16 +225,33 @@
                             <includeGroupIds>
                                 com.fasterxml.jackson.core,org.wso2.orbit.io.swagger.v3,
                                 org.wso2.orbit.com.atlassian.oai,com.fasterxml.jackson.datatype,
-                                com.fasterxml.jackson.dataformat,io.swagger,org.wso2.orbit.com.github.java-json-tools,
+                                com.fasterxml.jackson.dataformat,org.wso2.orbit.com.github.java-json-tools,
                                 joda-time,com.sun.mail,com.googlecode.libphonenumber,com.google.guava,rhino.wso2
                             </includeGroupIds>
                             <includeArtifactIds>
                                 jackson-databind,jackson-core,jackson-annotations,swagger-parser,
                                 swagger-request-validator-core,jackson-datatype-jsr310,jackson-dataformat-yaml,
-                                json-schema-core,swagger-core,swagger-models,btf,jackson-coreutils,
+                                json-schema-core,btf,jackson-coreutils,
                                 json-schema-validator-all,joda-time,javax.mail,libphonenumber,guava,
                                 failureaccess,js
                             </includeArtifactIds>
+                        </configuration>
+                    </execution>
+                    <!-- io.swagger jars are copied separately so that only swagger-core and swagger-models are
+                         picked. A groupId filter matches by prefix, so 'io.swagger' would otherwise also copy
+                         io.swagger:swagger-parser and the io.swagger.core.v3 / io.swagger.parser.v3 jars, whose
+                         classes clash with the ones bundled in org.wso2.orbit.io.swagger.v3:swagger-parser. -->
+                    <execution>
+                        <id>copy-validation-swagger-jars</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib/dependencies/validation</outputDirectory>
+                            <includeGroupIds>io.swagger</includeGroupIds>
+                            <excludeGroupIds>io.swagger.core.v3,io.swagger.parser.v3</excludeGroupIds>
+                            <includeArtifactIds>swagger-core,swagger-models</includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
