@@ -43,7 +43,8 @@ public class ProtocCommandBuilder {
             "{{proto_file_path}} --descriptor_set_out={{desc_file_path}}";
     public static final String PROTOC_PLUGIN_EXE_URL_SUFFIX = "https://repo1.maven.org/maven2/com/google/" +
             "protobuf/protoc/";
-    private String protocVersion = "3.9.1";
+    // 3.21.0 is the first protoc release that publishes a native osx-aarch_64 (Apple Silicon) binary.
+    static final String PROTOC_VERSION = "3.21.12";
     public static final String PROTOC_PLUGIN_EXE_PREFIX = ".exe";
     private String exePath;
     private String protoPath;
@@ -70,8 +71,8 @@ public class ProtocCommandBuilder {
         try {
             downloadProtocexe();
         } catch (IOException e) {
-            throw new CLIInternalException("Error while downloading the protoc executable : protoc-" +
-                    OSDetector.getDetectedClassifier() + ".exe");
+            throw new CLIInternalException("Error while downloading the protoc executable : " +
+                    getProtocFilename());
         }
         String finalCommand = COMMAND_PLACEHOLDER.replace(EXE_PATH_PLACEHOLDER, exePath)
                 .replace(PROTO_PATH_PLACEHOLDER, protoPath)
@@ -85,16 +86,15 @@ public class ProtocCommandBuilder {
      * Download the protoc executor.
      */
     private void downloadProtocexe() throws IOException {
-        String protocFilename = getProtocFilename();
+        String classifier = OSDetector.getDetectedClassifier();
+        String protocFilename = getProtocFilename(classifier);
         String protocDirPath = CmdUtils.getProtocDirPath();
         File protocExeFile = new File(protocDirPath, protocFilename);
         String protocExePath = protocExeFile.getAbsolutePath(); // if file already exists will do nothing
         if (!protocExeFile.exists()) {
             logger.info("Downloading protoc executor file - " + protocFilename);
-            String protocDownloadurl = PROTOC_PLUGIN_EXE_URL_SUFFIX + protocVersion + "/protoc-" + protocVersion
-                    + "-" + OSDetector.getDetectedClassifier() + PROTOC_PLUGIN_EXE_PREFIX;
-            File tempDownloadFile = new File(protocDirPath,
-                    "protoc-" + OSDetector.getDetectedClassifier() + ".exe.download");
+            String protocDownloadurl = getProtocDownloadUrl(classifier);
+            File tempDownloadFile = new File(protocDirPath, protocFilename + ".download");
             try {
                 downloadFile(new URL(protocDownloadurl), tempDownloadFile);
                 Files.move(tempDownloadFile.toPath(), protocExeFile.toPath());
@@ -160,6 +160,28 @@ public class ProtocCommandBuilder {
     }
 
     private static String getProtocFilename() {
-        return "protoc-" + OSDetector.getDetectedClassifier() + ".exe";
+        return getProtocFilename(OSDetector.getDetectedClassifier());
+    }
+
+    /**
+     * Get the local file name of the protoc executable. The protoc version is part of the name so that a
+     * previously downloaded executable of a different version is not reused.
+     *
+     * @param classifier OS classifier (ex: osx-aarch_64)
+     * @return protoc executable file name
+     */
+    static String getProtocFilename(String classifier) {
+        return "protoc-" + PROTOC_VERSION + "-" + classifier + PROTOC_PLUGIN_EXE_PREFIX;
+    }
+
+    /**
+     * Get the maven central URL of the protoc executable for the given OS classifier.
+     *
+     * @param classifier OS classifier (ex: osx-aarch_64)
+     * @return download URL of the protoc executable
+     */
+    static String getProtocDownloadUrl(String classifier) {
+        return PROTOC_PLUGIN_EXE_URL_SUFFIX + PROTOC_VERSION + "/protoc-" + PROTOC_VERSION + "-" + classifier
+                + PROTOC_PLUGIN_EXE_PREFIX;
     }
 }
