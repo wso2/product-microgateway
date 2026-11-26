@@ -41,6 +41,7 @@ import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Analytics Data Provider of Microgateway
@@ -258,12 +259,33 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     private void setCustomPropertiesMap(HTTPAccessLogEntry logEntry, Map<String, Object> customProperties) {
         if (logEntry.getRequest().getRequestHeadersMap() != null) {
             customProperties.putAll(logEntry.getRequest().getRequestHeadersMap());
+            customProperties.putAll(
+                    logEntry.getRequest().getRequestHeadersMap().entrySet().stream()
+                            .collect(Collectors.toMap(
+                                    entry -> "REQUEST_HEADER_" + entry.getKey(),
+                                    Map.Entry::getValue
+                            ))
+            );
         }
         if (logEntry.getResponse().getResponseHeadersMap() != null) {
             customProperties.putAll(logEntry.getResponse().getResponseHeadersMap());
+            customProperties.putAll(
+                    logEntry.getResponse().getResponseHeadersMap().entrySet().stream()
+                            .collect(Collectors.toMap(
+                                    entry -> "RESPONSE_HEADER_" + entry.getKey(),
+                                    Map.Entry::getValue
+                            ))
+            );
         }
         if (logEntry.getResponse().getResponseTrailersMap() != null) {
             customProperties.putAll(logEntry.getResponse().getResponseTrailersMap());
+            customProperties.putAll(
+                    logEntry.getResponse().getResponseTrailersMap().entrySet().stream()
+                            .collect(Collectors.toMap(
+                                    entry -> "RESPONSE_TRAILER_" + entry.getKey(),
+                                    Map.Entry::getValue
+                            ))
+            );
         }
     }
 }
